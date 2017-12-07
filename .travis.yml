@@ -1,24 +1,6 @@
 language: java
-sudo: false
-install: true
-
-addons:
-  sonarcloud:
-    organization: "ani3190-github"
-    token:
-      secure: "e4377f2208ba8aaad8dba75e1464b322fbcb6327"
-    github_token:
-      secure: "ea0453a53aeb71934d4a5be4f41979f5b66eebb9"
-    branches: # The branches monitored by sonarqube
-      - master
-      - develop
-
 jdk:
     - openjdk8
-
-script:
-    - ./gradlew sonarqube
-
 group: stable
 dist: trusty
 os: linux

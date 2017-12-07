@@ -13,11 +13,12 @@ public class SortMapByValue {
         map.put("c", 50);
         map.put("d", 40);
         map.put("e", 20);
-        map.put("e", 20);
         System.out.println(map);
 
         TreeMap<String, Integer> sortedMap = sortMapByValue(map);
         System.out.println(sortedMap);
+        map.put("ruban",5);
+        System.out.println(sortMapByValue(map));
     }
 
     public static TreeMap<String, Integer> sortMapByValue(HashMap<String, Integer> map){
@@ -26,6 +27,7 @@ public class SortMapByValue {
         //The comparator is used to sort the TreeMap by keys.
         TreeMap<String, Integer> result = new TreeMap<String, Integer>(comparator);
         result.putAll(map);
+
         return result;
     }
 }

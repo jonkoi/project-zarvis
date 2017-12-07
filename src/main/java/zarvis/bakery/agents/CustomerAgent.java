@@ -31,40 +31,22 @@ public class CustomerAgent extends Agent {
 				this.orderAggregation.put(order.getGuid(), time); 
 			}
 		}
-		logger.info(orders.toString());
 	}
-	
 
 	
 	@Override
 	protected void setup() {
 
 		Util.registerInYellowPage(this,"Customer",customer.getGuid());
-		logger.info("Hi I'm the Customer agent, my name is:"+this.getAID().getName());
 
 		TreeMap<String, Integer> aggregatedOrders = Util.sortMapByValue(orderAggregation);
 
-//		logger.info(aggregatedOrders.toString());
+		addBehaviour(new RequestPerformerBehavior(customer,Util.sortMapByValue(orderAggregation)));
 
-//		addBehaviour(new RequestPerformerBehavior(customer,aggregatedOrders));
-
-//		int timeDiff =0;
-//		for (final Entry<String, Integer> entry : entries) {
-//
-//			try {
-//				Thread.sleep(entry.getValue()-timeDiff);
-//				timeDiff = entry.getValue();
-//			}
-//			catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
 
 	}
 	
 	protected void takeDown() {
-		// Printout a dismissal message
 		System.out.println("Agent "+getAID().getName()+" terminating.");
 	}
 }

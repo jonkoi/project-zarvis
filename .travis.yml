@@ -21,7 +21,3 @@ script:
 group: stable
 dist: trusty
 os: linux
-
-
-
-secure: 

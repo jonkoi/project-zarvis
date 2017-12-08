@@ -1,7 +1,11 @@
 package zarvis.bakery.behaviors.bakery;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
@@ -10,83 +14,87 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import zarvis.bakery.agents.manager.KneedingMachineManager;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.models.Order;
 import zarvis.bakery.utils.Util;
 
 public class ProcessOrderBehaviour extends CyclicBehaviour {
-	private Map<Integer, String> orderAggregation = new TreeMap<Integer, String>();
+	
+	private Logger logger = LoggerFactory.getLogger(ProcessOrderBehaviour.class);
+
+	private HashMap<String, Integer> orders = new HashMap<>();
+	private TreeMap<String, Integer> aggregatedOrders;
+
 	private Bakery bakery;
 
 	public ProcessOrderBehaviour(Bakery bakery) {
+
+
 		this.bakery = bakery;
 	}
 	@Override
 	public void action() {
 
 		try{
-			ACLMessage msg = myAgent.receive();
-			if (msg != null) {
-				String title = msg.getContent();
-				//  get the orderID from the message
-				String[] titleparts = title.split(" ");
-				// store orderID
+			ACLMessage message = myAgent.receive();
+			if (message == null) {
+				block();
+			}
+
+			else if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL &&
+					message.getConversationId().equals("inform-product-to-kneeding-machine-manager")){
+
+
+				logger.info("Order {} stored in {} successfully",message.getContent(),message.getSender().getName());
+			}
+
+			else if (message.getPerformative() == ACLMessage.CFP && message.getConversationId().equals("place-order")) {
+				String[] titleparts = message.getContent().split(" ");
+				String orderID = titleparts[0];
+
+				Order order = Util.getWrapper().getOrderById(orderID);
+
+				Util.sendReply(myAgent,message,ACLMessage.PROPOSE,
+						bakery.getGuid() +" "+String.valueOf(bakery.missingProductCount(order)),"place-order");
+
+
+			} else if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL && message.getConversationId().equals("place-order")) {
+
+				String[] titleparts = message.getContent().split(" ");
 				String orderID = titleparts[0];
 				Order order = Util.getWrapper().getOrderById(orderID);
 
-				if(!bakery.hasAllProducts(order)){
-					System.out.println("All products not found in our bakery " + bakery.getName());
-					ACLMessage reply = msg.createReply(); 
-					reply.setPerformative(ACLMessage.REFUSE); 
-					reply.setContent("All products not found in our bakery " + bakery.getName()); 
-					reply.setConversationId("customer request"); 
-					System.out.println("order placed"); 
-					myAgent.send(reply); 
-
-				} else {
-					// for available orders to be delivered on day 1 
-					if ((order.getDelivery_date().getDay() == 1)){
-						this.orderAggregation.put(order.getDelivery_date().getHour(), order.getGuid()); 
-					}
-					// for available orders to be delivered after day 1 
-					else {
-						int time = order.getDelivery_date().getHour() + (order.getDelivery_date().getDay()-1)* 24;
-						this.orderAggregation.put(time, order.getGuid()); 
-					}
-
-					ACLMessage reply = msg.createReply();
-					reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-					reply.setContent("request accepted");
-					reply.setConversationId("customer request");
-					myAgent.send(reply);
-
-					DFAgentDescription template = new DFAgentDescription();
-					ServiceDescription sd = new ServiceDescription();
-					sd.setType("KneedingMachineManager");
-					template.addServices(sd);
-
-					try {
-						DFAgentDescription[] result = DFService.search(myAgent, template);
-						AID[] kneedingMachineManagerAgent = (new AID[result.length]);
-
-						AID kneedingmachinemanager = result[0].getName();
-
-						// Send the cfp (call for proposal) to all sellers
-						ACLMessage cfp = new ACLMessage(ACLMessage.INFORM);
-						cfp.addReceiver(kneedingmachinemanager);
-
-						cfp.setContent(orderID);
-						cfp.setConversationId("inform-product-to-kneeding-machine-manager");
-						cfp.setReplyWith("inform"+System.currentTimeMillis()); // Unique value
-						myAgent.send(cfp);
-
-					} catch (FIPAException fe) {
-						fe.printStackTrace();
-					}
+				// for available orders to be delivered on day 1
+				if ((order.getDelivery_date().getDay() == 1)) {
+					this.orders.put(order.getGuid(),order.getDelivery_date().getHour());
+				}
+				// for available orders to be delivered after day 1
+				else {
+					int time = order.getDelivery_date().getHour() + (order.getDelivery_date().getDay() - 1) * 24;
+					this.orders.put(order.getGuid(),time);
 				}
 
-			}				
+				aggregatedOrders = Util.sortMapByValue(this.orders);
+
+				Util.sendReply(myAgent,message,ACLMessage.CONFIRM,bakery.getGuid()+" "+order.getGuid(),"place-order");
+//				logger.info("order {} successfully received from {}",order.getGuid(),titleparts[1]);
+				informKneedingManager();
+			}
 		}
 		catch (Exception e) {e.printStackTrace(); }			
+	}
+
+	private void informKneedingManager(){
+		AID kneedingmachinemanager = Util.searchInYellowPage(myAgent,"KneedingMachineManager",null)[0].getName();
+
+		String orderGuid = aggregatedOrders.firstKey();
+
+		Util.sendMessage(myAgent,kneedingmachinemanager,ACLMessage.INFORM,orderGuid,"inform-product-to-kneeding-machine-manager");
+
+		orders.remove(orderGuid);
+		aggregatedOrders.remove(orderGuid);
+//		logger.info("order {} sent to kneeding manager : {} ",orderGuid,kneedingmachinemanager.getName());
+
 	}
 }

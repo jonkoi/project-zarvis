@@ -35,7 +35,7 @@
       ],
       "products": [
         {
-          "guid": "bread",
+          "id": "bread",
           "dough_prep_time": 15,
           "resting_time": 15,
           "item_prep_time": 15,
@@ -49,7 +49,7 @@
           "sales_price": 15
         },
         {
-          "guid": "bagel",
+          "id": "bagel",
           "dough_prep_time": 15,
           "resting_time": 15,
           "item_prep_time": 15,
@@ -106,7 +106,7 @@
   "orders": [
     {
       "guid": "order-001",
-      "customer_id": "customer-002",
+      "customer_id": "Citadel Cafe",
       "order_date": {
         "day": 1,
         "hour": 12
@@ -120,8 +120,23 @@
       }
     },
     {
+      "guid": "order-003",
+      "customer_id": "Citadel Cafe",
+      "order_date": {
+        "day": 1,
+        "hour": 12
+      },
+      "delivery_date": {
+        "day": 1,
+        "hour": 12
+      },
+      "products": {
+        "bagel": 6
+      }
+    },
+    {
       "guid": "order-002",
-      "customer_id": "customer-001",
+      "customer_id": "Winterfell",
       "order_date": {
         "day": 2,
         "hour": 12

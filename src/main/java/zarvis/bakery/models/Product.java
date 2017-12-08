@@ -2,7 +2,15 @@ package zarvis.bakery.models;
 
 public class Product {
 
-	private String id;	
+	public String getGuid() {
+		return guid;
+	}
+
+	public void setGuid(String guid) {
+		this.guid = guid;
+	}
+
+	private String guid;
 			
 	private int dough_prep_time;	
 			
@@ -22,19 +30,11 @@ public class Product {
 			
 	private int breads_per_box;	
 			
-	private int production_cost;
+	private float production_cost;
 			
-	private int sales_price	;
+	private float sales_price;
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public int getDough_prep_time() {
+	public float getDough_prep_time() {
 		return dough_prep_time;
 	}
 
@@ -106,25 +106,25 @@ public class Product {
 		this.breads_per_box = breads_per_box;
 	}
 
-	public int getProduction_cost() {
+	public float getProduction_cost() {
 		return production_cost;
 	}
 
-	public void setProduction_cost(int production_cost) {
+	public void setProduction_cost(float production_cost) {
 		this.production_cost = production_cost;
 	}
 
-	public int getSales_price() {
+	public float getSales_price() {
 		return sales_price;
 	}
 
-	public void setSales_price(int sales_price) {
+	public void setSales_price(float sales_price) {
 		this.sales_price = sales_price;
 	}
 
 	@Override
 	public String toString() {
-		return "Product [id=" + id + ", dough_prep_time=" + dough_prep_time + ", resting_time=" + resting_time
+		return "Product [guid=" + guid + ", dough_prep_time=" + dough_prep_time + ", resting_time=" + resting_time
 				+ ", item_prep_time=" + item_prep_time + ", breads_per_oven=" + breads_per_oven + ", baking_time="
 				+ baking_time + ", baking_temp=" + baking_temp + ", cooling_rate=" + cooling_rate + ", boxing_temp="
 				+ boxing_temp + ", breads_per_box=" + breads_per_box + ", production_cost=" + production_cost

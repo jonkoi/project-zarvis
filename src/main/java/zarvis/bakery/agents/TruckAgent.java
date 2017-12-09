@@ -2,7 +2,7 @@ package zarvis.bakery.agents;
 
 import jade.core.Agent;
 
-public class TruckAgent extends Agent{
+public class TruckAgent extends Agent {
 
 	@Override
 	protected void setup() {

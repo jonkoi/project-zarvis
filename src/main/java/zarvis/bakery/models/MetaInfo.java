@@ -1,7 +1,7 @@
 package zarvis.bakery.models;
 
 public class MetaInfo {
-	
+
 	private int orders;
 	private Customer customers;
 	private int bakeries;
@@ -16,7 +16,7 @@ public class MetaInfo {
 	public int getBakeries() {
 		return bakeries;
 	}
-	
+
 	public Customer getCustomers() {
 		return customers;
 	}
@@ -62,5 +62,5 @@ public class MetaInfo {
 		return "MetaInfo [orders=" + orders + ", customers=" + customers + ", bakeries=" + bakeries + ", duration_days="
 				+ duration_days + ", trucks=" + trucks + ", products=" + products + "]";
 	}
-	
+
 }

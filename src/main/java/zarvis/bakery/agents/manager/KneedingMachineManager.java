@@ -18,10 +18,10 @@ import zarvis.bakery.models.Bakery;
 import zarvis.bakery.utils.Util;
 
 public class KneedingMachineManager extends Agent {
-	
+
 	private Logger logger = LoggerFactory.getLogger(KneedingMachineManager.class);
 	private Bakery bakery;
-	
+
 	public KneedingMachineManager(Bakery bakery) {
 		this.bakery = bakery;
 	}
@@ -29,15 +29,12 @@ public class KneedingMachineManager extends Agent {
 	@Override
 	protected void setup() {
 
-		Util.registerInYellowPage(this,"KneedingMachineManager","kneedingmachinemanager-"+bakery.getGuid());
-
-
+		Util.registerInYellowPage(this, "KneedingMachineManager", "kneedingmachinemanager-" + bakery.getGuid());
 
 		addBehaviour(new ManageProductsBehavior());
-//		addBehaviour(new KneedingMachinesAvailabilityBehavior());
+		// addBehaviour(new KneedingMachinesAvailabilityBehavior());
 		Util.waitForSometime(2000);
-//		addBehaviour(new SendProductsToKneedingMachineBehavior());
-
+		// addBehaviour(new SendProductsToKneedingMachineBehavior());
 
 	}
 }

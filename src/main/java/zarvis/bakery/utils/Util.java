@@ -14,18 +14,16 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import zarvis.bakery.agents.BakeryAgent;
-import zarvis.bakery.messages.CustomMessage;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 import zarvis.bakery.models.BakeryJsonWrapper;
 import zarvis.bakery.utils.ValueComparatorAscending;
 
 public class Util {
 
-	private static Logger logger = LoggerFactory.getLogger(Util.class);
-	
-	public static BakeryJsonWrapper getWrapper(){
+	//private static Logger logger = LoggerFactory.getLogger(Util.class);
+
+	public static BakeryJsonWrapper getWrapper() {
 		final String FILENAME = "src/main/config/random-scenario.json";
 		BakeryJsonWrapper jsonwrapper = null;
 		try {
@@ -38,19 +36,19 @@ public class Util {
 		return jsonwrapper;
 	}
 
-	public static DFAgentDescription[] searchInYellowPage(Agent agent,String type,String name){
-		DFAgentDescription agentDescription= new DFAgentDescription();
+	public static DFAgentDescription[] searchInYellowPage(Agent agent, String type, String name) {
+		DFAgentDescription agentDescription = new DFAgentDescription();
 		ServiceDescription serviceDescription = new ServiceDescription();
 
 		serviceDescription.setType(type);
-		if (name != null){
+		if (name != null) {
 			serviceDescription.setName(name);
 		}
 		agentDescription.addServices(serviceDescription);
 
 		try {
 			DFAgentDescription[] searchResult = DFService.search(agent, agentDescription);
-				return (searchResult.length != 0) ? searchResult : null;
+			return (searchResult.length != 0) ? searchResult : null;
 		} catch (FIPAException e) {
 			e.printStackTrace();
 			return null;
@@ -58,7 +56,7 @@ public class Util {
 
 	}
 
-	public static boolean registerInYellowPage(Agent agent,String type,String name){
+	public static boolean registerInYellowPage(Agent agent, String type, String name) {
 		// Create agent description and set AID
 		DFAgentDescription agentDescription = new DFAgentDescription();
 		agentDescription.setName(agent.getAID());
@@ -79,7 +77,8 @@ public class Util {
 		}
 	}
 
-	public static void sendReply(Agent agent,ACLMessage message,int performative,String content,String conversationId){
+	public static void sendReply(Agent agent, ACLMessage message, int performative, String content,
+			String conversationId) {
 		ACLMessage reply = message.createReply();
 		reply.setPerformative(performative);
 		reply.setContent(content);
@@ -87,13 +86,13 @@ public class Util {
 		agent.send(reply);
 	}
 
-	public static void sendMessage(Agent agent,AID receiver,int performative,String content,String conversationId){
+	public static void sendMessage(Agent agent, AID receiver, int performative, String content, String conversationId) {
 		ACLMessage message = new ACLMessage(performative);
 		message.addReceiver(receiver);
 		message.setConversationId(conversationId);
 		message.setContent(content);
 		agent.send(message);
-//		waitForSometime(100);
+		// waitForSometime(100);
 	}
 
 	public static void waitForSometime(long milliseconds) {
@@ -104,8 +103,7 @@ public class Util {
 		}
 	}
 
-
-	public static TreeMap<String, Integer> sortMapByValue(HashMap<String, Integer> map){
+	public static TreeMap<String, Integer> sortMapByValue(HashMap<String, Integer> map) {
 		Comparator<String> comparator = new ValueComparatorAscending(map);
 		TreeMap<String, Integer> result = new TreeMap<String, Integer>(comparator);
 		result.putAll(map);

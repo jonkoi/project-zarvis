@@ -2,7 +2,7 @@ package zarvis.bakery.agents;
 
 import jade.core.Agent;
 
-public class CoolingAgent extends Agent{
+public class CoolingAgent extends Agent {
 
 	@Override
 	protected void setup() {

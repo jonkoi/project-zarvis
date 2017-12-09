@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BakeryJsonWrapper {
-	
+
 	private MetaInfo meta;
 	private List<Bakery> bakeries;
 	private List<Customer> customers;
 	private List<Order> orders;
 	private StreetNetwork street_network;
-	
+
 	public List<Order> getOrders() {
 		return orders;
 	}
@@ -26,7 +26,6 @@ public class BakeryJsonWrapper {
 	public void setBakeries(List<Bakery> bakeries) {
 		this.bakeries = bakeries;
 	}
-
 
 	public List<Customer> getCustomers() {
 		return customers;
@@ -58,20 +57,19 @@ public class BakeryJsonWrapper {
 				+ orders + "]";
 	}
 
-	public List<Order> getOrderByIdCustomer(String customerId){
+	public List<Order> getOrderByIdCustomer(String customerId) {
 		List<Order> orders = new ArrayList<Order>();
-		for(Order order : this.orders){
-			if(order.getCustomer_id().equals(customerId))
+		for (Order order : this.orders) {
+			if (order.getCustomer_id().equals(customerId))
 				orders.add(order);
 		}
 		return orders;
 	}
 
-	public Order getOrderById(String guid){
+	public Order getOrderById(String guid) {
 
-		for(Order order : this.orders){
-			if(order.getGuid().equals(guid))
-			{
+		for (Order order : this.orders) {
+			if (order.getGuid().equals(guid)) {
 				return order;
 			}
 

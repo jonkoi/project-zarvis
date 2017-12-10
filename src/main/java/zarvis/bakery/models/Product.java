@@ -2,13 +2,7 @@ package zarvis.bakery.models;
 
 public class Product {
 
-	public String getGuid() {
-		return guid;
-	}
-
-	public void setGuid(String guid) {
-		this.guid = guid;
-	}
+	
 
 	private String guid;
 
@@ -33,6 +27,14 @@ public class Product {
 	private float production_cost;
 
 	private float sales_price;
+	
+	public String getGuid() {
+		return guid;
+	}
+
+	public void setGuid(String guid) {
+		this.guid = guid;
+	}
 
 	public float getDough_prep_time() {
 		return dough_prep_time;

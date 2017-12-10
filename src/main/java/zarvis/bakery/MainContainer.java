@@ -1,5 +1,8 @@
 package zarvis.bakery;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
@@ -15,11 +18,15 @@ import zarvis.bakery.models.BakeryJsonWrapper;
 import zarvis.bakery.models.Customer;
 import zarvis.bakery.models.KneedingMachine;
 import zarvis.bakery.utils.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MainContainer {
 	public static void main(String[] args) {
 		try {
+			Logger logger = LoggerFactory.getLogger(BakeryAgent.class);
 
+			List<CustomerAgent> customerAgentsList = new ArrayList<>();
 			Runtime runtime = Runtime.instance();
 			runtime.setCloseVM(true);
 
@@ -45,8 +52,28 @@ public class MainContainer {
 
 			// create multiple customer agents
 			for (Customer customer : wrapper.getCustomers().subList(0, 2)) {
-				mainContainer.acceptNewAgent(customer.getGuid(), new CustomerAgent(customer)).start();
+				CustomerAgent agent =  new CustomerAgent(customer);
+				customerAgentsList.add(agent);
+				mainContainer.acceptNewAgent(customer.getGuid(), agent).start();
 			}
+			
+			
+			while (true) {
+				Thread.sleep(30000);
+				boolean finished = true;
+				for (CustomerAgent customerAgent : customerAgentsList) {
+					if (!customerAgent.isFinished()) {
+						finished = false;
+					}
+				}
+				if (finished) {
+					logger.info("All customers are done, exit the platform...");
+					mainContainer.kill();
+					break;
+				}
+			}
+			
+			
 			//
 			// mainContainer.start();
 		} catch (Exception e) {

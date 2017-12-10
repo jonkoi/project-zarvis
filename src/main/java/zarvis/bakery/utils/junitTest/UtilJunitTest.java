@@ -2,16 +2,18 @@ package zarvis.bakery.utils.junitTest;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.HashMap;
 import java.util.TreeMap;
-
 import org.junit.Test;
-
 import zarvis.bakery.utils.Util;
 
 public class UtilJunitTest {
 
 	@Test
+	//for testing sortMapByvalue() method
 	public void sortMapByValueJunitTest() {
 		HashMap<String, Integer> map = new HashMap<String, Integer>();
 		map.put("str3", 3);
@@ -24,7 +26,14 @@ public class UtilJunitTest {
 		
 		
 		assertEquals(result,Util.sortMapByValue(map));
-
+	}
+	//for testing getWrapper() method
+	@Test
+	public void getWrapperJunitTest(){
+		File file = new File("src/main/config/random-scenario.json");
+		assertNotNull(file);
+		
+		
 	}
 
 }

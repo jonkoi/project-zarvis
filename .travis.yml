@@ -1,7 +1,23 @@
 language: java
 jdk:
     - openjdk8
+
+
+addons:
+  sonarcloud:
+    organization: "ani3190-github"
+    token:
+      secure: "j0dPc+BMVtgd8lquSXND/+0H08piMwSYss0NWFdbD2M3PBt4xqQK6m0WscIxiOrzW+s6NLrVl8SV5CoOx53QNOs5On8zuwx7zXq5OIg/J0S2Eh6m+lIH1AJ5/coVvrkT0ny20vYjrSVsEUPsV+Vj4b5/tpR+WhdoMjfk1xpPd7HD9MxjaHceZuyKz2Adhcv9xDFaB7MESdHkxRM/B4RbCOXQDUAZpoYLXgx02+iI2pVpPuQlHD3ApNMC2kvDRKXEKWYDnKMrKF/rMyUi+bs8eYt2ZcPzP1qzKI8yjgfq/1nYATgnjnZTJAiwepY1bFp2TQJZLdRAJQscqCDHE9Ni+V7mzr63YlQp9edt0n05L5rtU2z5D9YPwU7eeq27+LNrqgf3NapsMQe50MQD9WwIZ2llywBJMzBWrVsXbib9q78R/SkbjB1t+UjascxeTFciJm9wGg0FoO1q5v6p/uy2eFeX61p39uS4UHFxCTsUC6n0hE+1vJNlu1Uq68ONf6qBJPmoeEctgJFgDI1TxcaBge8QgzV4RObYP9N+pnOBUF0q1AiLVrelTrkicyLrkjIxW98byr4JUX0yGvCxqPLo1lcBJ3qCwTHecDey7zPCuVhRXecqY4zX9RMyTKiR+qmJ+Ne8nQg8SSzM4uI6DtBgW1kwpkmKAC354fxaUD46M+I="
+
+    branches: # The branches monitored by sonarqube
+      - master
+      - develop
+jdk:
+    - openjdk8
+
+script:
+    - ./gradlew sonarqube
+
 group: stable
 dist: trusty
 os: linux
-secure: "LvO9JZ45+2g5e0XJpGrcJyH5IbF7ob+oJKkvxNjyhfSowQmmg/IvXA5iBzqMOWu5Ku70qL2uIceW1PYlg14JAIGGkTPdeF3h/ZJZuZ+x9Mgl3kI5s0PdxOmPTo8ICrqoS1qMqtdDccHBTNz6jTLi6eO5gxop/4zjhDyRugqvq34j9oyM4h6bukt9bGQhcG8UnNpJWfwUt7oBdY5dxc6hhbNbFRQmX9EForioYBklz+iwtXpCVPRi90lJ2U29Cr+TL5ikJw7GIgQ4kA+rQ7pmM2t8jmUTuMN2if6+p1jknV5ZCoYMLMQXnEGEXY8f5qffvmbw485wjzMmIJYci5Ep31FeXhB5c/iBSBhIwPiEXLALOnBN2QIbgToaXqCM5f9DFVOdUMAwusXgHDzyxfd0tab0VA0LQ0NjQ5sdvlu7bWjsYwad+Y5Um5Yt1slz5ab43Tbcib6Bkcszrplu3tRM/Ju2v7kEEf3Gf8j3RPGaLVnd/PfNcoOkDdB5+sKrQ0N7OhB9PsSlatOwy2h06QBeRjUuoGc0LdWY3J5INTRijfLvSLn6Qa7eL1msQlaZiJy/MxFDJCQsu45D3qJVbS/BA/RPA4TptrZN71Tdraq8/Uy2cUn+X0qgt/NakjcoR/tbhobOz2u9kCxMpK9aT3VvTrnII2gDuXfnoZNCvNCRjSY="

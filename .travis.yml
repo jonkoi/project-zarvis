@@ -12,7 +12,7 @@ addons:
     branches: # The branches monitored by sonarqube
       - master
       - develop
-      -feature/integrate_sonarcloud
+      - feature/integrate_sonarcloud
 jdk:
     - openjdk8
 

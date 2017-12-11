@@ -5,7 +5,7 @@ jdk:
 
 addons:
   sonarcloud:
-    organization: "ani3190-github"
+    organization: "project-zarvis"
     token:
       secure: "j0dPc+BMVtgd8lquSXND/+0H08piMwSYss0NWFdbD2M3PBt4xqQK6m0WscIxiOrzW+s6NLrVl8SV5CoOx53QNOs5On8zuwx7zXq5OIg/J0S2Eh6m+lIH1AJ5/coVvrkT0ny20vYjrSVsEUPsV+Vj4b5/tpR+WhdoMjfk1xpPd7HD9MxjaHceZuyKz2Adhcv9xDFaB7MESdHkxRM/B4RbCOXQDUAZpoYLXgx02+iI2pVpPuQlHD3ApNMC2kvDRKXEKWYDnKMrKF/rMyUi+bs8eYt2ZcPzP1qzKI8yjgfq/1nYATgnjnZTJAiwepY1bFp2TQJZLdRAJQscqCDHE9Ni+V7mzr63YlQp9edt0n05L5rtU2z5D9YPwU7eeq27+LNrqgf3NapsMQe50MQD9WwIZ2llywBJMzBWrVsXbib9q78R/SkbjB1t+UjascxeTFciJm9wGg0FoO1q5v6p/uy2eFeX61p39uS4UHFxCTsUC6n0hE+1vJNlu1Uq68ONf6qBJPmoeEctgJFgDI1TxcaBge8QgzV4RObYP9N+pnOBUF0q1AiLVrelTrkicyLrkjIxW98byr4JUX0yGvCxqPLo1lcBJ3qCwTHecDey7zPCuVhRXecqY4zX9RMyTKiR+qmJ+Ne8nQg8SSzM4uI6DtBgW1kwpkmKAC354fxaUD46M+I="
 

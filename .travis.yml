@@ -16,7 +16,7 @@ jdk:
     - openjdk8
 
 script:
-    - sonar-scanner
+    - "gradle sonarqube"
 
 cache:
     directories:

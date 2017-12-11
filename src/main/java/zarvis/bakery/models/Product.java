@@ -2,6 +2,32 @@ package zarvis.bakery.models;
 
 public class Product {
 
+	
+
+	private String guid;
+
+	private int dough_prep_time;
+
+	private int resting_time;
+
+	private int item_prep_time;
+
+	private int breads_per_oven;
+
+	private int baking_time;
+
+	private int baking_temp;
+
+	private int cooling_rate;
+
+	private int boxing_temp;
+
+	private int breads_per_box;
+
+	private float production_cost;
+
+	private float sales_price;
+	
 	public String getGuid() {
 		return guid;
 	}
@@ -9,30 +35,6 @@ public class Product {
 	public void setGuid(String guid) {
 		this.guid = guid;
 	}
-
-	private String guid;
-			
-	private int dough_prep_time;	
-			
-	private int resting_time;	
-			
-	private int item_prep_time;
-			
-	private int breads_per_oven;
-			
-	private int baking_time;	
-			
-	private int baking_temp;
-			
-	private int cooling_rate;
-			
-	private int boxing_temp;	
-			
-	private int breads_per_box;	
-			
-	private float production_cost;
-			
-	private float sales_price;
 
 	public float getDough_prep_time() {
 		return dough_prep_time;

@@ -11,12 +11,12 @@ public class Bakery {
 	private String name;
 	private Location location;
 	private AID aid;
-	
+
 	private List<Oven> ovens;
 	private List<Product> products;
-	private List<Truck>  trucks;
+	private List<Truck> trucks;
 
-	private List<DoughPrepTable>  dough_prep_tables;
+	private List<DoughPrepTable> dough_prep_tables;
 
 	private List<KneedingMachine> kneading_machines;
 
@@ -44,7 +44,7 @@ public class Bakery {
 		this.aid = aid;
 	}
 
-	public Product getProduct(String guid){
+	public Product getProduct(String guid) {
 		for (Product product : products) {
 			if (product.getGuid().equals(guid)) {
 				return product;
@@ -52,67 +52,76 @@ public class Bakery {
 		}
 		return null;
 	}
-	
+
 	public String getGuid() {
 		return guid;
 	}
+
 	public void setGuid(String guid) {
 		this.guid = guid;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	public Location getLocation() {
 		return location;
 	}
+
 	public void setLocation(Location location) {
 		this.location = location;
 	}
+
 	public List<Oven> getOvens() {
 		return ovens;
 	}
+
 	public void setOvens(ArrayList<Oven> ovens) {
 		this.ovens = ovens;
 	}
+
 	public List<Product> getProducts() {
 		return products;
 	}
+
 	public void setProducts(ArrayList<Product> products) {
 		this.products = products;
 	}
+
 	public List<Truck> getTrucks() {
 		return trucks;
 	}
+
 	public void setTrucks(ArrayList<Truck> trucks) {
 		this.trucks = trucks;
 	}
-	
+
 	public int missingProductCount(Order order) {
 		List<String> productids = getProductIds();
 		int missingProductCount = 0;
-		for(String id : order.getProducts().keySet()){
-			if(!productids.contains(id)) {
+		for (String id : order.getProducts().keySet()) {
+			if (!productids.contains(id)) {
 				missingProductCount++;
 			}
 		}
 		return missingProductCount;
-		
+
 	}
-	
-	public List<String> getProductIds(){
+
+	public List<String> getProductIds() {
 		return getProducts().stream().map(Product::getGuid).collect(Collectors.toList());
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Bakery [guid=" + guid + ", name=" + name + ", location=" + location + ", kneading_machines="
 				+ kneading_machines + ", dough_prep_tables=" + dough_prep_tables + ", ovens=" + ovens + ", products="
 				+ products + ", trucks=" + trucks + "]";
 	}
-	
-	
-	
+
 }

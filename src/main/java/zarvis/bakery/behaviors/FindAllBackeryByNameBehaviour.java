@@ -14,7 +14,7 @@ import jade.lang.acl.MessageTemplate;
 import zarvis.bakery.models.Order;
 import zarvis.bakery.utils.Util;
 
-public class FindAllBackeryByNameBehaviour extends CyclicBehaviour{
+public class FindAllBackeryByNameBehaviour extends CyclicBehaviour {
 
 	private AID[] backeryAgents;
 	private MessageTemplate mt;
@@ -24,8 +24,8 @@ public class FindAllBackeryByNameBehaviour extends CyclicBehaviour{
 
 		ACLMessage message = myAgent.receive();
 
-		if ( message!= null) {
-			if (message.getPerformative() == ACLMessage.REQUEST){
+		if (message != null) {
+			if (message.getPerformative() == ACLMessage.REQUEST) {
 				DFAgentDescription findBakeryTemplate = new DFAgentDescription();
 
 				ServiceDescription serviceDescription = new ServiceDescription();
@@ -49,6 +49,5 @@ public class FindAllBackeryByNameBehaviour extends CyclicBehaviour{
 			block();
 		}
 	}
-
 
 }

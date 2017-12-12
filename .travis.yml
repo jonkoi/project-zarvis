@@ -1,34 +1,23 @@
 language: java
-jdk:
-- oraclejdk8
 sudo: false
 install: true
-group: stable
-dist: trusty
-os: linux
+
 addons:
   sonarcloud:
-
     organization: "project-zarvis"
     token:
-      secure: "njRvkUO7F1xXZgsLguYrc9/etKrPZbFnSOjglldUSTnLQAiOm0EDMvW4WSNNNlfq5057tWBLNgadeVMuoij6kRFiSTXpeTi+GihCgfwLF1Eg027plzGPRF+umhU2Hyn4UqEjYxeJkT4fslQ2phlxFQeFIOVU62lpUIGYAnpwQJxjybcutsLTnZLJwMuDyHeP1zuqr3DL+eukY0PdfQlrLVSOr4PuhJZgcVJa98Ka76SXPZiV+haINJfUWGXCdYg1njjzr2cuty9z79na31wh079atgjhNCuq3t/mV2VKhOgr1STCM/fQDGBYY52n6cTAxgamMt+cqGsUuUjTnKVyLjmPrjvR853P9JaZfTqubjM9NRL6Stk11ZXQgHsKxhuPeChg/nQV8SdBg1MFceStp6FgL5i7hikl7whakJcquthoreLT+QCWbUvtfceCeaOMiYZ35dW+YhlhMADIslZY+gUU2Cg5Mey3MiMw+VpT4+fYz6ZUnzipWpRYWAuZcJ1YHg6+DR7PeB96t7/mDl3zF7o1bkqVHs3DMKqP66Qtet8u1NcZqxYuRqWZalRPHTUm36vDtuPItJqWEeVOZZBbFtGHsD5SEjw8vl3QNpq5g/aS9JmFgWDa8+E547JV+hu+xlaDvrlWRUQ11z02Z6UMGuO9AM6W5znQFCh0CYWb5gs="
+      secure:  "uA7BC98SFTb+h0/WZ+oJjDdZunoUl+hie2havCkqLYeeta4ptHhH4/nVxINvZDTwONIsUaGChxO0MPm9bEmBMrmj8SBUY9nY8cezLTN0mNyvcO0XN0EtBW3L5ny3ft2vsmgdIaW7gYo+ViyxG6S2g+tWp4SpoEl2YtLTWQhIh6cw/1bnm+qV1+cVF2IC6i5lOA5GhEmlGg9rqacdWbIlJK1dr/57CAnRTXE6GO87bCkIo54yG3SRjpen4CCeckdfnx3W4xJDETDoZ9xCI9B5LeVV6BsPKHLtOcHQzJBsPsGxPSzGqogoFYL7UrWquqrQKVcnFx3zAwS+ZDJrY/6WrJ+SG+q4as95NO/iDyvAObQVSlfy0F0KSoF7vzJNzJRJOgekDyzYmzpVKAI2uyEmNjHAysrZjG6iR/4nMdyEczMbZyAaSAx/NFr2xrgOdN6rKZb85Grp7BBnnwdlQBdbWdiC66fIgMEPkETEXdkWosROU/YIwLsIa3xq7zCgr1tiLuEACxOUjjHsNt3K0Wqm0UId0TFEIE5aU2bpyauaREv6v6wakYzrZ1CDbmHKSc5bQeJw3o8No+ev3RDVkVU8Bj1v6U9X5ASytfVFEhpSChNvoD8M0hNQgVeGHa/cGHjb9TfbCo2riyw2CU9kZ1OHHxJMMvyGVV1TndQXI69628A="
 
-    branches: # The branches monitored by sonarqube
-      - master
-      - develop
 
-before_cache:
-  - "rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock"
-  - "rm -f  $HOME/.gradle/caches/*/fileHashes/fileHashes.bin"
-  - "rm -f  $HOME/.gradle/caches/*/fileHashes/fileHashes.lock"
-  - "rm -fr $HOME/.gradle/caches/*/plugin-resolution/"
+jdk:
+  - oraclejdk8
+
+script:
+  - ./gradlew sonarqube
 
 cache:
   directories:
-    - "$HOME/.m2/repository"
-    - "$HOME/.sonar/cache"
-    - "$HOME/.gradle/caches"
-
-script:
-    - "gradle sonarqube"
-    - "gradle run"
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
+    - '$HOME/.gradle'
+    - '.gradle'

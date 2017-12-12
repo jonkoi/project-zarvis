@@ -6,7 +6,7 @@ addons:
   sonarcloud:
     organization: "zarvis-project"
     token:
-      secure: "JBkar2lRQngtDsaHBPTC3l+CewmGQFXej0JN68h2S/SnDbWW9uY0sJ7VtJ67Meg4fW5GCEQB/6MD4V2UKFBUc6JaxzxQl9Whh4V8lAjwoBNEtc4MvqzQTUkIPd29JOZIvKbshYlzWBMeHz5Ed2q/Jniqcx7WpPIGsgLP1Xt2gZ0pl9/hCkwCJ8ocQgaeNXPC1ZolF138G8F8OeSHhtcgm9+FYTPrJUG99vI2MNL5zJRm+iVGNMJRNlzeer2VRooVW9EVxiXvToyYTvAwBbRTEnCvVwRFW+ilI+AIBvGSJAu3m/DtvdmoRR1Axa+Qva9sPE7yZfE+pFmhDq4QKjLZPMkFa4qBqStaKR8xmNu0sp/yM2we8m4xYazORYnqLOS1c/PoYDwp9DjwJkxTCLAtkHRrkkZNXfwFoVZ1urjh+jsZ7+3WtLbQGmcNX6QopQFDGUxlJe2sRj3A+UKcbUcYGzHGMtPq3ETHeBoQGxe7keiVxV/skCJVE8+RkxoYeNA802nzjKm+JpA6/uZvODSBhQvQvKKe8X7GagHBwRSkgPRPRfDHIbfjq9zouOi9zLqHrzePx8y0cwNm3BIpCUhxXzF40jj4fwASBizKejskBawpmkNNJ6Lq4bCEyK6Mh4aYTohHyIwF1V06VN230XEssD1CJZjzBsxPne5VA1o8HUA="
+      secure: ${SONAR-TOKEN}
 
     branches: # The branches monitored by sonarqube
       - master

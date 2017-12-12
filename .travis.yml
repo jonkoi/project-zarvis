@@ -3,15 +3,22 @@ jdk:
 - openjdk8
 addons:
   sonarcloud:
-    organization: project-zarvis
+
+    organization: "project-zarvis"
     token:
       secure: "njRvkUO7F1xXZgsLguYrc9/etKrPZbFnSOjglldUSTnLQAiOm0EDMvW4WSNNNlfq5057tWBLNgadeVMuoij6kRFiSTXpeTi+GihCgfwLF1Eg027plzGPRF+umhU2Hyn4UqEjYxeJkT4fslQ2phlxFQeFIOVU62lpUIGYAnpwQJxjybcutsLTnZLJwMuDyHeP1zuqr3DL+eukY0PdfQlrLVSOr4PuhJZgcVJa98Ka76SXPZiV+haINJfUWGXCdYg1njjzr2cuty9z79na31wh079atgjhNCuq3t/mV2VKhOgr1STCM/fQDGBYY52n6cTAxgamMt+cqGsUuUjTnKVyLjmPrjvR853P9JaZfTqubjM9NRL6Stk11ZXQgHsKxhuPeChg/nQV8SdBg1MFceStp6FgL5i7hikl7whakJcquthoreLT+QCWbUvtfceCeaOMiYZ35dW+YhlhMADIslZY+gUU2Cg5Mey3MiMw+VpT4+fYz6ZUnzipWpRYWAuZcJ1YHg6+DR7PeB96t7/mDl3zF7o1bkqVHs3DMKqP66Qtet8u1NcZqxYuRqWZalRPHTUm36vDtuPItJqWEeVOZZBbFtGHsD5SEjw8vl3QNpq5g/aS9JmFgWDa8+E547JV+hu+xlaDvrlWRUQ11z02Z6UMGuO9AM6W5znQFCh0CYWb5gs="
+
+    branches: # The branches monitored by sonarqube
+      - master
+      - develop
+jdk:
+    - openjdk8
 
     branches:
     - master
     - develop
 script:
-- sonar-scanner
+    - "gradle sonarqube"
 cache:
   directories:
   - "$HOME/.m2/repository"

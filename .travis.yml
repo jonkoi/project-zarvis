@@ -11,7 +11,7 @@ addons:
     - master
     - develop
 script:
-- "gradle sonarqube"
+    - "gradle sonarqube"
 
 cache:
   directories:

@@ -1,8 +1,6 @@
 package zarvis.bakery.behaviors.bakery;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +13,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import zarvis.bakery.agents.manager.KneedingMachineManager;
+import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.models.Order;
 import zarvis.bakery.utils.Util;
@@ -24,9 +23,11 @@ public class ProcessOrderBehaviour extends CyclicBehaviour {
 	private Logger logger = LoggerFactory.getLogger(ProcessOrderBehaviour.class);
 
 	private HashMap<String, Integer> orders = new HashMap<>();
-	private TreeMap<String, Integer> aggregatedOrders;
-
+	private TreeMap<String, Integer> aggregatedOrders = null;
+	private List<String> nextProducts = new ArrayList<String>();
 	private Bakery bakery;
+	Order currentOrder = null;
+
 
 	public ProcessOrderBehaviour(Bakery bakery) {
 
@@ -45,7 +46,7 @@ public class ProcessOrderBehaviour extends CyclicBehaviour {
 			else if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL
 					&& message.getConversationId().equals("inform-product-to-kneeding-machine-manager")) {
 
-				logger.info("Order {} stored in {} successfully", message.getContent(), message.getSender().getName());
+//				logger.info("Order {} stored in {} successfully", message.getContent(), message.getSender().getName());
 			}
 
 			else if (message.getPerformative() == ACLMessage.CFP && message.getConversationId().equals("place-order")) {
@@ -80,7 +81,25 @@ public class ProcessOrderBehaviour extends CyclicBehaviour {
 						"place-order");
 				// logger.info("order {} successfully received from
 				// {}",order.getGuid(),titleparts[1]);
-				informKneedingManager();
+//				informKneedingManager();
+			}
+
+			else if (message.getPerformative() == ACLMessage.REQUEST
+					&& message.getConversationId().equals("next-product-request")) {
+				if (nextProducts.size() == 0) {
+					if (aggregatedOrders == null || aggregatedOrders.size() == 0 ) {
+						Util.sendReply(myAgent, message, ACLMessage.REFUSE, "No products available for kneeding",
+								"next-product-request");
+					} else {
+						currentOrder = Util.getWrapper().getOrderById(aggregatedOrders.firstKey());
+						nextProducts = new ArrayList<>(currentOrder.getProducts().keySet());
+//						orderList.remove(0);
+						Util.sendReply(myAgent, message, CustomMessage.RESPONSE,
+								currentOrder.getGuid() + " " + nextProducts.get(0), "next-product-request");
+						nextProducts.remove(0);
+					}
+				}
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

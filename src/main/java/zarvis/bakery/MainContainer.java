@@ -42,12 +42,13 @@ public class MainContainer {
 			// create multiple bakery agents
 			for (Bakery bakery : wrapper.getBakeries()) {
 				mainContainer.acceptNewAgent(bakery.getGuid(), new BakeryAgent(bakery)).start();
-				mainContainer.acceptNewAgent("kneeding_machine_manager-" + bakery.getGuid(),
-						new KneedingMachineManager(bakery)).start();
 				for (KneedingMachine kneedingMachine : bakery.getKneading_machines()) {
 					mainContainer.acceptNewAgent(kneedingMachine.getGuid() + "-" + bakery.getGuid(),
 							new KneedingMachineAgent(bakery)).start();
 				}
+				mainContainer.acceptNewAgent("kneeding_machine_manager-" + bakery.getGuid(),
+						new KneedingMachineManager(bakery)).start();
+				break;
 			}
 
 			// create multiple customer agents

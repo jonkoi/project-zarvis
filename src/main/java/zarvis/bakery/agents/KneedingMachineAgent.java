@@ -5,6 +5,7 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import zarvis.bakery.behaviors.kneedingmachine.CurrentStatusBehaviour;
+import zarvis.bakery.behaviors.kneedingmachine.DoughKneedingBehaviour;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.utils.Util;
 
@@ -20,8 +21,9 @@ public class KneedingMachineAgent extends Agent {
 
 	@Override
 	protected void setup() {
-		Util.registerInYellowPage(this, "KneedingMachineAgent", "kneedingmachineagent-" + this.bakery.getGuid());
+		Util.registerInYellowPage(this, "KneedingMachineAgent", this.bakery.getGuid());
 		addBehaviour(new CurrentStatusBehaviour());
+		addBehaviour(new DoughKneedingBehaviour());
 	}
 
 	public class RequestProductFromKneedingManager extends OneShotBehaviour {

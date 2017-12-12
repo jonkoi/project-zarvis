@@ -1,30 +1,26 @@
 language: java
 jdk:
-    - openjdk8
-
+- openjdk8
 
 addons:
   sonarcloud:
-    organization: "ani3190-github"
+    organization: "project-zarvis"
     token:
-      secure: "j0dPc+BMVtgd8lquSXND/+0H08piMwSYss0NWFdbD2M3PBt4xqQK6m0WscIxiOrzW+s6NLrVl8SV5CoOx53QNOs5On8zuwx7zXq5OIg/J0S2Eh6m+lIH1AJ5/coVvrkT0ny20vYjrSVsEUPsV+Vj4b5/tpR+WhdoMjfk1xpPd7HD9MxjaHceZuyKz2Adhcv9xDFaB7MESdHkxRM/B4RbCOXQDUAZpoYLXgx02+iI2pVpPuQlHD3ApNMC2kvDRKXEKWYDnKMrKF/rMyUi+bs8eYt2ZcPzP1qzKI8yjgfq/1nYATgnjnZTJAiwepY1bFp2TQJZLdRAJQscqCDHE9Ni+V7mzr63YlQp9edt0n05L5rtU2z5D9YPwU7eeq27+LNrqgf3NapsMQe50MQD9WwIZ2llywBJMzBWrVsXbib9q78R/SkbjB1t+UjascxeTFciJm9wGg0FoO1q5v6p/uy2eFeX61p39uS4UHFxCTsUC6n0hE+1vJNlu1Uq68ONf6qBJPmoeEctgJFgDI1TxcaBge8QgzV4RObYP9N+pnOBUF0q1AiLVrelTrkicyLrkjIxW98byr4JUX0yGvCxqPLo1lcBJ3qCwTHecDey7zPCuVhRXecqY4zX9RMyTKiR+qmJ+Ne8nQg8SSzM4uI6DtBgW1kwpkmKAC354fxaUD46M+I="
-
-    branches: # The branches monitored by sonarqube
-      - master
-      - develop
-jdk:
-    - openjdk8
-
+      secure: "npdwu2hcuFUWvol2eGvVdNF6uNqHFQ/NX8+MayVNGDZbVye9ejbVJ9lrAzXV/TMbWo/vJlJ5UnmK/hZ+7Z+sfHfNCKQCJ6zVdmg71822UFMcruMw5ea5katRWqFG49Efk+xXnUPWDNSAvzNaDyHoiICHUG6b96p3zPp+E76TsPmWaKDa6UOQOFQufJ3nIOPm9fMnsb+dTKPE+zuFtihlB0ySf/t0MS3/n/IvtWemDF0o/gU2MSqVQR9dAs7cqH31vAIVPM8sGAwpuZbwwVeHLEuhfHmcDAGa6XnhZZVghnz1uyFAbaxncmD1YMivau3fzhtC3YErCj+qWyFWeRIPw2NajjlsmELFxMhb0DDB5tGea7NEfda03rBYQDl1c/SniBw6VcG7EteJhnvPo8Htb0B67kvR3K3aLts+SWHOSChW9HLwlJXLGwJFKZxTeFLD7N4asA4RTdQUX5SnMGG8Vk24Jb+ei225/qTSuby9IUfsdzDkZufanWcEeD17Cw58QNfRj3n+/8BmXzBLTNqD6Rvu/V1vSgvzHxdTB650k6hExitwhn4O0Ewxn4iy0ULHH9V6Hi2GcDsI0KRF5tZUGYmA7T8wpCZ7VTCkj5myDbJmnxKVoTlQBYjI2Vkxg/NwExSXCzo6LZKRE66tb78ewL/ny64MzEPiBZRLDn+1Mps="
+    branches:
+    - master
+    - develop
 script:
-    - sonar-scanner
+- "gradle sonarqube"
 
 cache:
-    directories:
-        - '$HOME/.m2/repository'
-        - '$HOME/.sonar/cache'
-        - '$HOME/.gradle'
-        - '$.gradle'
+  directories:
+  - "$HOME/.m2/repository"
+  - "$HOME/.sonar/cache"
+  - "$HOME/.gradle"
+  - "$.gradle"
 
 group: stable
 dist: trusty
 os: linux
+

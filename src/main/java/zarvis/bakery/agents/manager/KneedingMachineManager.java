@@ -31,10 +31,10 @@ public class KneedingMachineManager extends Agent {
 
 		Util.registerInYellowPage(this, "KneedingMachineManager", "kneedingmachinemanager-" + bakery.getGuid());
 
-		addBehaviour(new ManageProductsBehavior());
-		// addBehaviour(new KneedingMachinesAvailabilityBehavior());
-		Util.waitForSometime(2000);
-		// addBehaviour(new SendProductsToKneedingMachineBehavior());
+//		addBehaviour(new ManageProductsBehavior());
+//		Util.waitForSometime(2000);
+//		addBehaviour(new KneedingMachinesAvailabilityBehavior(bakery));
+		addBehaviour(new SendProductsToKneedingMachineBehavior(bakery));
 
 	}
 }

@@ -8,12 +8,17 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import zarvis.bakery.behaviors.bakery.ProcessOrderBehaviour;
 import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Status;
 
 public class CurrentStatusBehaviour extends CyclicBehaviour {
 
 	private Status status = new Status(true);
+	private Logger logger = LoggerFactory.getLogger(CurrentStatusBehaviour.class);
+
 
 	@Override
 	public void action() {

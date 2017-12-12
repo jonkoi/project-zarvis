@@ -36,11 +36,13 @@ public class ManageProductsBehavior extends CyclicBehaviour {
 
 			if (message.getPerformative() == ACLMessage.REQUEST
 					&& message.getConversationId().equals("next-product-request")) {
+				logger.info("requset received");
 				if (nextProducts.size() == 0) {
 					if (orderList.size() == 0) {
 						Util.sendReply(myAgent, message, ACLMessage.REFUSE, "No products available for kneeding",
 								"next-product-request");
 					} else {
+						logger.info("here");
 						currentOrder = orderList.get(0);
 						nextProducts = new ArrayList<>(currentOrder.getProducts().keySet());
 						orderList.remove(0);

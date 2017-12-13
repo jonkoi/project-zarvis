@@ -3,6 +3,8 @@
 ## Zarvis
 
 [![Build Status](https://travis-ci.org/HBRS-MAAS/project-zarvis.svg?branch=master)](https://travis-ci.org/HBRS-MAAS/project-zarvis)
+[![Quality Gate](https://sonarcloud.io/api/badges/gate?key=project-zarvis)](https://sonarcloud.io/dashboard?id=project-zarvis)
+[![Quality Gate](http://sonarcloud.io/api/badges/measure?key=project-zarvis&metric=coverage)](https://sonarcloud.io/component_measures?id=project-zarvis&metric=coverage)
 
 * Rubanraj Ravichandran- [@rubanraj54](https://github.com/rubanraj54)
 * Bouknify Yassine- [@bouknify](https://github.com/bouknify)

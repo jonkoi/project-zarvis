@@ -15,6 +15,7 @@ jdk:
 - openjdk8
 script:
   - "gradle sonarqube"
+  - "gradle run"
 
 cache:
   directories:

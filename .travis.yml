@@ -14,7 +14,7 @@ addons:
 jdk:
 - openjdk8
 script:
-  - ./gradlew sonarqube
+  - "gradlew sonarqube"
 
 cache:
   directories:

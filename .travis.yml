@@ -4,21 +4,23 @@ install: true
 
 addons:
   sonarcloud:
-    organization: "zarvis-project"
+    organization: "p-zarvis"
     token:
-      secure: ${SONAR-TOKEN}
-
-    branches: # The branches monitored by sonarqube
-      - master
+      secure: "l4ZWSEBGNybWD7r1BL8Y8Ji2IRLYEOlDqGynFC5NX5f7/gEs+DjkyiWW8ukGq2SV120PNgjmu3ZvczPw27j+kYEursewwAUadOu9uYimsQAMWuNqf5xJNqMyHgFpBt6FXyBWzSkvveE2Jis/dTUBN3VUNW56NdBP0WGAXAKApFDxSaFAp5uIC6atXiHdTtfTrvzEXD1bh5QcAzLnHHUaZBSw7spV1ms90a+OGFSSnS1cVP4q7bEoQ2RKsns06h1+xE9zLp6o3hiXgJcNtNTUU+8gu4Ny/Eeqen+dZRR0BpOL3AkDcw/+IEbn/boBKy2NRMKetveFeEmPH8n6smLxQ8HIJsB2t427oHuK/7C/gqDOo2Xq/dNn5umKTzqbfDlU7LcmNjm8nnYvaerwFhnVDZg/mwvaRP2F1yHWkZv6EJgTSHYo9bms4AOwiabD4qsqQyImpoBz2j3oF8C+jc4ZePS4GlH5CD2oSYDb9vye+96UN/rZ9wqqhkkkjXhEBWX93AC9uME6liNlJNuAl80UQ05ylgJpx1c+emJZTfS3P1hiluu6CDpU+k5OfOZy1EJRR4temz6eUoSx4Q0itoLThwzoDU+q7ZsVEEXopchXxp3cusUiCWITEpdkXePkDa1vSN71NjTqRlvG+iC9CZ9blJrB7qUwLDce6zl3JLcikD0="
+    branches:
+    - master
 jdk:
-  - openjdk8
-
+- openjdk8
 script:
-  - "gradle sonarqube"
-
+- ./gradlew sonarqube
 cache:
   directories:
-    - '$HOME/.m2/repository'
-    - '$HOME/.sonar/cache'
-    - '$HOME/.gradle'
-    - '.gradle'
+  - "$HOME/.m2/repository"
+  - "$HOME/.sonar/cache"
+  - "$HOME/.gradle"
+  - ".gradle"
+
+group: stable
+dist: trusty
+os: linux
+    

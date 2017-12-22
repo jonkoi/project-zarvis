@@ -6,7 +6,7 @@
 [![Quality Gate](https://sonarcloud.io/api/badges/gate?key=project-zarvis)](https://sonarcloud.io/dashboard?id=project-zarvis)
 [![Quality Gate](http://sonarcloud.io/api/badges/measure?key=project-zarvis&metric=coverage)](https://sonarcloud.io/component_measures?id=project-zarvis&metric=coverage)
 
-* Koi Jon- [@jonkoi](https://github.com/jonkoi)
+* Koi Jon - [jonkoi](https://github.com/jonkoi)
 * Bouknify Yassine- [@bouknify](https://github.com/bouknify)
 * Aniruddha Pal- [@ani3190](https://github.com/ani3190)
 

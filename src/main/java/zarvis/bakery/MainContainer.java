@@ -12,11 +12,13 @@ import jade.wrapper.AgentContainer;
 import zarvis.bakery.agents.BakeryAgent;
 import zarvis.bakery.agents.CustomerAgent;
 import zarvis.bakery.agents.KneedingMachineAgent;
+import zarvis.bakery.agents.manager.BakingManager;
 import zarvis.bakery.agents.manager.KneedingMachineManager;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.models.BakeryJsonWrapper;
 import zarvis.bakery.models.Customer;
 import zarvis.bakery.models.KneedingMachine;
+import zarvis.bakery.models.Oven;
 import zarvis.bakery.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,8 +48,14 @@ public class MainContainer {
 					mainContainer.acceptNewAgent(kneedingMachine.getGuid() + "-" + bakery.getGuid(),
 							new KneedingMachineAgent(bakery)).start();
 				}
-				mainContainer.acceptNewAgent("kneeding_machine_manager-" + bakery.getGuid(),
-						new KneedingMachineManager(bakery)).start();
+				mainContainer.acceptNewAgent("kneeding_machine_manager-" + bakery.getGuid(),new KneedingMachineManager(bakery)).start();
+				
+				for (Oven ovenMachine : bakery.getOvens()) {
+					mainContainer.acceptNewAgent(ovenMachine.getGuid() + "-" + bakery.getGuid(),
+							new KneedingMachineAgent(bakery)).start();
+				}
+				mainContainer.acceptNewAgent("bakingManager-" + bakery.getGuid(),new BakingManager(bakery)).start();
+
 				break;
 			}
 

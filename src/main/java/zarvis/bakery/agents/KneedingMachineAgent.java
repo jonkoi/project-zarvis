@@ -1,18 +1,15 @@
 package zarvis.bakery.agents;
 
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.OneShotBehaviour;
-import jade.lang.acl.ACLMessage;
 import zarvis.bakery.behaviors.kneedingmachine.CurrentStatusBehaviour;
 import zarvis.bakery.behaviors.kneedingmachine.DoughKneedingBehaviour;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.utils.Util;
 
-import java.util.concurrent.CyclicBarrier;
 
 public class KneedingMachineAgent extends Agent {
-
+	
+	private static final long serialVersionUID = 1L;
 	private Bakery bakery;
 
 	public KneedingMachineAgent(Bakery bakery) {
@@ -24,23 +21,5 @@ public class KneedingMachineAgent extends Agent {
 		Util.registerInYellowPage(this, "KneedingMachineAgent", this.bakery.getGuid());
 		addBehaviour(new CurrentStatusBehaviour());
 		addBehaviour(new DoughKneedingBehaviour());
-	}
-
-	public class RequestProductFromKneedingManager extends OneShotBehaviour {
-
-		@Override
-		public void action() {
-
-			// ACLMessage message = req
-			// ACLMessage message = myAgent.receive();
-			//
-			// if (message != null){
-			// if (message.getPerformative() == ACLMessage.INFORM) {
-			// ACLMessage
-			// }
-			// }else{
-			// block();
-			// }
-		}
 	}
 }

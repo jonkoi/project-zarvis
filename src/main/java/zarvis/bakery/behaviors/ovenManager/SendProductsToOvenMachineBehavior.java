@@ -1,4 +1,4 @@
-package zarvis.bakery.behaviors.bakingManager;
+package zarvis.bakery.behaviors.ovenManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,18 +33,18 @@ public class SendProductsToOvenMachineBehavior extends CyclicBehaviour {
 		case 0:
 			Util.sendMessage(myAgent,
 					Util.searchInYellowPage(myAgent, "KneedingMachineManager", "kneedingmachinemanager-" + bakery.getGuid())[0].getName(),
-					ACLMessage.REQUEST, "", "next-product-request-bakingManager");
+					ACLMessage.REQUEST, "", "next-product-request-ovenManager");
 			step = 1;
 			break;
 		case 1:
 			ACLMessage response = myAgent.receive();
 			if(response != null){
-				if (response.getPerformative() == CustomMessage.RESPONSE && response.getConversationId().equals("next-product-request-bakingManager")){
-					logger.info("next product-bakingManager" + response.getContent());
+				if (response.getPerformative() == CustomMessage.RESPONSE && response.getConversationId().equals("next-product-request-ovenManager")){
+					logger.info("next product-ovenManager" + response.getContent());
 					product = response.getContent();
 					step = 2;
 				}
-				if (response.getPerformative() == ACLMessage.REFUSE && response.getConversationId().equals("next-product-request-bakingManager")) {
+				if (response.getPerformative() == ACLMessage.REFUSE && response.getConversationId().equals("next-product-request-ovenManager")) {
 					//logger.info(response.getContent());
 					step = 0;
 				}

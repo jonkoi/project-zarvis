@@ -4,14 +4,11 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zarvis.bakery.messages.CustomMessage;
-import zarvis.bakery.models.Status;
 import zarvis.bakery.utils.Util;
 
 public class DoughKneedingBehaviour extends CyclicBehaviour {
-
+	private static final long serialVersionUID = 1L;
 	private Logger logger = LoggerFactory.getLogger(DoughKneedingBehaviour.class);
-
 
 	@Override
 	public void action() {

@@ -2,26 +2,20 @@ package zarvis.bakery.behaviors.bakery;
 
 import java.util.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import zarvis.bakery.agents.manager.KneedingMachineManager;
 import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.models.Order;
 import zarvis.bakery.utils.Util;
 
 public class ProcessOrderBehaviour extends CyclicBehaviour {
-
-	private Logger logger = LoggerFactory.getLogger(ProcessOrderBehaviour.class);
-
+	
+	private static final long serialVersionUID = 1L;
+	//private Logger logger = LoggerFactory.getLogger(ProcessOrderBehaviour.class);
 	private HashMap<String, Integer> orders = new HashMap<>();
 	private TreeMap<String, Integer> aggregatedOrders = null;
 	private List<String> nextProducts = new ArrayList<String>();

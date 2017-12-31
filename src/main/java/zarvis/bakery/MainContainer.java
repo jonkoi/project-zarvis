@@ -10,9 +10,12 @@ import jade.util.ExtendedProperties;
 import jade.util.leap.Properties;
 import jade.wrapper.AgentContainer;
 import zarvis.bakery.agents.BakeryAgent;
+import zarvis.bakery.agents.CoolingAgent;
 import zarvis.bakery.agents.CustomerAgent;
 import zarvis.bakery.agents.KneedingMachineAgent;
+import zarvis.bakery.agents.OvenAgent;
 import zarvis.bakery.agents.manager.OvenManager;
+import zarvis.bakery.agents.manager.CoolingManager;
 import zarvis.bakery.agents.manager.KneedingMachineManager;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.models.BakeryJsonWrapper;
@@ -51,11 +54,15 @@ public class MainContainer {
 				mainContainer.acceptNewAgent("kneeding_machine_manager-" + bakery.getGuid(),new KneedingMachineManager(bakery)).start();
 				
 				for (Oven ovenMachine : bakery.getOvens()) {
-					mainContainer.acceptNewAgent(ovenMachine.getGuid() + "-" + bakery.getGuid(),
-							new KneedingMachineAgent(bakery)).start();
+					mainContainer.acceptNewAgent(ovenMachine.getGuid() + "-" + bakery.getGuid(),new OvenAgent(bakery)).start();
 				}
-				mainContainer.acceptNewAgent("bakingManager-" + bakery.getGuid(),new OvenManager(bakery)).start();
-
+				
+				mainContainer.acceptNewAgent("ovenManager-" + bakery.getGuid(),new OvenManager(bakery)).start();
+				
+				mainContainer.acceptNewAgent("coolingMachine" + "-" + bakery.getGuid(),new CoolingAgent(bakery)).start();
+				mainContainer.acceptNewAgent("coolingManager-" + bakery.getGuid(),new CoolingManager(bakery)).start();
+				
+				
 				break;
 			}
 

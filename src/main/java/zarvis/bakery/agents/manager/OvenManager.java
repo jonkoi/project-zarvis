@@ -16,7 +16,7 @@ public class OvenManager extends Agent {
 	
 	@Override
 	protected void setup() {
-		Util.registerInYellowPage(this, "BakingManager", "bakingManager-"+bakery.getGuid());
+		Util.registerInYellowPage(this, "OvenManager", "ovenManager-"+bakery.getGuid());
 		addBehaviour(new SendProductsToOvenMachineBehavior(bakery));
 	}
 

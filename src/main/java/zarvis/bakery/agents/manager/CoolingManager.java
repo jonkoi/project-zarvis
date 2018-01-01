@@ -1,6 +1,7 @@
 package zarvis.bakery.agents.manager;
 
 import jade.core.Agent;
+import zarvis.bakery.behaviors.CoolingManager.SendProductsToCoolingMachineBehaviour;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.utils.Util;
 
@@ -15,7 +16,7 @@ public class CoolingManager extends Agent {
 	@Override
 	protected void setup() {
 		Util.registerInYellowPage(this, "CoolingManager", "coolingManager-"+bakery.getGuid());
-		//addBehaviour(new SendProductsToOvenMachineBehavior(bakery));
+		addBehaviour(new SendProductsToCoolingMachineBehaviour(bakery));
 	}
 
 }

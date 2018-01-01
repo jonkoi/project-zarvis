@@ -1,0 +1,225 @@
+{
+      "ovens": [
+        {
+          "cooling_rate": 3, 
+          "guid": "oven-001", 
+          "heating_rate": 3
+        }, 
+        {
+          "cooling_rate": 3, 
+          "guid": "oven-002", 
+          "heating_rate": 4
+        }
+      ], 
+      "guid": "bakery-001", 
+      "name": "Sunspear Bakery", 
+      "trucks": [
+        {
+          "load_capacity": 26, 
+          "guid": "truck-001", 
+          "location": {
+            "y": 0.10000000000000001, 
+            "x": 1.54
+          }
+        }, 
+        {
+          "load_capacity": 29, 
+          "guid": "truck-002", 
+          "location": {
+            "y": 0.10000000000000001, 
+            "x": 1.54
+          }
+        }
+      ], 
+      "dough_prep_tables": [
+        {
+          "guid": "prep-table-001"
+        }, 
+        {
+          "guid": "prep-table-002"
+        }
+      ], 
+      "products": [
+        {
+          "boxing_temp": 50, 
+          "sales_price": 3.92, 
+          "breads_per_oven": 4, 
+          "breads_per_box": 10, 
+          "item_prep_time": 4, 
+          "dough_prep_time": 8, 
+          "baking_temp": 195, 
+          "cooling_rate": 6, 
+          "guid": "Bread", 
+          "baking_time": 13, 
+          "resting_time": 53, 
+          "production_cost": 1.43
+        }, 
+        {
+          "boxing_temp": 40, 
+          "sales_price": 3.46, 
+          "breads_per_oven": 4, 
+          "breads_per_box": 5, 
+          "item_prep_time": 2, 
+          "dough_prep_time": 11, 
+          "baking_temp": 180, 
+          "cooling_rate": 11, 
+          "guid": "Bagel", 
+          "baking_time": 16, 
+          "resting_time": 33, 
+          "production_cost": 0.62
+        }, 
+        {
+          "boxing_temp": 40, 
+          "sales_price": 4.81, 
+          "breads_per_oven": 8, 
+          "breads_per_box": 10, 
+          "item_prep_time": 4, 
+          "dough_prep_time": 12, 
+          "baking_temp": 185, 
+          "cooling_rate": 17, 
+          "guid": "Berliner", 
+          "baking_time": 23, 
+          "resting_time": 59, 
+          "production_cost": 0.81
+        }, 
+        {
+          "boxing_temp": 55, 
+          "sales_price": 4.14, 
+          "breads_per_oven": 4, 
+          "breads_per_box": 10, 
+          "item_prep_time": 3, 
+          "dough_prep_time": 11, 
+          "baking_temp": 200, 
+          "cooling_rate": 14, 
+          "guid": "Muffin", 
+          "baking_time": 24, 
+          "resting_time": 29, 
+          "production_cost": 1.3
+        }, 
+        {
+          "boxing_temp": 45, 
+          "sales_price": 4.06, 
+          "breads_per_oven": 6, 
+          "breads_per_box": 5, 
+          "item_prep_time": 4, 
+          "dough_prep_time": 10, 
+          "baking_temp": 195, 
+          "cooling_rate": 5, 
+          "guid": "Croissant", 
+          "baking_time": 21, 
+          "resting_time": 57, 
+          "production_cost": 0.81
+        }, 
+        {
+          "boxing_temp": 40, 
+          "sales_price": 4.37, 
+          "breads_per_oven": 8, 
+          "breads_per_box": 10, 
+          "item_prep_time": 3, 
+          "dough_prep_time": 10, 
+          "baking_temp": 190, 
+          "cooling_rate": 12, 
+          "guid": "Donut", 
+          "baking_time": 23, 
+          "resting_time": 29, 
+          "production_cost": 1.1
+        }, 
+        {
+          "boxing_temp": 50, 
+          "sales_price": 4.68, 
+          "breads_per_oven": 8, 
+          "breads_per_box": 10, 
+          "item_prep_time": 3, 
+          "dough_prep_time": 13, 
+          "baking_temp": 195, 
+          "cooling_rate": 19, 
+          "guid": "Cookie", 
+          "baking_time": 12, 
+          "resting_time": 59, 
+          "production_cost": 1.67
+        }, 
+        {
+          "boxing_temp": 45, 
+          "sales_price": 4.85, 
+          "breads_per_oven": 16, 
+          "breads_per_box": 5, 
+          "item_prep_time": 2, 
+          "dough_prep_time": 8, 
+          "baking_temp": 180, 
+          "cooling_rate": 19, 
+          "guid": "Baguette", 
+          "baking_time": 15, 
+          "resting_time": 70, 
+          "production_cost": 1.08
+        }, 
+        {
+          "boxing_temp": 50, 
+          "sales_price": 3.91, 
+          "breads_per_oven": 4, 
+          "breads_per_box": 10, 
+          "item_prep_time": 5, 
+          "dough_prep_time": 13, 
+          "baking_temp": 195, 
+          "cooling_rate": 8, 
+          "guid": "Brezel", 
+          "baking_time": 12, 
+          "resting_time": 50, 
+          "production_cost": 1.09
+        }, 
+        {
+          "boxing_temp": 55, 
+          "sales_price": 3.19, 
+          "breads_per_oven": 12, 
+          "breads_per_box": 15, 
+          "item_prep_time": 2, 
+          "dough_prep_time": 12, 
+          "baking_temp": 200, 
+          "cooling_rate": 18, 
+          "guid": "Bun", 
+          "baking_time": 19, 
+          "resting_time": 52, 
+          "production_cost": 1.09
+        }, 
+        {
+          "boxing_temp": 50, 
+          "sales_price": 3.35, 
+          "breads_per_oven": 12, 
+          "breads_per_box": 5, 
+          "item_prep_time": 4, 
+          "dough_prep_time": 5, 
+          "baking_temp": 180, 
+          "cooling_rate": 10, 
+          "guid": "Multigrain Bread", 
+          "baking_time": 25, 
+          "resting_time": 70, 
+          "production_cost": 1.06
+        }, 
+        {
+          "boxing_temp": 40, 
+          "sales_price": 4.79, 
+          "breads_per_oven": 12, 
+          "breads_per_box": 10, 
+          "item_prep_time": 4, 
+          "dough_prep_time": 11, 
+          "baking_temp": 195, 
+          "cooling_rate": 15, 
+          "guid": "Ciabatta", 
+          "baking_time": 20, 
+          "resting_time": 29, 
+          "production_cost": 1.84
+        }
+      ], 
+      "location": {
+        "y": 1, 
+        "x": 3
+      }, 
+      "kneading_machines": [
+        {
+          "guid": "kneading-machine-001"
+        }, 
+        {
+          "guid": "kneading-machine-002"
+        }
+      ]
+  }
+

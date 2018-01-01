@@ -1,0 +1,10 @@
+{
+  "name": "Wildfire Alchemist Society", 
+  "company": "customer-030", 
+  "location": {
+    "y": -1, 
+    "x": 3
+  }, 
+  "guid": "node-032", 
+  "type": "customer"
+}

@@ -1,60 +1,35 @@
 package zarvis.bakery.models.junitTest;
 
 import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import org.junit.Test;
-
+import com.google.gson.Gson;
 import zarvis.bakery.models.Bakery;
-import zarvis.bakery.models.Location;
-import zarvis.bakery.models.Oven;
-import zarvis.bakery.models.Product;
+
 
 public class BakeryJunitTest {
-
-	@Test
-	public void getNameTest() {
-		Bakery bakery = new Bakery();
-		bakery.setName("bakery01");
-		assertEquals("bakery01", bakery.getName());
-	}
+	//final String FILENAME = "src/main/test/Bakery.json";
+	final String FILENAME = "/home/yassine/WS17_yboukn2s/project-zarvis/src/main/test/Bakery.json";
 	
 	@Test
-	public void getGuidTest(){
-		Bakery bakery = new Bakery();
-		bakery.setGuid("bakeryId001");
-		assertEquals("bakeryId001", bakery.getGuid());
-	}
-	
-	@Test
-	public void getLocationTest(){
-		Location location = new Location();
-		location.setX(3);
-		location.setY(4);
-		Bakery bakery = new Bakery();
-		bakery.setLocation(location);
+	public void test() throws UnsupportedEncodingException, IOException {
+		BufferedReader reader = new BufferedReader(new FileReader(FILENAME));
+		Bakery b = new Gson().fromJson(reader, Bakery.class);
+		System.out.println(b);
+		assertEquals(b.getGuid(),"bakery-001");
+		assertEquals(b.getName(),"Sunspear Bakery");
+		assertEquals(b.getOvens().get(0).getGuid(),"oven-001");
+		assertEquals(b.getOvens().get(0).getCooling_rate(),3);
+		assertEquals(b.getProducts().get(6).getGuid(),"Cookie");
+		assertEquals(b.getProducts().get(6).getBaking_time(),12);
+		assertEquals(b.getDough_prep_tables().get(1).getGuid(),"prep-table-002");
+		assertEquals(b.getKneading_machines().get(1).getGuid(),"kneading-machine-002");
+		assertEquals(b.getLocation().getX(),3,0);
+		assertEquals(b.getLocation().getY(),1,0);
 		
-		assertEquals(location, bakery.getLocation());
 		
 	}
-	
-	@Test
-	public void getOvensTest(){
-		ArrayList<Oven> ovens = new ArrayList<Oven>();
-		Oven oven1 = new Oven();
-		oven1.setGuid("oven1");
-		oven1.setCooling_rate(12);
-		oven1.setHeating_rate(13);
-		ovens.add(oven1);
-		Bakery bakery = new Bakery();
-		bakery.setOvens(ovens);
-		
-		assertEquals(ovens,bakery.getOvens());
-	}
-	
-	
-	
-
 }

@@ -1,0 +1,39 @@
+{
+  "directed": true, 
+    "nodes": [
+      {
+        "name": "Wildfire Alchemist Society", 
+        "company": "customer-030", 
+        "location": {
+          "y": -1, 
+          "x": 1
+        }, 
+        "guid": "node-032", 
+        "type": "customer"
+      }, 
+      {
+        "name": "Doughnuts of Myr", 
+        "company": "customer-008", 
+        "location": {
+          "y": 9, 
+          "x": 4
+        }, 
+        "guid": "node-010", 
+        "type": "customer"
+      }
+  ],
+  "links": [
+      {
+        "source": "node-032", 
+        "guid": "edge-001", 
+        "dist": 2, 
+        "target": "node-020"
+      }, 
+      {
+        "source": "node-032", 
+        "guid": "edge-002", 
+        "dist": 1, 
+        "target": "node-001"
+      }
+  ]
+}

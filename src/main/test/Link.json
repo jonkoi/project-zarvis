@@ -1,0 +1,6 @@
+{
+    "source": "node-032", 
+    "guid": "edge-002", 
+    "dist": 1, 
+    "target": "node-001"
+}

@@ -20,7 +20,7 @@ public class BakingProcessBehaviour extends CyclicBehaviour {
 		ACLMessage message = myAgent.receive();
 		if (message != null) {
 			if (message.getPerformative() == ACLMessage.INFORM && message.getConversationId().equals("oven-product")) {
-				logger.info("product received for preparation table " + message.getContent());
+				logger.info("product received from preparation table " + message.getContent());
 				listProducts.add(message.getContent());
 				Util.sendReply(myAgent,message,ACLMessage.CONFIRM,"product accecpted by oven machine","oven-product");
 			}

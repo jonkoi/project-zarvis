@@ -22,21 +22,13 @@ public class TimeAgent extends Agent {
 		this.globalStartTime = globalStartTime;
 	}
 	
-	protected void takeDown() {
-		// Deregister from the yellow pages
-		try {
-			DFService.deregister(this);
-		} catch (FIPAException fe) {
-			fe.printStackTrace();
-		}
-	}
-	
-	//Delay so that every agent is initialized
 	class WaitSetup extends Behaviour {
+		
 		private boolean started = false;
 		
 		@Override
 		public void action() {
+			System.out.println("WS");
 			if (System.currentTimeMillis() >= globalStartTime) {
 				started = true;
 			} else {

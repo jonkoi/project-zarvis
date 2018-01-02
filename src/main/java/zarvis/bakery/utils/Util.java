@@ -63,7 +63,7 @@ public class Util {
 		DFAgentDescription agentDescription = new DFAgentDescription();
 		agentDescription.setName(agent.getAID());
 
-		// Create service description and set type and bakery name
+		// Create service description and set type and agent name
 		ServiceDescription serviceDescription = new ServiceDescription();
 		serviceDescription.setType(type);
 		serviceDescription.setName(name);
@@ -76,6 +76,14 @@ public class Util {
 		} catch (FIPAException e) {
 			e.printStackTrace();
 			return false;
+		}
+	}
+	
+	public static void deregisterInYellowPage(Agent agent) {
+		try {
+			DFService.deregister(agent);
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
 		}
 	}
 

@@ -22,19 +22,6 @@ public class TimeAgent extends Agent {
 		this.globalStartTime = globalStartTime;
 	}
 	
-	protected void registerService(ServiceDescription sd) {
-		// Register to the yellow pages
-		DFAgentDescription dfd = new DFAgentDescription();
-		dfd.setName(getAID());
-		dfd.addServices(sd);
-		try {
-			DFService.register(this, dfd);
-		}
-		catch (FIPAException fe) {
-			fe.printStackTrace();
-		}
-	}
-	
 	protected void takeDown() {
 		// Deregister from the yellow pages
 		try {
@@ -45,22 +32,22 @@ public class TimeAgent extends Agent {
 	}
 	
 	//Delay so that every agent is initialized
-		class WaitSetup extends Behaviour {
-			private boolean started = false;
-			
-			@Override
-			public void action() {
-				if (System.currentTimeMillis() >= globalStartTime) {
-					started = true;
-				} else {
-					block(globalStartTime - System.currentTimeMillis());
-				}
-			}
-
-			@Override
-			public boolean done() {
-				return started;
+	class WaitSetup extends Behaviour {
+		private boolean started = false;
+		
+		@Override
+		public void action() {
+			if (System.currentTimeMillis() >= globalStartTime) {
+				started = true;
+			} else {
+				block(globalStartTime - System.currentTimeMillis());
 			}
 		}
+
+		@Override
+		public boolean done() {
+			return started;
+		}
+	}
 
 }

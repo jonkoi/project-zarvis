@@ -33,7 +33,6 @@ public class CustomerAgent extends Agent {
 
 	@Override
 	protected void setup() {
-
 		Util.registerInYellowPage(this, "Customer", customer.getGuid());
 
 		//TreeMap<String, Integer> aggregatedOrders = Util.sortMapByValue(orderAggregation);
@@ -43,6 +42,7 @@ public class CustomerAgent extends Agent {
 	}
 
 	protected void takeDown() {
+		Util.deregisterInYellowPage(this);
 		finish = true;
 		System.out.println("Agent " + getAID().getName() + " terminating.");
 	}

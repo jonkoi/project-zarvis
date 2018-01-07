@@ -78,6 +78,15 @@ public class Util {
 			return false;
 		}
 	}
+	
+	public static void deregisterInYellowPage(Agent agent) {
+		try {
+			DFService.deregister(agent);
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
+	}
+
 
 	public static void sendReply(Agent agent, ACLMessage message, int performative, String content,
 			String conversationId) {

@@ -1,7 +1,7 @@
 package zarvis.bakery.agents.manager;
 
 import jade.core.Agent;
-import zarvis.bakery.behaviours.PreparationTableManager.SendProductsToPreparationTableBehavior;
+import zarvis.bakery.behaviors.PreparationTableManager.SendProductsToPreparationTableBehavior;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.utils.Util;
 

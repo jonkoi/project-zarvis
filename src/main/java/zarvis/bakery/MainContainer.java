@@ -85,7 +85,7 @@ public class MainContainer {
 			
 			// create multiple customer agents
 			for (Customer customer : wrapper.getCustomers().subList(0, 2)) {
-				CustomerAgent agent =  new CustomerAgent(customer);
+				CustomerAgent agent =  new CustomerAgent(customer,globalStartTime);
 				customerAgentsList.add(agent);
 				mainContainer.acceptNewAgent(customer.getGuid(), agent).start();
 			}

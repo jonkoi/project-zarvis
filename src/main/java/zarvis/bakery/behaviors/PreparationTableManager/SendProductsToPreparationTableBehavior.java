@@ -2,7 +2,6 @@ package zarvis.bakery.behaviors.PreparationTableManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -22,6 +21,7 @@ public class SendProductsToPreparationTableBehavior extends CyclicBehaviour{
 	private DFAgentDescription[] preparationTables;
 	private int counter = 0;
 	
+	
 	public SendProductsToPreparationTableBehavior(Bakery bakery) {
 		this.bakery = bakery;
 	}
@@ -31,9 +31,13 @@ public class SendProductsToPreparationTableBehavior extends CyclicBehaviour{
 	public void action() {
 		switch (step) {
 		case 0:
-			Util.sendMessage(myAgent,
-					Util.searchInYellowPage(myAgent, "KneedingMachineAgent", "KneedingMachineAgent-" + bakery.getGuid())[0].getName(),
-					ACLMessage.REQUEST, "", "next-product-request-preparationTableManager");
+			DFAgentDescription[] df = Util.searchInYellowPage(myAgent, "KneedingMachineAgent", bakery.getGuid());
+			ACLMessage mesg = new ACLMessage(ACLMessage.REQUEST);
+			mesg.setPerformative(ACLMessage.REQUEST);
+			mesg.addReceiver(df[0].getName());
+			mesg.setConversationId("next-product-request-preparationTableManager");
+			mesg.setContent(" ");
+			myAgent.send(mesg);
 			step = 1;
 			break;
 		case 1:
@@ -53,7 +57,7 @@ public class SendProductsToPreparationTableBehavior extends CyclicBehaviour{
 				block();
 			break;
 		case 2:
-			preparationTables = Util.searchInYellowPage(myAgent, "OvenAgent", bakery.getGuid());
+			preparationTables = Util.searchInYellowPage(myAgent, "PreparationTableAgent", bakery.getGuid());
 			if (preparationTables.length != 0){
 				for (DFAgentDescription ovenMachine : preparationTables) {
 					Util.sendMessage(myAgent, ovenMachine.getName(), CustomMessage.REQUEST_STATUS, "","preparationTable-availability");

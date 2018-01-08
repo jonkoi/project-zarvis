@@ -14,19 +14,15 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 import zarvis.bakery.models.BakeryJsonWrapper;
 import zarvis.bakery.utils.ValueComparatorAscending;
 
 public class Util {
 
-	//private static Logger logger = LoggerFactory.getLogger(Util.class);
-
 	public static BakeryJsonWrapper getWrapper() {
-		final String FILENAME = "src/main/config/random-scenario.json";
+		//final String FILENAME = "src/main/config/random-scenario.json";
 		//final String FILENAME = "/home/aniruddha/Downloads/WS2017/MultiAgent/project-zarvis/src/main/config/random-scenario.json";
-		//final String FILENAME = "/home/yassine/WS17_yboukn2s/project-zarvis/src/main/config/random-scenario.json";
+		final String FILENAME = "/home/yassine/WS17_yboukn2s/project-zarvis/src/main/config/random-scenario.json";
 		BakeryJsonWrapper jsonwrapper = null;
 		try {
 			// read json file and convert them to objects

@@ -19,7 +19,6 @@ public class DoughKneedingBehaviour extends CyclicBehaviour {
 
 	@Override
 	public void action() {
-
 		ACLMessage message = myAgent.receive();
 		if (message != null) {
 			if (message.getPerformative() == ACLMessage.INFORM && message.getConversationId().equals("kneeding-product")) {
@@ -27,19 +26,22 @@ public class DoughKneedingBehaviour extends CyclicBehaviour {
 				listProducts.add(message.getContent());
 				Util.sendReply(myAgent,message,ACLMessage.CONFIRM,"product accecpted by kneeding machine","kneeding-product");
 			}
-			else 
+			else {
 				if(message.getPerformative() == ACLMessage.REQUEST 
-				&& message.getConversationId().equals("next-product-request-ovenManager")){
+				&& message.getConversationId().equals("next-product-request-preparationTableManager")){
+					
 					if(listProducts.size() == 0){
 						Util.sendReply(myAgent, message, ACLMessage.REFUSE, "No products available for kneeding machine",
-								"next-product-request-ovenManager");
+								"next-product-request-preparationTableManager");
 					}
 					else{
 						Util.sendReply(myAgent, message, CustomMessage.RESPONSE,
-								listProducts.get(0), "next-product-request-ovenManager");
+								listProducts.get(0), "next-product-request-preparationTableManager");
 						listProducts.remove(0);
 					}
 				}
+				
+			}
 		}
 		else 
 			block();

@@ -1,7 +1,6 @@
 package zarvis.bakery.behaviors.CoolingAgent;
 
 import java.util.ArrayList;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jade.core.behaviours.CyclicBehaviour;
@@ -26,14 +25,14 @@ public class CoolingProcessBehaviour extends CyclicBehaviour {
 			}
 			else 
 				if(message.getPerformative() == ACLMessage.REQUEST 
-				&& message.getConversationId().equals("next-product-request-deliveryManager")){
+				&& message.getConversationId().equals("next-product-request-packagingAgent")){
 					if(listProducts.size() == 0){
 						Util.sendReply(myAgent, message, ACLMessage.REFUSE, "No products available for cooling machine",
-								"next-product-request-deliveryManager");
+								"next-product-request-packagingAgent");
 					}
 					else{
 						Util.sendReply(myAgent, message, CustomMessage.RESPONSE,
-								listProducts.get(0), "next-product-request-deliveryManager");
+								listProducts.get(0), "next-product-request-packagingAgent");
 						listProducts.remove(0);
 					}
 				}

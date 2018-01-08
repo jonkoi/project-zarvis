@@ -21,5 +21,10 @@ public class KneedingMachineAgent extends Agent {
 		Util.registerInYellowPage(this, "KneedingMachineAgent", this.bakery.getGuid());
 		addBehaviour(new CurrentStatusBehaviour());
 		addBehaviour(new DoughKneedingBehaviour());
+		
+	
 	}
+	
 }
+
+

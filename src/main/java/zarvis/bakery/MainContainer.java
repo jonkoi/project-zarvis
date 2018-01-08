@@ -30,6 +30,10 @@ public class MainContainer {
 	public static void main(String[] args) {
 		
 		try {
+			//Delay for 5 seconds to wait for all to initialize
+			long delay = 5000;
+			long globalStartTime = System.currentTimeMillis() + delay;
+			
 			Logger logger = LoggerFactory.getLogger(BakeryAgent.class);
 			
 			List<CustomerAgent> customerAgentsList = new ArrayList<>();
@@ -44,6 +48,7 @@ public class MainContainer {
 			AgentContainer mainContainer = runtime.createMainContainer(profileImpl);
 			
 			BakeryJsonWrapper wrapper = Util.getWrapper();
+			
 
 			// create multiple bakery agents
 			for (Bakery bakery : wrapper.getBakeries()) {
@@ -76,6 +81,7 @@ public class MainContainer {
 				
 				break;
 			}
+
 			
 			// create multiple customer agents
 			for (Customer customer : wrapper.getCustomers().subList(0, 2)) {
@@ -83,6 +89,10 @@ public class MainContainer {
 				customerAgentsList.add(agent);
 				mainContainer.acceptNewAgent(customer.getGuid(), agent).start();
 			}
+
+
+			
+
 			
 			
 			while (true) {

@@ -16,6 +16,8 @@ import zarvis.bakery.models.Status;
 
 public class CurrentStatusBehaviour extends CyclicBehaviour {
 
+	
+	private static final long serialVersionUID = 1L;
 	private Status status = new Status(true);
 	private Logger logger = LoggerFactory.getLogger(CurrentStatusBehaviour.class);
 

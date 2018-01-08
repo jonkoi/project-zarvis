@@ -1,6 +1,8 @@
 package zarvis.bakery.agents.manager;
 
 import jade.core.Agent;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.lang.acl.ACLMessage;
 import zarvis.bakery.behaviors.PreparationTableManager.SendProductsToPreparationTableBehavior;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.utils.Util;
@@ -16,9 +18,9 @@ public class PreparationTableManager extends Agent {
 
 	@Override
 	protected void setup() {
+		
 		Util.registerInYellowPage(this, "preparationTableManager", "preparationTableManager-"+bakery.getGuid());
 		addBehaviour(new SendProductsToPreparationTableBehavior(bakery));
-		super.setup();
 	}
 
 }

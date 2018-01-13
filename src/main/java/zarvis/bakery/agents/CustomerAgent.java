@@ -51,7 +51,7 @@ public class CustomerAgent extends TimeAgent {
 
 	@Override
 	protected void setup() {
-		
+//		System.out.println("My local-name is "+getAID().getLocalName());
 		Util.registerInYellowPage(this, "Customer", customer.getGuid());
 		//TreeMap<String, Integer> aggregatedOrders = Util.sortMapByValue(orderAggregation);
 		
@@ -135,14 +135,22 @@ public class CustomerAgent extends TimeAgent {
 			Map.Entry<String,Integer> entry = sortedOrderAggregation.entrySet().iterator().next();
 			String key;
 			int value = entry.getValue();
+			orderMsg = new ACLMessage(ACLMessage.CFP);
+			String msg = "";
 			do {
 				key = entry.getKey();
 				inWaitOrderAggregation.put(key, value);
+				
+				msg += Util.buildOrderMessage(key, orders, getAID().getLocalName());
+				System.out.println(msg);
+				
 				sortedOrderAggregation.remove(key);
 				entry = sortedOrderAggregation.entrySet().iterator().next();
 			} while (value == entry.getValue());
-			exitValue = 2;
 			
+			
+			
+			exitValue = 2;
 			UpdateTime();
 		}
 		
@@ -173,29 +181,29 @@ public class CustomerAgent extends TimeAgent {
 		}
 	}
 	
-	private class PlaceOrder extends ContractNetInitiator{
+	private class PlaceOrder extends OneShotBehaviour{
 		
 		
 
-		public PlaceOrder(Agent a, ACLMessage cfp) {
-			super(a, cfp);
-			
-		}
-		
-		
-		
-//		public void action() {
-//			// pass the string to the bakeryAgent wait for the confirmation.
-//			//ToDo handle
-//			System.out.println("placing customer order---------\n");
-//			ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-//			cfp.setContent("Hello");
-//			cfp.setConversationId("order_proposal");
-//			cfp.addReceiver(new AID("bakery-001",AID.ISLOCALNAME));
-//			myAgent.send(cfp);
-//			System.out.println("SENT!");
+//		public PlaceOrder(Agent a, ACLMessage cfp) {
+//			super(a, cfp);
 //			
-//			inWaitOrderAggregation.clear();
+//		}
+		
+		
+		
+		public void action() {
+			// pass the string to the bakeryAgent wait for the confirmation.
+			//ToDo handle
+			System.out.println("placing customer order---------\n");
+			ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+			cfp.setContent("Hello");
+			cfp.setConversationId("order_proposal");
+			cfp.addReceiver(new AID("bakery-001",AID.ISLOCALNAME));
+			myAgent.send(cfp);
+			System.out.println("SENT!");
+			
+			inWaitOrderAggregation.clear();
 			
 			
 //			cfp.setReplyWith("cfp"+System.currentTimeMillis());
@@ -204,7 +212,7 @@ public class CustomerAgent extends TimeAgent {
 //					MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
 //			addBehaviour(new AcknowledgeOrder());
 			
-//		}
+		}
 	}
 	
 	private void UpdateTime() {

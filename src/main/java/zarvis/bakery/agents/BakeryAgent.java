@@ -26,12 +26,16 @@ public class BakeryAgent extends Agent {
 	public BakeryAgent(Bakery bakery) {
 		this.bakery = bakery;
 		this.products = bakery.getProducts();
-		if (products.size() > 0) {
-			Collections.sort(products, new Comparator<Product>() {
+		if (this.products.size() > 0) {
+			Collections.sort(this.products, new Comparator<Product>() {
 				public int compare(final Product object1, final Product object2) {
 					return object1.getGuid().compareTo(object2.getGuid());
 				}
 			});
+		}
+		
+		for (Product p: this.products) {
+			System.out.println(p.getGuid());
 		}
 	}
 

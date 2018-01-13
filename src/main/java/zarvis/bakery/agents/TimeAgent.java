@@ -28,7 +28,7 @@ public class TimeAgent extends Agent {
 		
 		@Override
 		public void action() {
-			System.out.println("WS");
+//			System.out.println("WS");
 			if (System.currentTimeMillis() >= globalStartTime) {
 				started = true;
 			} else {

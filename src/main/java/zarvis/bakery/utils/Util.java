@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.*;
+import java.util.Map.Entry;
 
 import com.google.gson.Gson;
 
@@ -14,10 +15,12 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
-import zarvis.bakery.models.BakeryJsonWrapper;
 import zarvis.bakery.utils.ValueComparatorAscending;
+import zarvis.bakery.models.*;
 
 public class Util {
+	private static List<String> productsName = Arrays.asList("Bagel", "Baguette", "Berliner", "Bread", "Brezel", "Bun", "Ciabatta",
+			"Cookie", "Croissant", "Donut", "Muffin","Multigrain Bread");
 
 	public static BakeryJsonWrapper getWrapper() {
 		final String FILENAME = "src/main/config/random-scenario.json";
@@ -115,6 +118,37 @@ public class Util {
 		TreeMap<String, Integer> result = new TreeMap<String, Integer>(comparator);
 		result.putAll(map);
 		return result;
+	}
+	
+	public static String buildOrderMessage(String guid, List<Order> orders, String agentGuid) {
+		String msg = "";
+		for (Order o: orders) {
+			if (o.getGuid() == guid) {
+				int orderDay = o.getOrder_date().getDay();
+				int orderHour = o.getOrder_date().getHour();
+				
+				int delDay = o.getDelivery_date().getDay();
+				int delHour = o.getDelivery_date().getHour();
+				
+				
+				msg = msg + agentGuid + ",<" + orderDay + "." + orderHour + ">,<" + delDay + "." + delHour + ">,[";
+				
+				Map<String, Integer> products = o.getProducts();
+				for (String p : productsName) {
+					if (products.get(p) == null) {
+						msg = msg + "0.";
+					} else {
+						msg = msg + products.get(p) + ".";
+					}
+				}
+				
+				msg = msg.substring(0, msg.length() - 1) + "]";
+				break;
+			}
+		}
+		
+		
+		return msg;
 	}
 
 }

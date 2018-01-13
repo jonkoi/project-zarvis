@@ -16,6 +16,7 @@ import zarvis.bakery.behaviors.bakery.ProcessOrderBehaviour;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.models.Product;
 import zarvis.bakery.utils.Util;
+import jade.proto.ContractNetResponder;
 
 public class BakeryAgent extends Agent {
 

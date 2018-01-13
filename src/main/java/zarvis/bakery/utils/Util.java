@@ -142,7 +142,7 @@ public class Util {
 					}
 				}
 				
-				msg = msg.substring(0, msg.length() - 1) + "]";
+				msg = msg.substring(0, msg.length() - 1) + "],";
 				break;
 			}
 		}

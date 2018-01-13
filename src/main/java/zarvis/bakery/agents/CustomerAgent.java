@@ -9,7 +9,11 @@ import jade.core.Agent;
 import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.WakerBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.core.behaviours.CyclicBehaviour;
 import zarvis.bakery.behaviors.customer.RequestPerformerBehavior;
@@ -24,6 +28,7 @@ public class CustomerAgent extends TimeAgent {
 	//private Logger logger = LoggerFactory.getLogger(CustomerAgent.class);
 	private Customer customer;
 	private List<Order> orders;
+//	private List<Bakeries> bakeries;
 	private HashMap<String, Integer> orderAggregation = new HashMap<String, Integer>();
 	private TreeMap<String, Integer> sortedOrderAggregation = new TreeMap<String, Integer>();
 	private DFAgentDescription[] bakeries;
@@ -55,6 +60,8 @@ public class CustomerAgent extends TimeAgent {
 		Util.registerInYellowPage(this, "Customer", customer.getGuid());
 		//TreeMap<String, Integer> aggregatedOrders = Util.sortMapByValue(orderAggregation);
 		
+		
+		
 		// Koi: My take on the FSMBehavior
 		// FSM building
 		FSMBehaviour fb = new FSMBehaviour();
@@ -62,7 +69,7 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerState(new GetBakeries(), "GetBakeries-state");
 		fb.registerState(new CheckNextOrders(), "CheckNextOrders-state");
 		fb.registerState(new CheckTime(this, millisLeft), "CheckTime-state");
-		fb.registerState(new PlaceOrder(), "PlaceOrder-state");
+		fb.registerState(new PlaceOrder(this, orderMsg), "PlaceOrder-state");
 		
 		//Transitions
 		fb.registerDefaultTransition("WaitSetup-state", "GetBakeries-state");
@@ -94,8 +101,6 @@ public class CustomerAgent extends TimeAgent {
 	// Get the bakery list | 0: No bakeries found, 1: Bakeries, move to check next order
 	private class GetBakeries extends OneShotBehaviour{
 		private int exitValue = 0;
-		
-		
 
 		@Override
 		public void action() {
@@ -107,6 +112,15 @@ public class CustomerAgent extends TimeAgent {
 			if (bakeries.length > 0) {
 				exitValue = 1;
 			}
+			
+			orderMsg = new ACLMessage(ACLMessage.CFP);
+			for (int i = 0; i < bakeries.length; ++i) {
+//				System.out.println("Hello, hello" + bakeries[i].getName());
+				orderMsg.addReceiver(bakeries[i].getName());
+	  		}
+			orderMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+			orderMsg.setReplyByDate(new Date(System.currentTimeMillis() + 500));
+			
 		}
 		
 		public int onEnd() {
@@ -135,21 +149,19 @@ public class CustomerAgent extends TimeAgent {
 			Map.Entry<String,Integer> entry = sortedOrderAggregation.entrySet().iterator().next();
 			String key;
 			int value = entry.getValue();
-			orderMsg = new ACLMessage(ACLMessage.CFP);
+			
 			String msg = "";
 			do {
 				key = entry.getKey();
 				inWaitOrderAggregation.put(key, value);
 				
 				msg += Util.buildOrderMessage(key, orders, getAID().getLocalName());
-				System.out.println(msg);
 				
 				sortedOrderAggregation.remove(key);
 				entry = sortedOrderAggregation.entrySet().iterator().next();
 			} while (value == entry.getValue());
 			
-			
-			
+			orderMsg.setContent(msg.substring(0, msg.length() - 1));
 			exitValue = 2;
 			UpdateTime();
 		}
@@ -175,44 +187,76 @@ public class CustomerAgent extends TimeAgent {
 			}
 		}
 		public int onEnd() {
-			System.out.println(exitValue);
+//			System.out.println(exitValue);
 			reset(millisLeft);
 			return exitValue;
 		}
 	}
 	
-	private class PlaceOrder extends OneShotBehaviour{
+	private class PlaceOrder extends ContractNetInitiator{
+		
+		public PlaceOrder(Agent a, ACLMessage cfp) {
+			super(a, cfp);
+		}
+		protected void handlePropose(ACLMessage propose, Vector v) {
+			System.out.println("Agent "+propose.getSender().getName()+" proposed "+propose.getContent());
+		}
+		protected void handleRefuse(ACLMessage refuse) {
+			System.out.println("Agent "+refuse.getSender().getName()+" refused");
+		}
+		protected void handleAllResponses(Vector responses, Vector acceptances) {
+			if (responses.size() < bakeries.length) {
+				// Some responder didn't reply within the specified timeout
+				System.out.println("Timeout expired: missing "+(bakeries.length - responses.size())+" responses");
+			}
+			// Evaluate proposals.
+			int bestProposal = -1;
+			AID bestProposer = null;
+			ACLMessage accept = null;
+			Enumeration e = responses.elements();
+			while (e.hasMoreElements()) {
+				ACLMessage msg = (ACLMessage) e.nextElement();
+				if (msg.getPerformative() == ACLMessage.PROPOSE) {
+					ACLMessage reply = msg.createReply();
+					reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+					acceptances.addElement(reply);
+					int proposal = Integer.parseInt(msg.getContent());
+					if (proposal > bestProposal) {
+						bestProposal = proposal;
+						bestProposer = msg.getSender();
+						accept = reply;
+					}
+				}
+			}
+			// Accept the proposal of the best proposer
+			if (accept != null) {
+				System.out.println("Accepting proposal "+bestProposal+" from responder "+bestProposer.getName());
+				accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+			}						
+		}
 		
 		
-
-//		public PlaceOrder(Agent a, ACLMessage cfp) {
-//			super(a, cfp);
+//		public void action() {
+//			// pass the string to the bakeryAgent wait for the confirmation.
+//			//ToDo handle
+//			System.out.println("placing customer order---------\n");
+//			ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+//			cfp.setContent("Hello");
+//			cfp.setConversationId("order_proposal");
+//			cfp.addReceiver(new AID("bakery-001",AID.ISLOCALNAME));
+//			myAgent.send(cfp);
+//			System.out.println("SENT!");
+//			
+//			inWaitOrderAggregation.clear();
+//			
+//			
+////			cfp.setReplyWith("cfp"+System.currentTimeMillis());
+////			send(cfp);
+////			mt = MessageTemplate.and(MessageTemplate.MatchConversationId("order_proposal-reply"),
+////					MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+////			addBehaviour(new AcknowledgeOrder());
 //			
 //		}
-		
-		
-		
-		public void action() {
-			// pass the string to the bakeryAgent wait for the confirmation.
-			//ToDo handle
-			System.out.println("placing customer order---------\n");
-			ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-			cfp.setContent("Hello");
-			cfp.setConversationId("order_proposal");
-			cfp.addReceiver(new AID("bakery-001",AID.ISLOCALNAME));
-			myAgent.send(cfp);
-			System.out.println("SENT!");
-			
-			inWaitOrderAggregation.clear();
-			
-			
-//			cfp.setReplyWith("cfp"+System.currentTimeMillis());
-//			send(cfp);
-//			mt = MessageTemplate.and(MessageTemplate.MatchConversationId("order_proposal-reply"),
-//					MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
-//			addBehaviour(new AcknowledgeOrder());
-			
-		}
 	}
 	
 	private void UpdateTime() {
@@ -221,6 +265,6 @@ public class CustomerAgent extends TimeAgent {
 		daysElapsed = (long) Math.floorDiv(operatingDuration , MILLIS_PER_DAY);
 		hoursElapsed = (long) Math.floorDiv(operatingDuration - daysElapsed * MILLIS_PER_DAY, MILLIS_PER_HOUR);
 		millisLeft = MILLIS_PER_HOUR - (operatingDuration - totalHoursElapsed * MILLIS_PER_HOUR);
-		System.out.println(millisLeft);
+//		System.out.println(millisLeft);
 	}
 }

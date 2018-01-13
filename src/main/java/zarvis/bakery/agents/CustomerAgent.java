@@ -16,6 +16,7 @@ import zarvis.bakery.behaviors.customer.RequestPerformerBehavior;
 import zarvis.bakery.models.Customer;
 import zarvis.bakery.models.Order;
 import zarvis.bakery.utils.Util;
+import jade.proto.ContractNetInitiator;
 
 public class CustomerAgent extends TimeAgent {
 	private static final long serialVersionUID = 1L;
@@ -30,6 +31,8 @@ public class CustomerAgent extends TimeAgent {
 	private TreeMap<String, Integer> inWaitOrderAggregation = new TreeMap<String,Integer>();
 	private TreeMap<String, Integer> inProcessOrderAggregation = new TreeMap<String,Integer>();
 	private TreeMap<String, Integer> finishedOrderAggregation = new TreeMap<String, Integer>();
+	
+	private ACLMessage orderMsg;
 
 	public CustomerAgent(Customer customer, long globalStartTime) {
 		super(globalStartTime);
@@ -170,20 +173,29 @@ public class CustomerAgent extends TimeAgent {
 		}
 	}
 	
-	private class PlaceOrder extends OneShotBehaviour{
+	private class PlaceOrder extends ContractNetInitiator{
 		
-		public void action() {
-			// pass the string to the bakeryAgent wait for the confirmation.
-			//ToDo handle
-			System.out.println("placing customer order---------\n");
-			ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-			cfp.setContent("Hello");
-			cfp.setConversationId("order_proposal");
-			cfp.addReceiver(new AID("bakery-001",AID.ISLOCALNAME));
-			myAgent.send(cfp);
-			System.out.println("SENT!");
+		
+
+		public PlaceOrder(Agent a, ACLMessage cfp) {
+			super(a, cfp);
 			
-			inWaitOrderAggregation.clear();
+		}
+		
+		
+		
+//		public void action() {
+//			// pass the string to the bakeryAgent wait for the confirmation.
+//			//ToDo handle
+//			System.out.println("placing customer order---------\n");
+//			ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+//			cfp.setContent("Hello");
+//			cfp.setConversationId("order_proposal");
+//			cfp.addReceiver(new AID("bakery-001",AID.ISLOCALNAME));
+//			myAgent.send(cfp);
+//			System.out.println("SENT!");
+//			
+//			inWaitOrderAggregation.clear();
 			
 			
 //			cfp.setReplyWith("cfp"+System.currentTimeMillis());
@@ -192,7 +204,7 @@ public class CustomerAgent extends TimeAgent {
 //					MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
 //			addBehaviour(new AcknowledgeOrder());
 			
-		}
+//		}
 	}
 	
 	private void UpdateTime() {

@@ -52,7 +52,7 @@ public class MainContainer {
 
 			// create multiple bakery agents
 			for (Bakery bakery : wrapper.getBakeries()) {
-				mainContainer.acceptNewAgent(bakery.getGuid(), new BakeryAgent(bakery)).start();
+				mainContainer.acceptNewAgent(bakery.getGuid(), new BakeryAgent(bakery, globalStartTime)).start();
 				for (KneedingMachine kneedingMachine : bakery.getKneading_machines().subList(0, 1)) {
 					mainContainer.acceptNewAgent(kneedingMachine.getGuid() + "-" + bakery.getGuid(),
 							new KneedingMachineAgent(bakery)).start();
@@ -84,7 +84,7 @@ public class MainContainer {
 
 			
 			// create multiple customer agents
-			for (Customer customer : wrapper.getCustomers().subList(0, 2)) {
+			for (Customer customer : wrapper.getCustomers().subList(0, 1)) {
 				CustomerAgent agent =  new CustomerAgent(customer,globalStartTime);
 				customerAgentsList.add(agent);
 				mainContainer.acceptNewAgent(customer.getGuid(), agent).start();
@@ -96,7 +96,7 @@ public class MainContainer {
 			
 			
 			while (true) {
-				Thread.sleep(30000);
+				Thread.sleep(300000);
 				boolean finished = true;
 				for (CustomerAgent customerAgent : customerAgentsList) {
 					if (!customerAgent.isFinished()) {

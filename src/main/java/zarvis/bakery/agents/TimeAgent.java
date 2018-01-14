@@ -28,7 +28,7 @@ public class TimeAgent extends Agent {
 		
 		@Override
 		public void action() {
-			System.out.println("WS");
+//			System.out.println("WS");
 			if (System.currentTimeMillis() >= globalStartTime) {
 				started = true;
 			} else {
@@ -40,6 +40,17 @@ public class TimeAgent extends Agent {
 		public boolean done() {
 			return started;
 		}
+	}
+	
+	
+	
+	protected void UpdateTime() {
+		long operatingDuration = System.currentTimeMillis() - globalStartTime;
+		totalHoursElapsed = (long) Math.floorDiv(operatingDuration , MILLIS_PER_HOUR);
+		daysElapsed = (long) Math.floorDiv(operatingDuration , MILLIS_PER_DAY);
+		hoursElapsed = (long) Math.floorDiv(operatingDuration - daysElapsed * MILLIS_PER_DAY, MILLIS_PER_HOUR);
+		millisLeft = MILLIS_PER_HOUR - (operatingDuration - totalHoursElapsed * MILLIS_PER_HOUR);
+//		System.out.println(millisLeft);
 	}
 
 }

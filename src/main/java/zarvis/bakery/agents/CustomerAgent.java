@@ -107,7 +107,7 @@ public class CustomerAgent extends TimeAgent {
 			for (Map.Entry<String, Integer> entry : sortedOrderAggregation.entrySet()) {
 				System.out.println(entry.getKey() + " " + entry.getValue());
 			}
-			System.out.println("GS");
+//			System.out.println("GS");
 			bakeries = Util.searchInYellowPage(myAgent, "BakeryService", null);
 			if (bakeries.length > 0) {
 				exitValue = 1;
@@ -119,7 +119,7 @@ public class CustomerAgent extends TimeAgent {
 				orderMsg.addReceiver(bakeries[i].getName());
 	  		}
 			orderMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
-			orderMsg.setReplyByDate(new Date(System.currentTimeMillis() + 500));
+			orderMsg.setReplyByDate(new Date(System.currentTimeMillis() + 200));
 			
 		}
 		
@@ -134,18 +134,20 @@ public class CustomerAgent extends TimeAgent {
 
 		@Override
 		public void action() {
-			
+			System.out.println("SIZE: " + sortedOrderAggregation.size());
 			exitValue = 0;
 			
 			if (sortedOrderAggregation.isEmpty()) {
+				System.out.println("Shit");
 				exitValue = 0;
 				return;
 			}
 			if (inWaitOrderAggregation.isEmpty() == false) {
+				
 				exitValue = 1;
 				return;
 			}
-			System.out.println("CS");
+//			System.out.println("CS");
 			Map.Entry<String,Integer> entry = sortedOrderAggregation.entrySet().iterator().next();
 			String key;
 			int value = entry.getValue();
@@ -197,6 +199,12 @@ public class CustomerAgent extends TimeAgent {
 		
 		public PlaceOrder(Agent a, ACLMessage cfp) {
 			super(a, cfp);
+			System.out.println("inner");
+		}
+		public void onStart() {
+			System.out.println("in placeorder");
+//			System.out.println("inner");
+			inWaitOrderAggregation.clear();
 		}
 		protected void handlePropose(ACLMessage propose, Vector v) {
 			System.out.println("Agent "+propose.getSender().getName()+" proposed "+propose.getContent());
@@ -235,6 +243,12 @@ public class CustomerAgent extends TimeAgent {
 			}						
 		}
 		
+		public int onEnd() {
+			reset(orderMsg);
+			System.out.println("END!");
+			return 0;
+		}
+		
 		
 //		public void action() {
 //			// pass the string to the bakeryAgent wait for the confirmation.
@@ -259,12 +273,5 @@ public class CustomerAgent extends TimeAgent {
 //		}
 	}
 	
-	private void UpdateTime() {
-		long operatingDuration = System.currentTimeMillis() - globalStartTime;
-		totalHoursElapsed = (long) Math.floorDiv(operatingDuration , MILLIS_PER_HOUR);
-		daysElapsed = (long) Math.floorDiv(operatingDuration , MILLIS_PER_DAY);
-		hoursElapsed = (long) Math.floorDiv(operatingDuration - daysElapsed * MILLIS_PER_DAY, MILLIS_PER_HOUR);
-		millisLeft = MILLIS_PER_HOUR - (operatingDuration - totalHoursElapsed * MILLIS_PER_HOUR);
-//		System.out.println(millisLeft);
-	}
+	
 }

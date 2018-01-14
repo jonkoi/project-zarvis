@@ -52,7 +52,7 @@ public class MainContainer {
 
 			// create multiple bakery agents
 			for (Bakery bakery : wrapper.getBakeries()) {
-				mainContainer.acceptNewAgent(bakery.getGuid(), new BakeryAgent(bakery)).start();
+				mainContainer.acceptNewAgent(bakery.getGuid(), new BakeryAgent(bakery, globalStartTime)).start();
 				for (KneedingMachine kneedingMachine : bakery.getKneading_machines().subList(0, 1)) {
 					mainContainer.acceptNewAgent(kneedingMachine.getGuid() + "-" + bakery.getGuid(),
 							new KneedingMachineAgent(bakery)).start();

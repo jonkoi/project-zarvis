@@ -15,6 +15,7 @@ import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.core.behaviours.CyclicBehaviour;
 import zarvis.bakery.behaviors.customer.RequestPerformerBehavior;
 import zarvis.bakery.models.Customer;
@@ -71,6 +72,8 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerState(new CheckTime(this, millisLeft), "CheckTime-state");
 		fb.registerState(new PlaceOrder(this, orderMsg), "PlaceOrder-state");
 		
+		fb.registerState(new DummyReceive(),"dum");
+		
 		//Transitions
 		fb.registerDefaultTransition("WaitSetup-state", "GetBakeries-state");
 		fb.registerTransition("GetBakeries-state", "NoBakeries-state", 0); // No bakeries found
@@ -116,10 +119,10 @@ public class CustomerAgent extends TimeAgent {
 			orderMsg = new ACLMessage(ACLMessage.CFP);
 			for (int i = 0; i < bakeries.length; ++i) {
 //				System.out.println("Hello, hello" + bakeries[i].getName());
-				orderMsg.addReceiver(bakeries[i].getName());
+				orderMsg.addReceiver(new AID(bakeries[i].getName().getLocalName(), AID.ISLOCALNAME));
 	  		}
 			orderMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
-			orderMsg.setReplyByDate(new Date(System.currentTimeMillis() + 200));
+			
 			
 		}
 		
@@ -131,6 +134,10 @@ public class CustomerAgent extends TimeAgent {
 	// Get the next order(s) to be auctioned/ordered | 0: No more orders, 1: Error, previous order has not been processed, 2: Next order(s) had
 	private class CheckNextOrders extends OneShotBehaviour {
 		private int exitValue = 0;
+		
+		public void onStart() {
+			System.out.println("Hello");
+		}
 
 		@Override
 		public void action() {
@@ -164,6 +171,7 @@ public class CustomerAgent extends TimeAgent {
 			} while (value == entry.getValue());
 			
 			orderMsg.setContent(msg.substring(0, msg.length() - 1));
+			
 			exitValue = 2;
 			UpdateTime();
 		}
@@ -197,80 +205,67 @@ public class CustomerAgent extends TimeAgent {
 	
 	private class PlaceOrder extends ContractNetInitiator{
 		
+		private ACLMessage msg;
+		
 		public PlaceOrder(Agent a, ACLMessage cfp) {
-			super(a, cfp);
-			System.out.println("inner");
+			super(null, null);
+			msg = cfp;
 		}
 		public void onStart() {
 			System.out.println("in placeorder");
-//			System.out.println("inner");
 			inWaitOrderAggregation.clear();
 		}
-		protected void handlePropose(ACLMessage propose, Vector v) {
-			System.out.println("Agent "+propose.getSender().getName()+" proposed "+propose.getContent());
+		@Override
+		protected Vector prepareCfps(ACLMessage cfp) {
+			cfp = new ACLMessage(ACLMessage.CFP);
+//			cfp = (ACLMessage) orderMsg.clone();
+			for (int i = 0; i < bakeries.length; ++i) {
+				cfp.addReceiver(new AID(bakeries[i].getName().getLocalName(), AID.ISLOCALNAME));
+	  		}
+			cfp.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+			cfp.setReplyByDate(new Date(System.currentTimeMillis() + 1000));
+			cfp.setContent(orderMsg.getContent());
+			Vector v = new Vector();
+			v.add(cfp); 
+			return v;
 		}
-		protected void handleRefuse(ACLMessage refuse) {
-			System.out.println("Agent "+refuse.getSender().getName()+" refused");
-		}
-		protected void handleAllResponses(Vector responses, Vector acceptances) {
-			if (responses.size() < bakeries.length) {
-				// Some responder didn't reply within the specified timeout
-				System.out.println("Timeout expired: missing "+(bakeries.length - responses.size())+" responses");
-			}
-			// Evaluate proposals.
-			int bestProposal = -1;
-			AID bestProposer = null;
-			ACLMessage accept = null;
-			Enumeration e = responses.elements();
-			while (e.hasMoreElements()) {
-				ACLMessage msg = (ACLMessage) e.nextElement();
-				if (msg.getPerformative() == ACLMessage.PROPOSE) {
-					ACLMessage reply = msg.createReply();
-					reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
-					acceptances.addElement(reply);
-					int proposal = Integer.parseInt(msg.getContent());
-					if (proposal > bestProposal) {
-						bestProposal = proposal;
-						bestProposer = msg.getSender();
-						accept = reply;
-					}
-				}
-			}
-			// Accept the proposal of the best proposer
-			if (accept != null) {
-				System.out.println("Accepting proposal "+bestProposal+" from responder "+bestProposer.getName());
-				accept.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-			}						
-		}
-		
-		public int onEnd() {
-			reset(orderMsg);
-			System.out.println("END!");
-			return 0;
-		}
-		
-		
-//		public void action() {
-//			// pass the string to the bakeryAgent wait for the confirmation.
-//			//ToDo handle
-//			System.out.println("placing customer order---------\n");
-//			ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-//			cfp.setContent("Hello");
-//			cfp.setConversationId("order_proposal");
-//			cfp.addReceiver(new AID("bakery-001",AID.ISLOCALNAME));
-//			myAgent.send(cfp);
-//			System.out.println("SENT!");
-//			
-//			inWaitOrderAggregation.clear();
-//			
-//			
-////			cfp.setReplyWith("cfp"+System.currentTimeMillis());
-////			send(cfp);
-////			mt = MessageTemplate.and(MessageTemplate.MatchConversationId("order_proposal-reply"),
-////					MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
-////			addBehaviour(new AcknowledgeOrder());
-//			
+//		protected void handlePropose(ACLMessage propose, Vector v) {
+//			System.out.println("Agent "+propose.getSender().getName()+" proposed "+propose.getContent());
+//			ACLMessage reply = propose.createReply();
+//			reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+//			v.add(reply);
 //		}
+//		@Override
+//		public int onEnd() {
+////			reset(orderMsg);
+//			System.out.println("END!");
+//			return 0;
+//		}
+	}
+	
+
+	
+	private class DummyReceive extends CyclicBehaviour {
+		public void action() {
+			MessageTemplate mt =
+			  		MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				System.out.println(msg.getContent());
+			}
+			
+		}
+	}
+	
+	private class DummyPlaceOrder extends OneShotBehaviour {
+
+		public void action() {
+			System.out.println("Sending");
+			inWaitOrderAggregation.clear();
+			send(orderMsg);
+			
+		}
+		
 	}
 	
 	

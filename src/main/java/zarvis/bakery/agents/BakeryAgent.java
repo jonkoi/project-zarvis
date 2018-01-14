@@ -8,15 +8,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.FSMBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.RefuseException;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import zarvis.bakery.agents.TimeAgent.WaitSetup;
 import zarvis.bakery.behaviors.bakery.ProcessOrderBehaviour;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.models.Product;
@@ -56,37 +60,53 @@ public class BakeryAgent extends TimeAgent {
 		orderTemplate = MessageTemplate.and(
 		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
 		  		MessageTemplate.MatchPerformative(ACLMessage.CFP) );
-
-		addBehaviour(new ProcessOrderBehaviour(bakery));
+		
+		FSMBehaviour fb = new FSMBehaviour();
+		fb.registerFirstState(new WaitSetup(), "WaitSetup-state");
+		fb.registerState(new ContractResponse(this, orderTemplate), "ContractResponse-state");
+		
+		fb.registerDefaultTransition("WaitSetup-state", "ContractResponse-state");
+		fb.registerDefaultTransition("ContractResponse-state", "ContractResponse-state");
+		
+		addBehaviour(fb);
+//		addBehaviour(new ProcessOrderBehaviour(bakery));
 	}
 
 	protected void takeDown() {
 	}
 	
-	private class ContractRespose extends ContractNetResponder{
+	private class ContractResponse extends ContractNetResponder{
 
-		public ContractRespose(Agent a, MessageTemplate mt) {
+		public ContractResponse(Agent a, MessageTemplate mt) {
 			super(a, mt);
 		}
 		
-		protected ACLMessage prepareResponse(ACLMessage cfp) throws NotUnderstoodException, RefuseException {
-			System.out.println("Agent "+getLocalName()+": CFP received from "+cfp.getSender().getName()+". Action is "+cfp.getContent());
-			long proposal = processProposal();
-			if (proposal > 2) {
-				// We provide a proposal
-				System.out.println("Agent "+getLocalName()+": Proposing "+proposal);
-				ACLMessage propose = cfp.createReply();
-				propose.setPerformative(ACLMessage.PROPOSE);
-				propose.setContent(String.valueOf(proposal));
-				return propose;
-			}
-			else {
-				// We refuse to provide a proposal
-				System.out.println("Agent "+getLocalName()+": Refuse");
-				throw new RefuseException("evaluation-failed");
-			}
+		protected ACLMessage handleCfp(ACLMessage cfp) throws RefuseException, FailureException, NotUnderstoodException {
+			System.out.print(cfp.getContent());
+			ACLMessage reply = cfp.createReply();
+			reply.setPerformative(ACLMessage.PROPOSE);
+			reply.setContent("Hey");
+			System.out.print("Hey");
+			return reply;
 		}
+//		public int onEnd() {
+//			System.out.println("END REsP");
+//			return 0;
+//		}
 		
+	}
+	
+	private class DummyReceive extends CyclicBehaviour {
+		public void action() {
+			MessageTemplate mt = MessageTemplate.and(
+			  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
+			  		MessageTemplate.MatchPerformative(ACLMessage.CFP));
+			ACLMessage msg = myAgent.receive(mt);
+			if (msg != null) {
+				System.out.println(msg.getContent());
+			}
+			
+		}
 	}
 	
 	private long processProposal() {

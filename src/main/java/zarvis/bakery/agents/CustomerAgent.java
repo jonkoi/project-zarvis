@@ -72,8 +72,8 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerTransition("CheckTime-state", "PlaceOrder-state", 1);
 		fb.registerDefaultTransition("PlaceOrder-state", "CheckNextOrders-state");
 		
-		addBehaviour(fb);
-//		addBehaviour(new RequestPerformerBehavior(customer, Util.sortMapByValue(orderAggregation)));
+		//addBehaviour(fb);
+		addBehaviour(new RequestPerformerBehavior(customer, Util.sortMapByValue(orderAggregation)));
 		finish = true;
 	}
 

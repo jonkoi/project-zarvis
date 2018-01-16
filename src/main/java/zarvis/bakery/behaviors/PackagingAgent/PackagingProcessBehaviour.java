@@ -107,7 +107,7 @@ public class PackagingProcessBehaviour extends CyclicBehaviour {
 		String[] str = product.split(" ");
 		BakeryJsonWrapper wrapper = Util.getWrapper();
 		Order order = wrapper.getOrderById(str[0]);
-		productPackaging = product + "["+order.getDelivery_date().getDay()+"-"+order.getDelivery_date().getHour()+"]";
+		productPackaging = product +" "+"["+order.getDelivery_date().getDay()+"-"+order.getDelivery_date().getHour()+"]";
 		return productPackaging;
 	}
 }

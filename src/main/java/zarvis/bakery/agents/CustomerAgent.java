@@ -92,6 +92,7 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerTransition("CheckTime-state", "PlaceOrder-state", 1);
 		fb.registerDefaultTransition("PlaceOrder-state", "CheckNextOrders-state");
 		
+
 		//ContractNet Sequence
 //		fb.registerDefaultTransition("PlaceOrder-state", "WaitProposal-state");
 //		fb.registerTransition("WaitProposal-state", "WaitProposal-state", 0);

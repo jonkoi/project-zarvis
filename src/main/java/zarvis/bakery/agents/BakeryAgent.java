@@ -82,11 +82,13 @@ public class BakeryAgent extends TimeAgent {
 		}
 		
 		protected ACLMessage handleCfp(ACLMessage cfp) throws RefuseException, FailureException, NotUnderstoodException {
-			System.out.print(cfp.getContent());
+			System.out.print("I will crash now");
+			
+			//System.out.print(cfp.getContent());
 			ACLMessage reply = cfp.createReply();
 			reply.setPerformative(ACLMessage.PROPOSE);
 			reply.setContent("Hey");
-			System.out.print("Hey");
+			System.out.print("Did I Crash?");
 			return reply;
 		}
 //		public int onEnd() {

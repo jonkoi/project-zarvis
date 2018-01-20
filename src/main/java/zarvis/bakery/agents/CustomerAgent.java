@@ -8,6 +8,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -70,7 +71,7 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerState(new GetBakeries(), "GetBakeries-state");
 		fb.registerState(new CheckNextOrders(), "CheckNextOrders-state");
 		fb.registerState(new CheckTime(this, millisLeft), "CheckTime-state");
-		fb.registerState(new PlaceOrder(this, orderMsg), "PlaceOrder-state");
+		fb.registerState(new PlaceOrder(this), "PlaceOrder-state");
 		
 		fb.registerState(new DummyReceive(),"dum");
 		
@@ -85,6 +86,7 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerTransition("CheckTime-state", "PlaceOrder-state", 1);
 		fb.registerDefaultTransition("PlaceOrder-state", "CheckNextOrders-state");
 		
+		
 		addBehaviour(fb);
 //		addBehaviour(new RequestPerformerBehavior(customer, Util.sortMapByValue(orderAggregation)));
 		finish = true;
@@ -93,7 +95,7 @@ public class CustomerAgent extends TimeAgent {
 	protected void takeDown() {
 		Util.deregisterInYellowPage(this);
 		finish = true;
-		System.out.println("Agent " + getAID().getName() + " terminating.");
+		System.out.println("Agent " + getAID().getName() + " terminating.");	
 	}
 	
 	public boolean isFinished(){
@@ -118,7 +120,6 @@ public class CustomerAgent extends TimeAgent {
 			
 			orderMsg = new ACLMessage(ACLMessage.CFP);
 			for (int i = 0; i < bakeries.length; ++i) {
-//				System.out.println("Hello, hello" + bakeries[i].getName());
 				orderMsg.addReceiver(new AID(bakeries[i].getName().getLocalName(), AID.ISLOCALNAME));
 	  		}
 			orderMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
@@ -203,37 +204,65 @@ public class CustomerAgent extends TimeAgent {
 		}
 	}
 	
-	private class PlaceOrder extends ContractNetInitiator{
+	private class PlaceOrder extends SequentialBehaviour{
 		
-		private ACLMessage msg;
-		
-		public PlaceOrder(Agent a, ACLMessage cfp) {
-			super(null, null);
-			msg = cfp;
+		public PlaceOrder(Agent a) {
+			super(a);
 		}
+		
 		public void onStart() {
-			System.out.println("in placeorder");
-			inWaitOrderAggregation.clear();
+			addSubBehaviour(new OneShotBehaviour() {
+
+				@Override
+				public void action() {
+					send(orderMsg);
+				}
+				
+			});
+			
+			addSubBehaviour(new CyclicBehaviour() {
+
+				@Override
+				public void action() {
+					
+				}
+				
+			});
 		}
-		@Override
-		protected Vector prepareCfps(ACLMessage cfp) {
-			cfp = new ACLMessage(ACLMessage.CFP);
-//			cfp = (ACLMessage) orderMsg.clone();
-			for (int i = 0; i < bakeries.length; ++i) {
-				cfp.addReceiver(new AID(bakeries[i].getName().getLocalName(), AID.ISLOCALNAME));
-	  		}
-			cfp.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
-			cfp.setReplyByDate(new Date(System.currentTimeMillis() + 1000));
-			cfp.setContent(orderMsg.getContent());
-			Vector v = new Vector();
-			v.add(cfp); 
-			return v;
-		}
+		
+//		private ACLMessage msg;
+//		
+//		public PlaceOrder(Agent a, ACLMessage cfp) {
+//			super(a, cfp);
+//			msg = cfp;
+//		}
+//		public void onStart() {
+//			System.out.println("in placeorder");
+//			inWaitOrderAggregation.clear();
+//		}
+//		@Override
+//		protected Vector prepareCfps(ACLMessage cfp) {
+//			cfp = new ACLMessage(ACLMessage.CFP);
+////			cfp = (ACLMessage) orderMsg.clone();
+//			for (int i = 0; i < bakeries.length; ++i) {
+//				cfp.addReceiver(new AID(bakeries[i].getName().getLocalName(), AID.ISLOCALNAME));
+//	  		}
+//			cfp.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+//			cfp.setReplyByDate(new Date(System.currentTimeMillis() + 1000));
+//			cfp.setContent(orderMsg.getContent());
+//			Vector v = new Vector();
+//			v.add(cfp); 
+//			return v;
+//		}
 //		protected void handlePropose(ACLMessage propose, Vector v) {
 //			System.out.println("Agent "+propose.getSender().getName()+" proposed "+propose.getContent());
 //			ACLMessage reply = propose.createReply();
 //			reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
 //			v.add(reply);
+//		}
+//		@Override
+//		protected void handleOutOfSequence(ACLMessage cfp) {
+//			System.out.println("Agent ");
 //		}
 //		@Override
 //		public int onEnd() {

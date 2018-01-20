@@ -60,7 +60,7 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 				}
 				if (productResponse.getPerformative() == ACLMessage.REFUSE
 						&& productResponse.getConversationId().equals("next-product-request")) {
-					logger.info(productResponse.getContent());
+					//logger.info(productResponse.getContent());
 
 					step = 0;
 				}

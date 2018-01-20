@@ -93,7 +93,7 @@ public class MainContainer {
 
 			
 			// create multiple customer agents
-			for (Customer customer : wrapper.getCustomers().subList(0, 2)) {
+			for (Customer customer : wrapper.getCustomers().subList(0, 1)) {
 				CustomerAgent agent =  new CustomerAgent(customer,globalStartTime);
 				customerAgentsList.add(agent);
 				mainContainer.acceptNewAgent(customer.getGuid(), agent).start();
@@ -101,7 +101,7 @@ public class MainContainer {
 
 
 			while (true) {
-				Thread.sleep(30000);
+				Thread.sleep(300000);
 				boolean finished = true;
 				for (CustomerAgent customerAgent : customerAgentsList) {
 					if (!customerAgent.isFinished()) {

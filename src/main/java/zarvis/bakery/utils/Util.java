@@ -19,7 +19,7 @@ import zarvis.bakery.utils.ValueComparatorAscending;
 import zarvis.bakery.models.*;
 
 public class Util {
-	private static List<String> productsName = Arrays.asList("Bagel", "Baguette", "Berliner", "Bread", "Brezel", "Bun", "Ciabatta",
+	public static final List<String> PRODUCTNAMES = Arrays.asList("Bagel", "Baguette", "Berliner", "Bread", "Brezel", "Bun", "Ciabatta",
 			"Cookie", "Croissant", "Donut", "Muffin","Multigrain Bread");
 
 	public static BakeryJsonWrapper getWrapper() {
@@ -95,6 +95,13 @@ public class Util {
 		reply.setConversationId(conversationId);
 		agent.send(reply);
 	}
+	
+	public static void sendReply(Agent agent, ACLMessage message, int performative, String content) {
+        ACLMessage reply = message.createReply();
+        reply.setPerformative(performative);
+        reply.setContent(content);
+        agent.send(reply);
+    }
 
 	public static void sendMessage(Agent agent, AID receiver, int performative, String content, String conversationId) {
 		ACLMessage message = new ACLMessage(performative);
@@ -104,6 +111,16 @@ public class Util {
 		agent.send(message);
 		// waitForSometime(100);
 	}
+	
+	public static void sendMessage(Agent agent, AID [] receiver, int performative, String content, String conversationId) {
+        ACLMessage message = new ACLMessage(performative);
+        for(int i = 0;i<receiver.length;i++){
+			message.addReceiver(receiver[i]);
+		}
+        message.setConversationId(conversationId);
+        message.setContent(content);
+        agent.send(message);
+    }
 
 	public static void waitForSometime(long milliseconds) {
 		try {
@@ -130,24 +147,19 @@ public class Util {
 				int delDay = o.getDelivery_date().getDay();
 				int delHour = o.getDelivery_date().getHour();
 				
-				
-				msg = msg + agentGuid + ",<" + orderDay + "." + orderHour + ">,<" + delDay + "." + delHour + ">,[";
-				
+				msg = msg + agentGuid + "," + orderDay + "." + orderHour + "," + delDay + "." + delHour + ",";
 				Map<String, Integer> products = o.getProducts();
-				for (String p : productsName) {
+				for (String p : PRODUCTNAMES) {
 					if (products.get(p) == null) {
 						msg = msg + "0.";
 					} else {
 						msg = msg + products.get(p) + ".";
 					}
 				}
-				
-				msg = msg.substring(0, msg.length() - 1) + "],";
+				msg = msg.substring(0, msg.length() - 1) + ",";
 				break;
 			}
 		}
-		
-		
 		return msg;
 	}
 

@@ -17,6 +17,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import zarvis.bakery.behaviors.customer.RequestPerformerBehavior;
 import zarvis.bakery.models.Customer;
@@ -41,6 +42,11 @@ public class CustomerAgent extends TimeAgent {
 	
 	private ACLMessage orderMsg;
 
+	//Test
+	private AID[] bakeriesAID;
+	private String orderMsgString;
+	
+	
 	public CustomerAgent(Customer customer, long globalStartTime) {
 		super(globalStartTime);
 		this.customer = customer;
@@ -71,9 +77,9 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerState(new GetBakeries(), "GetBakeries-state");
 		fb.registerState(new CheckNextOrders(), "CheckNextOrders-state");
 		fb.registerState(new CheckTime(this, millisLeft), "CheckTime-state");
-		fb.registerState(new PlaceOrder(this), "PlaceOrder-state");
-		
-		fb.registerState(new DummyReceive(),"dum");
+		fb.registerState(new PlaceOrder(), "PlaceOrder-state");
+		fb.registerState(new WaitProposal(), "WaitProposal-state");
+//		fb.registerState(new AcceptProposal(), "WaitProposal-state");
 		
 		//Transitions
 		fb.registerDefaultTransition("WaitSetup-state", "GetBakeries-state");
@@ -85,6 +91,11 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerTransition("CheckTime-state", "CheckTime-state", 0);
 		fb.registerTransition("CheckTime-state", "PlaceOrder-state", 1);
 		fb.registerDefaultTransition("PlaceOrder-state", "CheckNextOrders-state");
+		
+		//ContractNet Sequence
+//		fb.registerDefaultTransition("PlaceOrder-state", "WaitProposal-state");
+//		fb.registerTransition("WaitProposal-state", "WaitProposal-state", 0);
+//		fb.registerTransition("WaitProposal-state", "CheckNextOrders-state", 1);
 		
 		
 		addBehaviour(fb);
@@ -115,6 +126,7 @@ public class CustomerAgent extends TimeAgent {
 //			System.out.println("GS");
 			bakeries = Util.searchInYellowPage(myAgent, "BakeryService", null);
 			if (bakeries.length > 0) {
+				System.out.println(bakeries.length);
 				exitValue = 1;
 			}
 			
@@ -122,9 +134,8 @@ public class CustomerAgent extends TimeAgent {
 			for (int i = 0; i < bakeries.length; ++i) {
 				orderMsg.addReceiver(new AID(bakeries[i].getName().getLocalName(), AID.ISLOCALNAME));
 	  		}
-			orderMsg.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
 			
-			
+			orderMsg.setConversationId("order");			
 		}
 		
 		public int onEnd() {
@@ -144,14 +155,12 @@ public class CustomerAgent extends TimeAgent {
 		public void action() {
 			System.out.println("SIZE: " + sortedOrderAggregation.size());
 			exitValue = 0;
-			
 			if (sortedOrderAggregation.isEmpty()) {
 				System.out.println("Shit");
 				exitValue = 0;
 				return;
 			}
 			if (inWaitOrderAggregation.isEmpty() == false) {
-				
 				exitValue = 1;
 				return;
 			}
@@ -171,6 +180,7 @@ public class CustomerAgent extends TimeAgent {
 				entry = sortedOrderAggregation.entrySet().iterator().next();
 			} while (value == entry.getValue());
 			
+			orderMsgString = msg.substring(0, msg.length() - 1);
 			orderMsg.setContent(msg.substring(0, msg.length() - 1));
 			
 			exitValue = 2;
@@ -198,79 +208,209 @@ public class CustomerAgent extends TimeAgent {
 			}
 		}
 		public int onEnd() {
-//			System.out.println(exitValue);
 			reset(millisLeft);
 			return exitValue;
 		}
 	}
 	
-	private class PlaceOrder extends SequentialBehaviour{
+	private class PlaceOrder extends Behaviour{
+		private MessageTemplate mt;
+		private int replies = 0;
+		private AID cheapestBakery;
+		private double bestPrice;
+		private static final int SEND_ORDER = 0;
+		private static final int RECEIVE_PROPOSAL = 1;
+		private static final int ACCEPT_LOWEST = 2;
+		private static final int RECEIVE_ACKNOWLEDGEMENT = 3;
+		private static final int DONE = 4;
+		private int giveOrderState = PlaceOrder.SEND_ORDER;
 		
-		public PlaceOrder(Agent a) {
-			super(a);
-		}
-		
-		public void onStart() {
-			addSubBehaviour(new OneShotBehaviour() {
-
-				@Override
-				public void action() {
-					send(orderMsg);
-				}
-				
-			});
-			
-			addSubBehaviour(new CyclicBehaviour() {
-
-				@Override
-				public void action() {
+		public void action(){
+			bakeriesAID = new AID[bakeries.length];
+			for (int i = 0; i < bakeries.length; ++i) {
+				bakeriesAID[i] = bakeries[i].getName();
+			}
+			switch(giveOrderState){
+				case PlaceOrder.SEND_ORDER:
+					Util.sendMessage(myAgent, bakeriesAID, ACLMessage.CFP, orderMsgString, "Order");
+					mt = MessageTemplate.MatchConversationId("Order");
+					giveOrderState = PlaceOrder.RECEIVE_PROPOSAL;
+					inWaitOrderAggregation.clear();
+					break;
 					
-				}
+				case PlaceOrder.RECEIVE_PROPOSAL:
+					ACLMessage reply = myAgent.receive(mt);
+					
+					if(reply == null){
+						block();		
+					}
+					else if (reply.getPerformative() == ACLMessage.PROPOSE) {
+						
+						double price = Double.parseDouble(reply.getContent());
+						if(cheapestBakery == null || price < bestPrice){
+							cheapestBakery = reply.getSender();
+							bestPrice = price;
+						}
+						replies++;
+					}
+					
+					else if (reply.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
+						
+						replies++;
+					}
 				
-			});
+					if (replies >= bakeriesAID.length){
+						giveOrderState = PlaceOrder.ACCEPT_LOWEST;
+					}
+					break;
+					
+				case PlaceOrder.ACCEPT_LOWEST:
+					Util.sendMessage(myAgent, cheapestBakery, ACLMessage.ACCEPT_PROPOSAL, orderMsgString, "Accepting");
+					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("Accepting"),
+							MessageTemplate.MatchPerformative(ACLMessage.CONFIRM));
+					giveOrderState = PlaceOrder.RECEIVE_ACKNOWLEDGEMENT;
+					break;
+					
+				case PlaceOrder.RECEIVE_ACKNOWLEDGEMENT:
+					reply = myAgent.receive(mt);
+					
+					if(reply != null){
+						giveOrderState = PlaceOrder.DONE;
+					}
+					else {
+						block();
+					}
+					break;
+					
+				default:
+					System.out.println("Error in give order sequence...");
+			}
 		}
 		
-//		private ACLMessage msg;
+		public boolean done(){
+			return (giveOrderState == PlaceOrder.DONE);
+		}
+		
+		public int onEnd() {
+			giveOrderState = PlaceOrder.SEND_ORDER;
+			return 0;
+		}
+	}
+	
+	private class PlaceOrder_old2 extends OneShotBehaviour{
+		@Override
+		public void action() {
+			send(orderMsg);
+			inWaitOrderAggregation.clear();
+		}
+	}
+	private class WaitProposal extends OneShotBehaviour{
+		private int exitValue = 0;
+		public void action() {
+			System.out.println("GOT PROPOSAL 1!");
+			MessageTemplate template = 
+					MessageTemplate.MatchConversationId("proposal");
+			ACLMessage msg = myAgent.receive(template);
+			if (msg != null) {
+				System.out.println("GOT PROPOSAL!");
+				System.out.println(msg.getContent());
+				ACLMessage acceptMsg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+				acceptMsg.addReceiver(new AID(bakeries[0].getName().getLocalName(), AID.ISLOCALNAME));
+				acceptMsg.setConversationId("accept-proposal");
+				myAgent.send(acceptMsg);
+				exitValue = 1;
+			} else {
+				block();
+			}
+		}
+		public int onEnd() {
+			return exitValue;
+		}
+	}
+//	private class AcceptProposal extends OneShotBehaviour{
+//		@Override
+//		public void action() {
+//			ACLMessage acceptMsg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+//			acceptMsg.addReceiver(new AID(bakeries[0].getName().getLocalName(), AID.ISLOCALNAME));
+//			acceptMsg.setConversationId("accept-proposal");
+//			send(acceptMsg);	
+//		}	
+//	}
+	
+//	private class PlaceOrder_old extends SequentialBehaviour{
+//		private long cDeadline = 0;
+//		private long waitDuration = 200;
 //		
-//		public PlaceOrder(Agent a, ACLMessage cfp) {
-//			super(a, cfp);
-//			msg = cfp;
+//		private boolean isdone1 = false;
+//		private boolean isdone2 = false;
+//		private boolean isdone3 = false;
+//		
+//		public PlaceOrder_old(Agent a) {
+////			super(a);
 //		}
+//		
 //		public void onStart() {
-//			System.out.println("in placeorder");
-//			inWaitOrderAggregation.clear();
+//			if (isdone1 == false) {
+//				addSubBehaviour(new OneShotBehaviour() {
+//					@Override
+//					public void action() {
+//						System.out.println("C1");
+////						System.out.println("Again");
+//						send(orderMsg);
+//						cDeadline = System.currentTimeMillis() + waitDuration;
+//						inWaitOrderAggregation.clear();
+//						isdone1 = true;
+//					}
+//				});
+//			}
+//			
+//			MessageTemplate template = 
+//					MessageTemplate.MatchConversationId("proposal");
+//			
+//			if (isdone2 == false) {
+//				addSubBehaviour(new Behaviour() {
+//					private int isDone = 0;
+//					@Override
+//					public void action() {
+//						System.out.println("C2");
+//						ACLMessage msg = myAgent.receive(template);
+//						if (msg!=null) {
+//							System.out.println("GOT PROPOSAL!");
+//							isDone = 1;
+//						}
+//					}
+//					@Override
+//					public boolean done() {
+//						isdone2 = true;
+//						if (isDone == 0) {
+//							return false;
+//						} else {
+//							return true;
+//						}
+//					}
+//				});
+//			}
+//			
+//			if (isdone3 == false) {
+//				addSubBehaviour(new OneShotBehaviour() {
+//					@Override
+//					public void action() {
+//						System.out.println("C3");
+//						ACLMessage acceptMsg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+//						acceptMsg.addReceiver(new AID(bakeries[0].getName().getLocalName(), AID.ISLOCALNAME));
+//						acceptMsg.setConversationId("accept-proposal");
+//						send(acceptMsg);
+//						isdone3 = true;
+//					}
+//				});
+//			}
 //		}
-//		@Override
-//		protected Vector prepareCfps(ACLMessage cfp) {
-//			cfp = new ACLMessage(ACLMessage.CFP);
-////			cfp = (ACLMessage) orderMsg.clone();
-//			for (int i = 0; i < bakeries.length; ++i) {
-//				cfp.addReceiver(new AID(bakeries[i].getName().getLocalName(), AID.ISLOCALNAME));
-//	  		}
-//			cfp.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
-//			cfp.setReplyByDate(new Date(System.currentTimeMillis() + 1000));
-//			cfp.setContent(orderMsg.getContent());
-//			Vector v = new Vector();
-//			v.add(cfp); 
-//			return v;
-//		}
-//		protected void handlePropose(ACLMessage propose, Vector v) {
-//			System.out.println("Agent "+propose.getSender().getName()+" proposed "+propose.getContent());
-//			ACLMessage reply = propose.createReply();
-//			reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-//			v.add(reply);
-//		}
-//		@Override
-//		protected void handleOutOfSequence(ACLMessage cfp) {
-//			System.out.println("Agent ");
-//		}
-//		@Override
+//		
 //		public int onEnd() {
-////			reset(orderMsg);
-//			System.out.println("END!");
+//			reset();
 //			return 0;
 //		}
-	}
+//	}
 	
 
 	

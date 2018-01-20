@@ -1,40 +1,28 @@
-package zarvis.bakery.behaviors.kneedingmachine;
+package zarvis.bakery.behaviors.truckAgent;
 
-import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import zarvis.bakery.behaviors.bakery.ProcessOrderBehaviour;
 import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Status;
 
-public class CurrentStatusBehaviour extends CyclicBehaviour {
-
+public class TruckAgentAvailabilityBehaviour extends CyclicBehaviour{
 	
 	private static final long serialVersionUID = 1L;
 	private Status status = new Status(true);
-	private Logger logger = LoggerFactory.getLogger(CurrentStatusBehaviour.class);
-
-
+	
+	
 	@Override
 	public void action() {
-
 		ACLMessage message = myAgent.receive();
 
 		if (message != null) {
 
 			if (message.getPerformative() == CustomMessage.REQUEST_STATUS
-					&& message.getConversationId().equals("kneeding-machine-availability")) {
+					&& message.getConversationId().equals("truckAgent-availability")) {
 				ACLMessage reply = message.createReply();
 				reply.setPerformative(CustomMessage.RESPONSE_STATUS);
 				reply.setContent(status.getStatus() ? "Available" : "Unavailable");
-				reply.setConversationId("kneeding-machine-status");
+				reply.setConversationId("truckAgent-availability");
 				myAgent.send(reply);
 
 			}
@@ -46,7 +34,6 @@ public class CurrentStatusBehaviour extends CyclicBehaviour {
 		} else {
 			block();
 		}
-
 	}
 
 }

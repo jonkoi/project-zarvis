@@ -54,13 +54,13 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 			if (productResponse != null) {
 				if (productResponse.getPerformative() == CustomMessage.RESPONSE
 						&& productResponse.getConversationId().equals("next-product-request")) {
-					logger.info("next produc" + productResponse.getContent());
+					logger.info("next produc " + productResponse.getContent());
 					product = productResponse.getContent();
 					step = 2;
 				}
 				if (productResponse.getPerformative() == ACLMessage.REFUSE
 						&& productResponse.getConversationId().equals("next-product-request")) {
-					logger.info(productResponse.getContent());
+					//logger.info(productResponse.getContent());
 
 					step = 0;
 				}

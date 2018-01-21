@@ -130,11 +130,11 @@ public class BakeryAgent extends TimeAgent {
     			}
     			if(data.getPerformative() == ACLMessage.ACCEPT_PROPOSAL){
     				ContentExtractor extractor = new ContentExtractor(data.getContent());
+    				ordersList.add(extractor);
+    				ordersList.sort(Comparator.comparing(ContentExtractor::getDeliveryTime));
     				if(extractor.getDeliveryDay()==daysElapsed){
     					addBehaviour(new UpdateTodaysOrder(extractor));
     				}
-    				ordersList.add(extractor);
-    				ordersList.sort(Comparator.comparing(ContentExtractor::getDeliveryTime));
     				Util.sendReply(myAgent, data, ACLMessage.CONFIRM, extractor.getDeliveryDateString());
   
 //    				Orders order = jsonData.getOrder(extractor.getOrderGuid());

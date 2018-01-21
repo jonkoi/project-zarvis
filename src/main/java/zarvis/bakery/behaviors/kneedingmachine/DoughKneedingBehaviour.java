@@ -21,7 +21,9 @@ public class DoughKneedingBehaviour extends CyclicBehaviour {
 	public void action() {
 		ACLMessage message = myAgent.receive();
 		if (message != null) {
+			
 			if (message.getPerformative() == ACLMessage.INFORM && message.getConversationId().equals("kneeding-product")) {
+				
 				logger.info("product received for dough preparation " + message.getContent());
 				listProducts.add(message.getContent());
 				Util.sendReply(myAgent,message,ACLMessage.CONFIRM,"product accecpted by kneeding machine","kneeding-product");
@@ -40,11 +42,12 @@ public class DoughKneedingBehaviour extends CyclicBehaviour {
 						listProducts.remove(0);
 					}
 				}
-				
 			}
 		}
-		else 
+		else {
 			block();
+		}
+			
 
 	}
 

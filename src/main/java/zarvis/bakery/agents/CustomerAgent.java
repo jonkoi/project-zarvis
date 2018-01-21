@@ -202,8 +202,10 @@ public class CustomerAgent extends TimeAgent {
 		public void onWake() {
 			UpdateTime();
 			exitValue = 0;
-			System.out.println("Hours: " + totalHoursElapsed);
-			System.out.println("Next Order: "+ inWaitOrderAggregation.values().toArray()[0]);
+			String log = getAID().getLocalName() + " - " + "Day: " + daysElapsed + " "
+					+ "Hours: " + totalHoursElapsed + " " + "Next Order: "
+					+ inWaitOrderAggregation.values().toArray()[0];
+			System.out.println(log);
 			if (inWaitOrderAggregation.entrySet().iterator().next().getValue() <= totalHoursElapsed) {
 				exitValue = 1;
 			}
@@ -328,92 +330,6 @@ public class CustomerAgent extends TimeAgent {
 			return exitValue;
 		}
 	}
-//	private class AcceptProposal extends OneShotBehaviour{
-//		@Override
-//		public void action() {
-//			ACLMessage acceptMsg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-//			acceptMsg.addReceiver(new AID(bakeries[0].getName().getLocalName(), AID.ISLOCALNAME));
-//			acceptMsg.setConversationId("accept-proposal");
-//			send(acceptMsg);	
-//		}	
-//	}
-	
-//	private class PlaceOrder_old extends SequentialBehaviour{
-//		private long cDeadline = 0;
-//		private long waitDuration = 200;
-//		
-//		private boolean isdone1 = false;
-//		private boolean isdone2 = false;
-//		private boolean isdone3 = false;
-//		
-//		public PlaceOrder_old(Agent a) {
-////			super(a);
-//		}
-//		
-//		public void onStart() {
-//			if (isdone1 == false) {
-//				addSubBehaviour(new OneShotBehaviour() {
-//					@Override
-//					public void action() {
-//						System.out.println("C1");
-////						System.out.println("Again");
-//						send(orderMsg);
-//						cDeadline = System.currentTimeMillis() + waitDuration;
-//						inWaitOrderAggregation.clear();
-//						isdone1 = true;
-//					}
-//				});
-//			}
-//			
-//			MessageTemplate template = 
-//					MessageTemplate.MatchConversationId("proposal");
-//			
-//			if (isdone2 == false) {
-//				addSubBehaviour(new Behaviour() {
-//					private int isDone = 0;
-//					@Override
-//					public void action() {
-//						System.out.println("C2");
-//						ACLMessage msg = myAgent.receive(template);
-//						if (msg!=null) {
-//							System.out.println("GOT PROPOSAL!");
-//							isDone = 1;
-//						}
-//					}
-//					@Override
-//					public boolean done() {
-//						isdone2 = true;
-//						if (isDone == 0) {
-//							return false;
-//						} else {
-//							return true;
-//						}
-//					}
-//				});
-//			}
-//			
-//			if (isdone3 == false) {
-//				addSubBehaviour(new OneShotBehaviour() {
-//					@Override
-//					public void action() {
-//						System.out.println("C3");
-//						ACLMessage acceptMsg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-//						acceptMsg.addReceiver(new AID(bakeries[0].getName().getLocalName(), AID.ISLOCALNAME));
-//						acceptMsg.setConversationId("accept-proposal");
-//						send(acceptMsg);
-//						isdone3 = true;
-//					}
-//				});
-//			}
-//		}
-//		
-//		public int onEnd() {
-//			reset();
-//			return 0;
-//		}
-//	}
-	
-
 	
 	private class DummyReceive extends CyclicBehaviour {
 		public void action() {

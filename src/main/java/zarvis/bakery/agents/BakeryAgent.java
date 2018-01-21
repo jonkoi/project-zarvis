@@ -16,7 +16,9 @@ import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPANames;
@@ -46,9 +48,12 @@ public class BakeryAgent extends TimeAgent {
 	//Process
 	private AID sender;
 	private ACLMessage processingMsg;
+	private int sucess = 0;
+	private int failure = 0;
 	
 	//Test
 	private transient List<ContentExtractor> ordersList = new ArrayList<>();
+	private transient Map<ContentExtractor, Integer> todaysOrder = new HashMap<>();
 
 	public BakeryAgent(Bakery bakery, long globalStartTime) {
 		super(globalStartTime);
@@ -85,10 +90,11 @@ public class BakeryAgent extends TimeAgent {
 //		fb.registerDefaultTransition("WaitSetup-state", "ReceiveOrder-state");
 //		fb.registerDefaultTransition("WaitSetup-state", "ReceiveOrder-state");
 		
-		SequentialBehaviour seq = new SequentialBehaviour();
+//		SequentialBehaviour seq = new SequentialBehaviour();
+		ParallelBehaviour pal = new ParallelBehaviour();
 		
-		seq.addSubBehaviour(new WaitSetup());
-		seq.addSubBehaviour(new ReceiveOrder());
+		pal.addSubBehaviour(new ReceiveOrder());
+		pal.addSubBehaviour(new CheckTime());
 		
 		//ContractNetSequence
 //		fb.registerTransition("ReceiveOrder-state", "ReceiveOrder-state", 0);
@@ -96,7 +102,7 @@ public class BakeryAgent extends TimeAgent {
 //		fb.registerTransition("WaitAccept-state", "WaitAccept-state", 0);
 //		fb.registerTransition("WaitAccept-state", "ReceiveOrder-state", 1);
 		
-		addBehaviour(seq);
+		addBehaviour(pal);
 //		addBehaviour(new ProcessOrderBehaviour(bakery));
 	}
 
@@ -111,6 +117,7 @@ public class BakeryAgent extends TimeAgent {
 			
 			ACLMessage data = myAgent.receive();
 			if( data != null){
+				UpdateTime();
     			if(data.getPerformative() == ACLMessage.CFP){
     				ACLMessage msg = data;
 	    			orders = msg.getContent();
@@ -130,11 +137,12 @@ public class BakeryAgent extends TimeAgent {
     			}
     			if(data.getPerformative() == ACLMessage.ACCEPT_PROPOSAL){
     				ContentExtractor extractor = new ContentExtractor(data.getContent());
-    				if(extractor.getDeliveryDay()==daysElapsed){
-    					addBehaviour(new UpdateTodaysOrder(extractor));
-    				}
     				ordersList.add(extractor);
     				ordersList.sort(Comparator.comparing(ContentExtractor::getDeliveryTime));
+    				System.out.println(ordersList.size());
+    				if(extractor.getDeliveryDay()==daysElapsed){
+    					addBehaviour(new UpdateOrder());
+    				}
     				Util.sendReply(myAgent, data, ACLMessage.CONFIRM, extractor.getDeliveryDateString());
   
 //    				Orders order = jsonData.getOrder(extractor.getOrderGuid());
@@ -142,7 +150,11 @@ public class BakeryAgent extends TimeAgent {
 //    				
 //    				liteUtil.addOrder(order);
     			}
-    		} else { 
+    			if (data.getPerformative() == ACLMessage.AGREE) {
+    				// An order have been done
+    				
+    			}
+    		} else {
     			UpdateTime();
     			block();
     		}
@@ -171,7 +183,6 @@ public class BakeryAgent extends TimeAgent {
 			
 			double price = 0;
 			for(Map.Entry<String, Integer> item: orderExtractor.getProducts().entrySet()){
-				System.out.println(item.getKey());
 				for(Product p: products) {
 					if(p.getGuid().equals(item.getKey())) {
 						price += item.getValue()*p.getSales_price();
@@ -183,178 +194,52 @@ public class BakeryAgent extends TimeAgent {
 		}
 	}
 	
-	public class UpdateTodaysOrder extends OneShotBehaviour {
-		
-		public UpdateTodaysOrder(ContentExtractor extractor){
+	private class CheckTime extends CyclicBehaviour {
+		@Override
+		public void action() {
+			UpdateTime();
+			String log = getAID().getLocalName() + " - " + "Day: " + daysElapsed + " " + "Hours: " + totalHoursElapsed;
+			System.out.println(log);
+			if (totalHoursElapsed%24 == 0) {
+				addBehaviour(new UpdateOrder());
+			} 
+			
+			// Add todaysOrder
+			
+			block(millisLeft);
+		}
+	}
+	
+	public class UpdateOrder extends OneShotBehaviour {
+
+		public UpdateOrder() {
 			
 		}
 
 		@Override
 		public void action() {
-			// TODO Auto-generated method stub
-		}
-		
-	}
-	
-	
-	
-	
-	private class ReceiveOrder_old extends OneShotBehaviour{
-		private int exitValue = 0;
-		private MessageTemplate orderTemplate = MessageTemplate.and(
-				MessageTemplate.MatchPerformative( ACLMessage.CFP ),
-				MessageTemplate.MatchConversationId("order"));
-		public void action() {
-			ACLMessage msg = myAgent.receive(orderTemplate);
-			if (msg != null) {
-				processingMsg = msg;
-				boolean proposal = CheckOrderViability();
-				ACLMessage reply = new ACLMessage(ACLMessage.PROPOSE);
-//				if (proposal == true) {
-//					reply.setPerformative(ACLMessage.PROPOSE);
-//				} else {
-//					reply.setPerformative(ACLMessage.REFUSE);
-//				}
-				reply.setConversationId("proposal");
-				reply.addReceiver(msg.getSender());
-				reply.setContent(msg.getContent());
-				myAgent.send(reply);
-				System.out.println("GOT ORDER!");
-				System.out.println(msg.getContent());
-				exitValue = 1;
-			}
-		}
-		public int onEnd() {
-			return exitValue;
-		}
-	}
-	private class WaitAccept extends OneShotBehaviour{
-		private int exitValue = 0;
-		private MessageTemplate acceptTemplate = MessageTemplate.MatchConversationId("accept-proposal");
-		public void action() {
-			ACLMessage msg = myAgent.receive(acceptTemplate);
-			if (msg != null) {
-				if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-					System.out.println("GOT ACCEPTED!");
-					AddOrder();
+			UpdateTime();
+			todaysOrder.clear();
+			String msgToManagerString = "";
+			for (int i = 0; i < ordersList.size(); i++) {
+				ContentExtractor ce = ordersList.get(i);
+				if (ce.getDeliveryDay() == daysElapsed) {
+					todaysOrder.put(ce, 0);
+					msgToManagerString = msgToManagerString + ce.getOriginalMessage() + ";";
 				}
-				exitValue = 1;
 			}
+			
+			if (todaysOrder.size() > 0) {
+				ACLMessage msgToManager = new ACLMessage(ACLMessage.INFORM);
+				msgToManagerString = msgToManagerString.substring(0, msgToManagerString.length() - 1);
+				msgToManager.setContent(msgToManagerString);
+				msgToManager.setConversationId("Inform-order");
+				msgToManager.addReceiver(new AID(myAgent.getAID().getLocalName() + "-manager", AID.ISLOCALNAME));
+				System.out.println(msgToManagerString);
+				myAgent.send(msgToManager);
+			}
+			
 		}
-		public int onEnd() {
-			return exitValue;
-		}
-	}
-	
-//	private class ReceiveOrder_old extends SequentialBehaviour {
-//		
-//		private ACLMessage message;
-//		private AID sender; 
-//		
-//		private boolean isdone1 = false;
-//		private boolean isdone2 = false;
-//		public ReceiveOrder_old(Agent a) {
-//			super(a);
-//		}
-//		
-//		public void onStart() {
-//			
-//			MessageTemplate orderTemplate = MessageTemplate.and(
-//					MessageTemplate.MatchPerformative( ACLMessage.CFP ),
-//					MessageTemplate.MatchConversationId("order"));
-//			
-//			addSubBehaviour(new Behaviour() {
-//				private int isDone = 0;
-//				@Override
-//				public void action() {
-//					if (isdone1 == false) {
-//						System.out.println("B1");
-//						isdone1 = true;
-//					}
-//					
-//					ACLMessage msg = myAgent.receive(orderTemplate);
-//					if (msg!=null) {
-////						System.out.println(msg.getContent());
-//						sender = msg.getSender();
-//						message = msg;
-//						isDone = 1;
-//					}
-//				}
-//				@Override
-//				public boolean done() {
-//					if (isDone == 0) {
-//						return false;
-//					} else {
-//						return true;
-//					}
-//				}
-//			});
-//			
-//			if (isdone2 == false) {
-//				addSubBehaviour(new OneShotBehaviour() {
-//					@Override
-//					public void action() {
-//						System.out.println("B2");
-//						boolean proposal = CheckOrderViability();
-//						ACLMessage reply;
-//						if (proposal == true) {
-//							reply = new ACLMessage(ACLMessage.PROPOSE);
-//						} else {
-//							reply = new ACLMessage(ACLMessage.REFUSE);
-//						}
-//						reply.addReceiver(sender);
-//						reply.setConversationId("proposal");
-//						send(reply);
-//					}
-//				});
-//			}
-//			
-//			MessageTemplate acceptTemplate = MessageTemplate.and(
-//					MessageTemplate.or(
-//							MessageTemplate.MatchPerformative( ACLMessage.ACCEPT_PROPOSAL),
-//							MessageTemplate.MatchPerformative( ACLMessage.REJECT_PROPOSAL)),
-//					MessageTemplate.MatchConversationId("accept-proposal"));
-//			
-//			addSubBehaviour(new Behaviour() {
-//				private int isDone = 0;
-//				@Override
-//				public void action() {
-//					System.out.println("B3");
-//					ACLMessage msg = myAgent.receive(acceptTemplate);
-//					if (msg!=null) {
-//						if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-//							System.out.println("GOT ACCEPTED!");
-//							AddOrder();
-//						}
-//						message = msg;
-//						isDone = 1;
-//					} else {
-//						block();
-//					}
-//				}
-//				@Override
-//				public boolean done() {
-//					if (isDone == 0) {
-//						return false;
-//					} else {
-//						return true;
-//					}
-//				}
-//			});
-//		}
-//		
-//		public int onEnd() {
-//			reset();
-//			return 0;
-//		}
-//	}
-	
-	private boolean CheckOrderViability() {
-		boolean proposal = true;
-		return proposal;
-	}
-	
-	private void AddOrder() {
 		
 	}
 }

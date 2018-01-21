@@ -8,6 +8,7 @@ import jade.util.ExtendedProperties;
 import jade.util.leap.Properties;
 import jade.wrapper.AgentContainer;
 import zarvis.bakery.agents.BakeryAgent;
+import zarvis.bakery.agents.BakeryManagerAgent;
 import zarvis.bakery.agents.CoolingAgent;
 import zarvis.bakery.agents.CustomerAgent;
 import zarvis.bakery.agents.KneedingMachineAgent;
@@ -56,6 +57,7 @@ public class MainContainer {
 			// create multiple bakery agents
 			for (Bakery bakery : wrapper.getBakeries()) {
 				mainContainer.acceptNewAgent(bakery.getGuid(), new BakeryAgent(bakery, globalStartTime)).start();
+				mainContainer.acceptNewAgent(bakery.getGuid() + "-manager", new BakeryManagerAgent(bakery, globalStartTime));
 				for (KneedingMachine kneedingMachine : bakery.getKneading_machines().subList(0, 1)) {
 					mainContainer.acceptNewAgent(kneedingMachine.getGuid() + "-" + bakery.getGuid(),
 							new KneedingMachineAgent(bakery)).start();

@@ -10,7 +10,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 public class TimeAgent extends Agent {
 //	Time parameter
 	protected long globalStartTime;
-	protected final long MILLIS_PER_HOUR = 500;
+	protected final long MILLIS_PER_HOUR = 100;
 	protected final long MILLIS_PER_DAY = 24*MILLIS_PER_HOUR;
 	
 	protected long millisLeft;
@@ -22,7 +22,7 @@ public class TimeAgent extends Agent {
 		this.globalStartTime = globalStartTime;
 	}
 	
-	class WaitSetup extends Behaviour {
+	protected class WaitSetup extends Behaviour {
 		
 		private boolean started = false;
 		
@@ -47,7 +47,7 @@ public class TimeAgent extends Agent {
 	protected void UpdateTime() {
 		long operatingDuration = System.currentTimeMillis() - globalStartTime;
 		totalHoursElapsed = (long) Math.floorDiv(operatingDuration , MILLIS_PER_HOUR);
-		daysElapsed = (long) Math.floorDiv(operatingDuration , MILLIS_PER_DAY);
+		daysElapsed = (long) Math.floorDiv(operatingDuration , MILLIS_PER_DAY) + 1;
 		hoursElapsed = (long) Math.floorDiv(operatingDuration - daysElapsed * MILLIS_PER_DAY, MILLIS_PER_HOUR);
 		millisLeft = MILLIS_PER_HOUR - (operatingDuration - totalHoursElapsed * MILLIS_PER_HOUR);
 //		System.out.println(millisLeft);

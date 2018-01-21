@@ -138,7 +138,7 @@ public class Util {
 	}
 	
 	public static String buildOrderMessage(String guid, List<Order> orders, String agentGuid) {
-		String msg = "";
+		String msg = guid + ",";
 		for (Order o: orders) {
 			if (o.getGuid() == guid) {
 				int orderDay = o.getOrder_date().getDay();
@@ -156,7 +156,7 @@ public class Util {
 						msg = msg + products.get(p) + ".";
 					}
 				}
-				msg = msg.substring(0, msg.length() - 1) + ",";
+				msg = msg.substring(0, msg.length() - 1) + ";";
 				break;
 			}
 		}

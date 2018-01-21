@@ -17,6 +17,7 @@ public class ContentExtractor {
 	private String [] content;
 	private String [] split;
 	
+	private String guid;
 	private String customer;
 	private String productString;
 	private String deliveryDateString;
@@ -25,11 +26,12 @@ public class ContentExtractor {
 	public ContentExtractor(String message) {
 		orginalMessage = message;
 		content = message.split(",");
-		customer = content[0];
-		setDeliveryDate(content[2]);
-		deliveryDateString = content[2];
-		setProducts(content[3]);
-		productString = content[3];
+		guid = content[0];
+		customer = content[1];
+		setDeliveryDate(content[3]);
+		deliveryDateString = content[3];
+		setProducts(content[4]);
+		productString = content[4];
 	}
 	
 	private void setDeliveryDate(String date){

@@ -16,7 +16,9 @@ import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPANames;
@@ -46,9 +48,12 @@ public class BakeryAgent extends TimeAgent {
 	//Process
 	private AID sender;
 	private ACLMessage processingMsg;
+	private int sucess = 0;
+	private int failure = 0;
 	
 	//Test
 	private transient List<ContentExtractor> ordersList = new ArrayList<>();
+	private transient Map<ContentExtractor, Integer> todaysOrder = new HashMap<>();
 
 	public BakeryAgent(Bakery bakery, long globalStartTime) {
 		super(globalStartTime);
@@ -85,10 +90,11 @@ public class BakeryAgent extends TimeAgent {
 //		fb.registerDefaultTransition("WaitSetup-state", "ReceiveOrder-state");
 //		fb.registerDefaultTransition("WaitSetup-state", "ReceiveOrder-state");
 		
-		SequentialBehaviour seq = new SequentialBehaviour();
+//		SequentialBehaviour seq = new SequentialBehaviour();
+		ParallelBehaviour pal = new ParallelBehaviour();
 		
-		seq.addSubBehaviour(new WaitSetup());
-		seq.addSubBehaviour(new ReceiveOrder());
+		pal.addSubBehaviour(new ReceiveOrder());
+		pal.addSubBehaviour(new CheckTime());
 		
 		//ContractNetSequence
 //		fb.registerTransition("ReceiveOrder-state", "ReceiveOrder-state", 0);
@@ -96,7 +102,7 @@ public class BakeryAgent extends TimeAgent {
 //		fb.registerTransition("WaitAccept-state", "WaitAccept-state", 0);
 //		fb.registerTransition("WaitAccept-state", "ReceiveOrder-state", 1);
 		
-		addBehaviour(seq);
+		addBehaviour(pal);
 //		addBehaviour(new ProcessOrderBehaviour(bakery));
 	}
 
@@ -111,6 +117,7 @@ public class BakeryAgent extends TimeAgent {
 			
 			ACLMessage data = myAgent.receive();
 			if( data != null){
+				UpdateTime();
     			if(data.getPerformative() == ACLMessage.CFP){
     				ACLMessage msg = data;
 	    			orders = msg.getContent();
@@ -132,8 +139,9 @@ public class BakeryAgent extends TimeAgent {
     				ContentExtractor extractor = new ContentExtractor(data.getContent());
     				ordersList.add(extractor);
     				ordersList.sort(Comparator.comparing(ContentExtractor::getDeliveryTime));
+    				System.out.println(ordersList.size());
     				if(extractor.getDeliveryDay()==daysElapsed){
-    					addBehaviour(new UpdateTodaysOrder(extractor));
+    					addBehaviour(new UpdateOrder());
     				}
     				Util.sendReply(myAgent, data, ACLMessage.CONFIRM, extractor.getDeliveryDateString());
   
@@ -142,7 +150,11 @@ public class BakeryAgent extends TimeAgent {
 //    				
 //    				liteUtil.addOrder(order);
     			}
-    		} else { 
+    			if (data.getPerformative() == ACLMessage.AGREE) {
+    				// An order have been done
+    				
+    			}
+    		} else {
     			UpdateTime();
     			block();
     		}
@@ -182,15 +194,51 @@ public class BakeryAgent extends TimeAgent {
 		}
 	}
 	
-	public class UpdateTodaysOrder extends OneShotBehaviour {
-		
-		public UpdateTodaysOrder(ContentExtractor extractor){
+	private class CheckTime extends CyclicBehaviour {
+		@Override
+		public void action() {
+			UpdateTime();
+			String log = getAID().getLocalName() + " - " + "Day: " + daysElapsed + " " + "Hours: " + totalHoursElapsed;
+			System.out.println(log);
+			if (totalHoursElapsed%24 == 0) {
+				addBehaviour(new UpdateOrder());
+			} 
+			
+			// Add todaysOrder
+			
+			block(millisLeft);
+		}
+	}
+	
+	public class UpdateOrder extends OneShotBehaviour {
+
+		public UpdateOrder() {
 			
 		}
 
 		@Override
 		public void action() {
-			// TODO Auto-generated method stub
+			UpdateTime();
+			todaysOrder.clear();
+			String msgToManagerString = "";
+			for (int i = 0; i < ordersList.size(); i++) {
+				ContentExtractor ce = ordersList.get(i);
+				if (ce.getDeliveryDay() == daysElapsed) {
+					todaysOrder.put(ce, 0);
+					msgToManagerString = msgToManagerString + ce.getOriginalMessage() + ";";
+				}
+			}
+			
+			if (todaysOrder.size() > 0) {
+				ACLMessage msgToManager = new ACLMessage(ACLMessage.INFORM);
+				msgToManagerString = msgToManagerString.substring(0, msgToManagerString.length() - 1);
+				msgToManager.setContent(msgToManagerString);
+				msgToManager.setConversationId("Inform-order");
+				msgToManager.addReceiver(new AID(myAgent.getAID().getLocalName() + "-manager", AID.ISLOCALNAME));
+				System.out.println(msgToManagerString);
+				myAgent.send(msgToManager);
+			}
+			
 		}
 		
 	}

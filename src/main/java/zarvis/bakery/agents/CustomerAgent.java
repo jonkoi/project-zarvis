@@ -202,8 +202,10 @@ public class CustomerAgent extends TimeAgent {
 		public void onWake() {
 			UpdateTime();
 			exitValue = 0;
-			System.out.println("Hours: " + totalHoursElapsed);
-			System.out.println("Next Order: "+ inWaitOrderAggregation.values().toArray()[0]);
+			String log = getAID().getLocalName() + " - " + "Day: " + daysElapsed + " "
+					+ "Hours: " + totalHoursElapsed + " " + "Next Order: "
+					+ inWaitOrderAggregation.values().toArray()[0];
+			System.out.println(log);
 			if (inWaitOrderAggregation.entrySet().iterator().next().getValue() <= totalHoursElapsed) {
 				exitValue = 1;
 			}

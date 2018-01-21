@@ -123,27 +123,34 @@ public class BakeryAgent extends TimeAgent {
 	    			orders = msg.getContent();
 	    			System.out.println(orders);
 	    			
-	    			currentOrder = new ContentExtractor(orders);
-					
-					if(checkOrders(currentOrder)){
-						price = getPrice(currentOrder);
-						System.out.print("price: ");
-						System.out.println(price);
-						Util.sendReply(myAgent, msg, ACLMessage.PROPOSE, price);						
-					}
-					else{
-						Util.sendReply(myAgent, msg, ACLMessage.REJECT_PROPOSAL, orders);
-					}		
+	    			String[] splitOrders = orders.split(";");
+	    			
+	    			for (String o: splitOrders) {
+	    				currentOrder = new ContentExtractor(o);
+	    				if(checkOrders(currentOrder)){
+							price = getPrice(currentOrder);
+							System.out.print("price: ");
+							System.out.println(price);
+							Util.sendReply(myAgent, msg, ACLMessage.PROPOSE, price);						
+						}
+						else{
+							Util.sendReply(myAgent, msg, ACLMessage.REJECT_PROPOSAL, orders);
+						}		
+	    			}
     			}
     			if(data.getPerformative() == ACLMessage.ACCEPT_PROPOSAL){
-    				ContentExtractor extractor = new ContentExtractor(data.getContent());
-    				ordersList.add(extractor);
-    				ordersList.sort(Comparator.comparing(ContentExtractor::getDeliveryTime));
-    				System.out.println(ordersList.size());
-    				if(extractor.getDeliveryDay()==daysElapsed){
-    					addBehaviour(new UpdateOrder());
+    				orders = data.getContent();
+    				String[] splitOrders = orders.split(";");
+    				for (String o: splitOrders) {
+    					ContentExtractor extractor = new ContentExtractor(o);
+        				ordersList.add(extractor);
+        				ordersList.sort(Comparator.comparing(ContentExtractor::getDeliveryTime));
+        				System.out.println(ordersList.size());
+        				if(extractor.getDeliveryDay()==daysElapsed){
+        					addBehaviour(new UpdateOrder());
+        				}
+        				Util.sendReply(myAgent, data, ACLMessage.CONFIRM, extractor.getDeliveryDateString());
     				}
-    				Util.sendReply(myAgent, data, ACLMessage.CONFIRM, extractor.getDeliveryDateString());
   
 //    				Orders order = jsonData.getOrder(extractor.getOrderGuid());
 //    				order.setBakery(bakery);
@@ -176,6 +183,7 @@ public class BakeryAgent extends TimeAgent {
 		
 		public boolean checkOrders(ContentExtractor orderExtractor) {
 			//Many criteria, return true for now
+			//Invalid delivery date
 			return true;
 		}
 		
@@ -235,7 +243,7 @@ public class BakeryAgent extends TimeAgent {
 				msgToManager.setContent(msgToManagerString);
 				msgToManager.setConversationId("Inform-order");
 				msgToManager.addReceiver(new AID(myAgent.getAID().getLocalName() + "-manager", AID.ISLOCALNAME));
-				System.out.println(msgToManagerString);
+				System.out.println("To production: " + msgToManagerString);
 				myAgent.send(msgToManager);
 			}
 			

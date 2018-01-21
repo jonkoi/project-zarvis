@@ -85,7 +85,7 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerDefaultTransition("WaitSetup-state", "GetBakeries-state");
 		fb.registerTransition("GetBakeries-state", "NoBakeries-state", 0); // No bakeries found
 		fb.registerTransition("GetBakeries-state", "CheckNextOrders-state", 1);
-		fb.registerTransition("CheckNextOrders-state", "P0", 0);
+		fb.registerTransition("CheckNextOrders-state", "CheckTime-state", 0);
 		fb.registerTransition("CheckNextOrders-state", "P1", 1);
 		fb.registerTransition("CheckNextOrders-state", "CheckTime-state", 2);
 		fb.registerTransition("CheckTime-state", "CheckTime-state", 0);
@@ -178,6 +178,9 @@ public class CustomerAgent extends TimeAgent {
 				msg += Util.buildOrderMessage(key, orders, getAID().getLocalName());
 				
 				sortedOrderAggregation.remove(key);
+				if (sortedOrderAggregation.size() == 0) {
+					break;
+				}
 				entry = sortedOrderAggregation.entrySet().iterator().next();
 			} while (value == entry.getValue());
 			
@@ -202,12 +205,19 @@ public class CustomerAgent extends TimeAgent {
 		public void onWake() {
 			UpdateTime();
 			exitValue = 0;
-			String log = getAID().getLocalName() + " - " + "Day: " + daysElapsed + " "
-					+ "Hours: " + totalHoursElapsed + " " + "Next Order: "
-					+ inWaitOrderAggregation.values().toArray()[0];
-			System.out.println(log);
-			if (inWaitOrderAggregation.entrySet().iterator().next().getValue() <= totalHoursElapsed) {
-				exitValue = 1;
+			
+			if (inWaitOrderAggregation.size() > 0) {
+				String log = getAID().getLocalName() + " - " + "Day: " + daysElapsed + " "
+						+ "Hours: " + totalHoursElapsed + " " + "Next Order: "
+						+ inWaitOrderAggregation.values().toArray()[0];
+				System.out.println(log);
+				if (inWaitOrderAggregation.entrySet().iterator().next().getValue() <= totalHoursElapsed) {
+					exitValue = 1;
+				}
+			} else {
+				String log = getAID().getLocalName() + " - " + "Day: " + daysElapsed + " "
+						+ "Hours: " + totalHoursElapsed;
+				System.out.println(log);
 			}
 		}
 		public int onEnd() {
@@ -330,29 +340,5 @@ public class CustomerAgent extends TimeAgent {
 			return exitValue;
 		}
 	}
-	
-	private class DummyReceive extends CyclicBehaviour {
-		public void action() {
-			MessageTemplate mt =
-			  		MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
-			ACLMessage msg = myAgent.receive(mt);
-			if (msg != null) {
-				System.out.println(msg.getContent());
-			}
-			
-		}
-	}
-	
-	private class DummyPlaceOrder extends OneShotBehaviour {
-
-		public void action() {
-			System.out.println("Sending");
-			inWaitOrderAggregation.clear();
-			send(orderMsg);
-			
-		}
-		
-	}
-	
 	
 }

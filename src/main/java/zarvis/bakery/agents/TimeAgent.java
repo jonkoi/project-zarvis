@@ -10,7 +10,8 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 public class TimeAgent extends Agent {
 //	Time parameter
 	protected long globalStartTime;
-	protected final long MILLIS_PER_HOUR = 100;
+	protected final long MILLIS_PER_MIN = 2;
+	protected final long MILLIS_PER_HOUR = 60*MILLIS_PER_MIN;
 	protected final long MILLIS_PER_DAY = 24*MILLIS_PER_HOUR;
 	
 	protected long millisLeft;

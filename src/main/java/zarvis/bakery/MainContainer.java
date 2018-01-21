@@ -35,7 +35,7 @@ public class MainContainer {
 		
 		try {
 			//Delay for 5 seconds to wait for all to initialize
-			long delay = 5000;
+			long delay = 2000;
 			long globalStartTime = System.currentTimeMillis() + delay;
 			
 			Logger logger = LoggerFactory.getLogger(BakeryAgent.class);
@@ -57,9 +57,8 @@ public class MainContainer {
 			// create multiple bakery agents
 			for (Bakery bakery : wrapper.getBakeries()) {
 				mainContainer.acceptNewAgent(bakery.getGuid(), new BakeryAgent(bakery, globalStartTime)).start();
-				mainContainer.acceptNewAgent(bakery.getGuid() + "-manager", new BakeryManagerAgent(bakery, globalStartTime));
 				for (KneedingMachine kneedingMachine : bakery.getKneading_machines().subList(0, 1)) {
-					mainContainer.acceptNewAgent(kneedingMachine.getGuid() + "-" + bakery.getGuid(),
+					mainContainer.acceptNewAgent(kneedingMachine.getGuid(),
 							new KneedingMachineAgent(bakery)).start();
 				}
 				mainContainer.acceptNewAgent("kneeding_machine_manager-" + bakery.getGuid(),new KneedingMachineManager(bakery)).start();

@@ -205,7 +205,7 @@ public class CustomerAgent extends TimeAgent {
 				String log = getAID().getLocalName() + " - " + "Day: " + daysElapsed + " "
 						+ "Hours: " + totalHoursElapsed + " " + "Next Order: "
 						+ inWaitOrderAggregation.values().toArray()[0];
-				System.out.println(log);
+//				System.out.println(log);
 				if (inWaitOrderAggregation.entrySet().iterator().next().getValue() <= totalHoursElapsed) {
 					exitValue = 1;
 				}

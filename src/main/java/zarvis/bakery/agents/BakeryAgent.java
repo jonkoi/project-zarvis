@@ -108,9 +108,10 @@ public class BakeryAgent extends TimeAgent {
 		pal.addSubBehaviour(new CheckTime());
 		pal.addSubBehaviour(new ManageProduction());
 		pal.addSubBehaviour(new SendKneadingMessage());
+		pal.addSubBehaviour(new UpdateKneadFree());
 		
 		seq.addSubBehaviour(pal);
-		addBehaviour(seq);
+		addBehaviour(pal);
 	}
 
 	protected void takeDown() {
@@ -212,11 +213,23 @@ public class BakeryAgent extends TimeAgent {
 		}
 	}
 	
-	private class SendKneadingMessage extends CyclicBehaviour {
+	private class UpdateKneadFree extends CyclicBehaviour {
 		
 		private MessageTemplate fromKneadTemplate = MessageTemplate.and(
 				MessageTemplate.MatchConversationId("next-product-request"),
 				MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+		@Override
+		public void action() {
+			ACLMessage fromKnead = myAgent.receive(fromKneadTemplate);
+			if (fromKnead!=null) {
+				System.out.println();
+				isKneadingFree = true;
+			}
+		}
+		
+	}
+	
+	private class SendKneadingMessage extends CyclicBehaviour {
 
 		public void action() {
 			if (isKneadingFree && idx!=9999) {
@@ -226,14 +239,11 @@ public class BakeryAgent extends TimeAgent {
 				toKnead.setConversationId("next-product-request");
 				toKnead.setContent(Integer.toString(idx));
 				myAgent.send(toKnead);
-				isKneadingFree = false;
+				
 				System.out.println("current amount: " + currentOrderAmounts[idx]);
+				
 				currentOrderAmounts[idx]--;
-			} else {
-				ACLMessage fromKnead = myAgent.receive(fromKneadTemplate);
-				if (fromKnead!=null) {
-					isKneadingFree = true;
-				}
+				isKneadingFree = false;
 			}
 		}
 	}
@@ -243,7 +253,7 @@ public class BakeryAgent extends TimeAgent {
 		public void action() {
 			UpdateTime();
 			String log = getAID().getLocalName() + " - " + "Day: " + daysElapsed + " " + "Hours: " + totalHoursElapsed;
-			System.out.println(log);
+//			System.out.println(log);
 			if (totalHoursElapsed%24 == 0) {
 				addBehaviour(new setTodayOrder());
 			} 

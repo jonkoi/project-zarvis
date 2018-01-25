@@ -49,14 +49,15 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 
 			Util.sendMessage(myAgent,Util.searchInYellowPage(myAgent,"BakeryService",bakery.getGuid())[0].getName(),
 					ACLMessage.REQUEST,"","next-product-request");
+			System.out.println("START");
 			step = 1;
 
 			break;
 		case 1:
 
 			ACLMessage productResponse = myAgent.receive(fromBakeryTemplate);
-
 			if (productResponse != null) {
+				
 				if (productResponse.getPerformative() == CustomMessage.RESPONSE) {
 //					System.out.println("next product " + productResponse.getContent());
 					product = productResponse.getContent();
@@ -79,7 +80,6 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 
 			if (kneedingMachines.length != 0){
 				for (DFAgentDescription kneedingMachine : kneedingMachines) {
-					System.out.println(kneedingMachine.getName().getLocalName());
 					Util.sendMessage(myAgent, kneedingMachine.getName(), CustomMessage.REQUEST_STATUS, "",
 							"kneeding-machine-availability");
 				}
@@ -90,15 +90,15 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 		case 3:
 
 			ACLMessage message = myAgent.receive(toMachineTemplate);
-			System.out.println("here now");
 			if (message != null) {
-				System.out.println("here too");
 				if (message.getPerformative() == CustomMessage.RESPONSE_STATUS
 						&& message.getConversationId().equals("kneeding-machine-status")) {
 					if (message.getContent().equals("Available")) {
-						availableKneedingMachine = message.getSender().getName();
+						availableKneedingMachine = message.getSender().getLocalName();
 						step = 4;
 						refuseCounter = 0;
+					} else {
+						block();
 					}
 				}
 
@@ -117,8 +117,10 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 			break;
 
 		case 4:
+			
 			if (!product.isEmpty() && !availableKneedingMachine.isEmpty()){
-				Util.sendMessage(myAgent,new AID(availableKneedingMachine), ACLMessage.INFORM, product,
+//				System.out.println("Step4");
+				Util.sendMessage(myAgent,new AID(availableKneedingMachine, AID.ISLOCALNAME), ACLMessage.INFORM, product,
 						"kneeding-product");
 				step = 5;
 			}
@@ -130,7 +132,9 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 			if (kneedingConfirmation != null) {
 				if (kneedingConfirmation.getPerformative() == ACLMessage.CONFIRM
 						&& kneedingConfirmation.getConversationId().equals("kneeding-product")) {
-				logger.info(kneedingConfirmation.getContent());
+					logger.info(kneedingConfirmation.getContent());
+					System.out.println("END!");
+					step = 0;
 				}
 			} else {
 				block();

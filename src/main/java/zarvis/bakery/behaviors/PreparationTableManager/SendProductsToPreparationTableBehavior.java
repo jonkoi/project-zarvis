@@ -44,6 +44,7 @@ public class SendProductsToPreparationTableBehavior extends CyclicBehaviour{
 			ACLMessage response = myAgent.receive();
 			if(response != null){
 				if (response.getPerformative() == CustomMessage.RESPONSE && response.getConversationId().equals("next-product-request-preparationTableManager")){
+
 					logger.info("next product-preparationTableManager" + response.getContent());
 					product = response.getContent();
 					step = 2;
@@ -71,7 +72,7 @@ public class SendProductsToPreparationTableBehavior extends CyclicBehaviour{
 			if (message != null) {
 				if (message.getPerformative() == CustomMessage.RESPONSE_STATUS && message.getConversationId().equals("preparationTable-availability")) {
 					if (message.getContent().equals("Available")) {
-						availablePreparationTableAgent = message.getSender().getName();
+						availablePreparationTableAgent = message.getSender().getLocalName();
 						step = 4;
 						counter = 0;
 					}
@@ -88,7 +89,7 @@ public class SendProductsToPreparationTableBehavior extends CyclicBehaviour{
 			break;
 		case 4:
 			if (!product.isEmpty() && !availablePreparationTableAgent.isEmpty()){
-				Util.sendMessage(myAgent,new AID(availablePreparationTableAgent), ACLMessage.INFORM, product,"preparationTable-product");
+				Util.sendMessage(myAgent,new AID(availablePreparationTableAgent, AID.ISLOCALNAME), ACLMessage.INFORM, product,"preparationTable-product");
 				step = 5;
 			}
 			break;
@@ -98,6 +99,8 @@ public class SendProductsToPreparationTableBehavior extends CyclicBehaviour{
 			if (preparationTableConfirmation != null) {
 				if (preparationTableConfirmation.getPerformative() == ACLMessage.CONFIRM && preparationTableConfirmation.getConversationId().equals("oven-product")) {
 					logger.info(preparationTableConfirmation.getContent());
+					step = 0;
+					System.out.println("END");
 				}
 			} 
 			else block();

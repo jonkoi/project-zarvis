@@ -36,7 +36,7 @@ public class Product {
 		this.guid = guid;
 	}
 
-	public float getDough_prep_time() {
+	public int getDough_prep_time() {
 		return dough_prep_time;
 	}
 

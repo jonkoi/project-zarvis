@@ -20,17 +20,21 @@ public class CurrentStatusBehaviour extends CyclicBehaviour {
 	private static final long serialVersionUID = 1L;
 	private Status status = new Status(true);
 	private Logger logger = LoggerFactory.getLogger(CurrentStatusBehaviour.class);
+	
+	private MessageTemplate fromKneadManagerTemplate = MessageTemplate.MatchConversationId("kneeding-machine-availability");
+	private MessageTemplate changeStatusTemplate = MessageTemplate.and(
+			MessageTemplate.MatchPerformative(CustomMessage.CHANGE_STATUS),
+			MessageTemplate.MatchConversationId("knead-change-status"));
 
 
 	@Override
 	public void action() {
 
-		ACLMessage message = myAgent.receive();
+		ACLMessage message = myAgent.receive(fromKneadManagerTemplate);
 
 		if (message != null) {
-
-			if (message.getPerformative() == CustomMessage.REQUEST_STATUS
-					&& message.getConversationId().equals("kneeding-machine-availability")) {
+			if (message.getPerformative() == CustomMessage.REQUEST_STATUS) {
+				System.out.println("We are in");
 				ACLMessage reply = message.createReply();
 				reply.setPerformative(CustomMessage.RESPONSE_STATUS);
 				reply.setContent(status.getStatus() ? "Available" : "Unavailable");
@@ -38,10 +42,12 @@ public class CurrentStatusBehaviour extends CyclicBehaviour {
 				myAgent.send(reply);
 
 			}
-
-			if (message.getPerformative() == CustomMessage.CHANGE_STATUS) {
-				status.setStatus(!status.getStatus());
-			}
+		ACLMessage message1 = myAgent.receive(changeStatusTemplate);
+//		System.out.println("State changed!");
+		if (message1 != null) {
+			System.out.println("State changed!");
+			status.setStatus(!status.getStatus());
+		}
 
 		} else {
 			block();

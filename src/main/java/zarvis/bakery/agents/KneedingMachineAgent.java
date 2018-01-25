@@ -11,7 +11,7 @@ import zarvis.bakery.utils.Util;
 public class KneedingMachineAgent extends Agent {
 	
 	private static final long serialVersionUID = 1L;
-	private Bakery bakery;
+	public Bakery bakery;
 
 	public KneedingMachineAgent(Bakery bakery) {
 		this.bakery = bakery;
@@ -21,8 +21,12 @@ public class KneedingMachineAgent extends Agent {
 	protected void setup() {
 		Util.registerInYellowPage(this, "KneedingMachineAgent", this.bakery.getGuid());
 		
-		addBehaviour(new CurrentStatusBehaviour());
-		addBehaviour(new DoughKneedingBehaviour());
+		ParallelBehaviour pal = new ParallelBehaviour();
+		
+		pal.addSubBehaviour(new CurrentStatusBehaviour());
+		pal.addSubBehaviour(new DoughKneedingBehaviour(bakery));
+		
+		addBehaviour(pal);
 	}
 	
 }

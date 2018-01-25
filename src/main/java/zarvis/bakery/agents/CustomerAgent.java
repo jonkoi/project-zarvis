@@ -121,10 +121,6 @@ public class CustomerAgent extends TimeAgent {
 
 		@Override
 		public void action() {
-			for (Map.Entry<String, Integer> entry : sortedOrderAggregation.entrySet()) {
-				System.out.println(entry.getKey() + " " + entry.getValue());
-			}
-//			System.out.println("GS");
 			bakeries = Util.searchInYellowPage(myAgent, "BakeryService", null);
 			if (bakeries.length > 0) {
 				System.out.println(bakeries.length);
@@ -149,7 +145,6 @@ public class CustomerAgent extends TimeAgent {
 		private int exitValue = 0;
 		
 		public void onStart() {
-			System.out.println("Hello");
 		}
 
 		@Override

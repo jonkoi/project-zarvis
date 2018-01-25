@@ -20,7 +20,8 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 
 	private int step = 0;
 
-	private MessageTemplate mt;
+	private MessageTemplate fromBakeryTemplate;
+	private MessageTemplate toMachineTemplate;
 
 	private static final int blockingTime = 3000;
 
@@ -33,6 +34,10 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 
 	public SendProductsToKneedingMachineBehavior(Bakery bakery){
 		this.bakery = bakery;
+		this.fromBakeryTemplate =
+				MessageTemplate.MatchConversationId("next-product-request");
+		this.toMachineTemplate =
+				MessageTemplate.MatchConversationId("kneeding-machine-status");
 	}
 
 	@Override
@@ -49,17 +54,15 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 			break;
 		case 1:
 
-			ACLMessage productResponse = myAgent.receive();
+			ACLMessage productResponse = myAgent.receive(fromBakeryTemplate);
 
 			if (productResponse != null) {
-				if (productResponse.getPerformative() == CustomMessage.RESPONSE
-						&& productResponse.getConversationId().equals("next-product-request")) {
-					logger.info("next produc " + productResponse.getContent());
+				if (productResponse.getPerformative() == CustomMessage.RESPONSE) {
+//					System.out.println("next product " + productResponse.getContent());
 					product = productResponse.getContent();
 					step = 2;
 				}
-				if (productResponse.getPerformative() == ACLMessage.REFUSE
-						&& productResponse.getConversationId().equals("next-product-request")) {
+				if (productResponse.getPerformative() == ACLMessage.REFUSE) {
 					//logger.info(productResponse.getContent());
 
 					step = 0;
@@ -71,68 +74,68 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 
 			break;
 
-			case 2:
-				kneedingMachines = Util.searchInYellowPage(myAgent, "KneedingMachineAgent", bakery.getGuid());
+		case 2:
+			kneedingMachines = Util.searchInYellowPage(myAgent, "KneedingMachineAgent", bakery.getGuid());
 
-				if (kneedingMachines.length != 0){
-					for (DFAgentDescription kneedingMachine : kneedingMachines) {
-						Util.sendMessage(myAgent, kneedingMachine.getName(), CustomMessage.REQUEST_STATUS, "",
-								"kneeding-machine-availability");
-					}
-					step = 3;
+			if (kneedingMachines.length != 0){
+				for (DFAgentDescription kneedingMachine : kneedingMachines) {
+					System.out.println(kneedingMachine.getName().getLocalName());
+					Util.sendMessage(myAgent, kneedingMachine.getName(), CustomMessage.REQUEST_STATUS, "",
+							"kneeding-machine-availability");
 				}
-				break;
+				step = 3;
+			}
+			break;
 
-			case 3:
+		case 3:
 
-				ACLMessage message = myAgent.receive();
-
-				if (message != null) {
-					if (message.getPerformative() == CustomMessage.RESPONSE_STATUS
-							&& message.getConversationId().equals("kneeding-machine-status")) {
-						if (message.getContent().equals("Available")) {
-							availableKneedingMachine = message.getSender().getName();
-							step = 4;
-							refuseCounter = 0;
-						}
+			ACLMessage message = myAgent.receive(toMachineTemplate);
+			System.out.println("here now");
+			if (message != null) {
+				System.out.println("here too");
+				if (message.getPerformative() == CustomMessage.RESPONSE_STATUS
+						&& message.getConversationId().equals("kneeding-machine-status")) {
+					if (message.getContent().equals("Available")) {
+						availableKneedingMachine = message.getSender().getName();
+						step = 4;
+						refuseCounter = 0;
 					}
-
-					if (message.getPerformative() == ACLMessage.REFUSE &&
-							message.getConversationId().equals("kneeding-machine-status")) {
-						logger.info("request refused");
-						refuseCounter ++;
-						if (refuseCounter == kneedingMachines.length){
-							step = 0;
-						}
-					}
-				} else {
-					block();
 				}
 
-				break;
-
-			case 4:
-				if (!product.isEmpty() && !availableKneedingMachine.isEmpty()){
-					Util.sendMessage(myAgent,new AID(availableKneedingMachine), ACLMessage.INFORM, product,
-							"kneeding-product");
-					step = 5;
-				}
-				break;
-
-			case 5:
-				ACLMessage kneedingConfirmation = myAgent.receive();
-
-				if (kneedingConfirmation != null) {
-					if (kneedingConfirmation.getPerformative() == ACLMessage.CONFIRM
-							&& kneedingConfirmation.getConversationId().equals("kneeding-product")) {
-					logger.info(kneedingConfirmation.getContent());
+				if (message.getPerformative() == ACLMessage.REFUSE &&
+						message.getConversationId().equals("kneeding-machine-status")) {
+					logger.info("request refused");
+					refuseCounter ++;
+					if (refuseCounter == kneedingMachines.length){
+						step = 0;
 					}
-				} else {
-					block();
 				}
-				break;
+			} else {
+				block();
+			}
 
+			break;
 
+		case 4:
+			if (!product.isEmpty() && !availableKneedingMachine.isEmpty()){
+				Util.sendMessage(myAgent,new AID(availableKneedingMachine), ACLMessage.INFORM, product,
+						"kneeding-product");
+				step = 5;
+			}
+			break;
+
+		case 5:
+			ACLMessage kneedingConfirmation = myAgent.receive();
+
+			if (kneedingConfirmation != null) {
+				if (kneedingConfirmation.getPerformative() == ACLMessage.CONFIRM
+						&& kneedingConfirmation.getConversationId().equals("kneeding-product")) {
+				logger.info(kneedingConfirmation.getContent());
+				}
+			} else {
+				block();
+			}
+			break;
 		}
 
 	}

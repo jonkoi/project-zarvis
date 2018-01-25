@@ -37,6 +37,7 @@ import zarvis.bakery.models.Product;
 import zarvis.bakery.utils.ContentExtractor;
 import zarvis.bakery.utils.Util;
 import jade.proto.ContractNetResponder;
+import zarvis.bakery.messages.CustomMessage;
 
 public class BakeryAgent extends TimeAgent {
 
@@ -63,6 +64,8 @@ public class BakeryAgent extends TimeAgent {
 	private int[] currentOrderAmounts = new int[Util.PRODUCTNAMES.size()];
 	private ContentExtractor currentCE;
 	Map<String,Integer> currentOrderProducts = new HashMap<>();
+	private int idx;
+	private boolean isKneadingFree;
  
 	public BakeryAgent(Bakery bakery, long globalStartTime) {
 		super(globalStartTime);
@@ -88,6 +91,8 @@ public class BakeryAgent extends TimeAgent {
 		for (Product p: this.products) {
 			System.out.println(p.getGuid());
 		}
+		this.idx = 9999;
+		this.isKneadingFree = true;
 	}
 
 	@Override
@@ -95,40 +100,26 @@ public class BakeryAgent extends TimeAgent {
 
 		Util.registerInYellowPage(this, "BakeryService", bakery.getGuid());
 		
-//		orderTemplate = MessageTemplate.and(
-//		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
-//		  		MessageTemplate.MatchPerformative(ACLMessage.CFP) );
-		
-//		FSMBehaviour fb = new FSMBehaviour();
-//		fb.registerFirstState(new WaitSetup(), "WaitSetup-state");
-//		fb.registerState(new ReceiveOrder(), "ReceiveOrder-state");
-////		fb.registerState(new WaitAccept(), "WaitAccept-state");
-//		
-//		
-//		fb.registerDefaultTransition("WaitSetup-state", "ReceiveOrder-state");
-//		fb.registerDefaultTransition("WaitSetup-state", "ReceiveOrder-state");
-		
-//		SequentialBehaviour seq = new SequentialBehaviour();
+		SequentialBehaviour seq = new SequentialBehaviour();
+		seq.addSubBehaviour(new WaitSetup());
 		ParallelBehaviour pal = new ParallelBehaviour();
 		
 		pal.addSubBehaviour(new ReceiveOrder());
 		pal.addSubBehaviour(new CheckTime());
 		pal.addSubBehaviour(new ManageProduction());
+		pal.addSubBehaviour(new SendKneadingMessage());
 		
-		//ContractNetSequence
-//		fb.registerTransition("ReceiveOrder-state", "ReceiveOrder-state", 0);
-//		fb.registerTransition("ReceiveOrder-state", "WaitAccept-state", 1);
-//		fb.registerTransition("WaitAccept-state", "WaitAccept-state", 0);
-//		fb.registerTransition("WaitAccept-state", "ReceiveOrder-state", 1);
-		
-		addBehaviour(pal);
-//		addBehaviour(new ProcessOrderBehaviour(bakery));
+		seq.addSubBehaviour(pal);
+		addBehaviour(seq);
 	}
 
 	protected void takeDown() {
 	}
 	
 	private class ReceiveOrder extends CyclicBehaviour{
+		
+		private MessageTemplate fromCustomerTemplate = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+		
 		public void action(){
 			String orders;
 			String price;
@@ -221,6 +212,32 @@ public class BakeryAgent extends TimeAgent {
 		}
 	}
 	
+	private class SendKneadingMessage extends CyclicBehaviour {
+		
+		private MessageTemplate fromKneadTemplate = MessageTemplate.and(
+				MessageTemplate.MatchConversationId("next-product-request"),
+				MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+
+		public void action() {
+			if (isKneadingFree && idx!=9999) {
+				ACLMessage toKnead = new ACLMessage(CustomMessage.RESPONSE);
+				toKnead.addReceiver(new AID("kneeding_machine_manager-"+myAgent.getLocalName(),
+						AID.ISLOCALNAME));
+				toKnead.setConversationId("next-product-request");
+				toKnead.setContent(Integer.toString(idx));
+				myAgent.send(toKnead);
+				isKneadingFree = false;
+				System.out.println("current amount: " + currentOrderAmounts[idx]);
+				currentOrderAmounts[idx]--;
+			} else {
+				ACLMessage fromKnead = myAgent.receive(fromKneadTemplate);
+				if (fromKnead!=null) {
+					isKneadingFree = true;
+				}
+			}
+		}
+	}
+	
 	private class CheckTime extends CyclicBehaviour {
 		@Override
 		public void action() {
@@ -255,10 +272,7 @@ public class BakeryAgent extends TimeAgent {
 					}
 				}
 			}
-			
-			
 		}
-		
 	}
 	
 	public class UpdateOrder extends OneShotBehaviour {
@@ -281,9 +295,7 @@ public class BakeryAgent extends TimeAgent {
 	}
 	
 	public class ManageProduction extends CyclicBehaviour{
-		
 		MessageTemplate confirmMt;
-		
 		public ManageProduction() {
 			confirmMt = MessageTemplate.and(
 					MessageTemplate.MatchPerformative(ACLMessage.CONFIRM),
@@ -294,8 +306,6 @@ public class BakeryAgent extends TimeAgent {
 		public void action() {
 			if (todaysOrder.size() > 0 || currentCE != null) {
 				if (currentCE == null) {
-					
-					
 					currentCE = todaysOrder.get(0);
 					todaysOrder.remove(0);
 					
@@ -306,60 +316,21 @@ public class BakeryAgent extends TimeAgent {
 						i++;
 					}
 				} 
-				
 				else if (currentCE != null) {
-					int idx = 9999;
 					for (int i = 0; i < currentOrderAmounts.length; i++) {
 						if (currentOrderAmounts[i] > 0) {
 							idx = i;
 							break;
 						}
 					}
-					
-					
 					if (idx == 9999) {
 						currentCE = null;
-					} else {
-						for (int i = 0; i < availableKnead.length; i++) {
-							if (availableKnead[i] == true) {
-//								System.out.println("CHECK!" + i);
-								if (currentOrderAmounts[idx] == 0) break;
-								ACLMessage toKnead = new ACLMessage(ACLMessage.INFORM);
-								toKnead.addReceiver(
-										new AID(bakery.getKneading_machines().get(i).getGuid(),AID.ISLOCALNAME));
-								toKnead.setConversationId("kneeding-product");
-								toKnead.setContent(Integer.toString(idx));
-								myAgent.send(toKnead);
-								
-								//Quite a nested hell
-								while(true)
-								{
-									ACLMessage msg = myAgent.receive(confirmMt);
-									if (msg!=null) {
-//										System.out.println("CHECK!");
-										availableKnead[i] = false;
-										currentOrderAmounts[idx]--;
-										break;
-									}
-								}
-							}
-						}
-					}
+					} 
 				}
+			}
+			else {
+				idx = 9999;
 			}
 		}
 	}
-	
-//	ACLMessage toBakery = myAgent.receive(mt);
-//	if (toBakery != null) {
-//		if (toBakery.getConversationId() == "free-knead") {
-//			AID senderAID = toBakery.getSender();
-//			String guid = senderAID.getLocalName();
-//			for (int i = 0; i < availableKnead.length; i++) {
-//				if (bakery.getKneading_machines().get(i).getGuid() == guid) {
-//					availableKnead[i] = true;
-//				}
-//			}
-//		} 
-//	}
 }

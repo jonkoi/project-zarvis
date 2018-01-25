@@ -39,7 +39,8 @@ public class Util {
 		finally
 		{
 			try {
-				reader.close();
+				if(reader != null)
+					reader.close();
 			}
 			catch (IOException e) {
 				e.printStackTrace();
@@ -139,6 +140,7 @@ public class Util {
 			Thread.sleep(milliseconds);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+			Thread.currentThread().interrupt();
 		}
 	}
 

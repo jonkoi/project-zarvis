@@ -9,7 +9,9 @@ import zarvis.bakery.utils.Util;
 
 public class BakeryManagerAgent extends TimeAgent {
 	
+	private static final long serialVersionUID = 1L;
 	private Bakery bakery;
+	@SuppressWarnings("unused")
 	private MessageTemplate mt;
 
 	public BakeryManagerAgent(Bakery bakery, long globalStartTime) {
@@ -32,6 +34,7 @@ public class BakeryManagerAgent extends TimeAgent {
 	}
 	
 	private class UpdateListen extends CyclicBehaviour {
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public void action() {
@@ -41,6 +44,7 @@ public class BakeryManagerAgent extends TimeAgent {
 	}
 	
 	private class ManageProduction extends CyclicBehaviour {
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public void action() {

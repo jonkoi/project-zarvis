@@ -8,22 +8,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Bakery;
-import zarvis.bakery.models.Order;
 import zarvis.bakery.utils.Util;
-
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class KneedingMachinesAvailabilityBehavior extends CyclicBehaviour {
+	private static final long serialVersionUID = 1L;
+
 	private Logger logger = LoggerFactory.getLogger(KneedingMachinesAvailabilityBehavior.class);
 
 	private List<String> availableKneedingMachines = new ArrayList<>();
 
 	private int step = 0;
 
+	@SuppressWarnings("unused")
 	private MessageTemplate mt;
 
+	@SuppressWarnings("unused")
 	private static final int blockingTime = 3000;
 	private Bakery bakery;
 
@@ -33,20 +34,11 @@ public class KneedingMachinesAvailabilityBehavior extends CyclicBehaviour {
 
 	@Override
 	public void action() {
-		// MessageTemplate messageTemplate =
-		// MessageTemplate.and(MessageTemplate.MatchConversationId("available-kneeding-machine"),
-		// MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
-		// ACLMessage message = myAgent.receive(messageTemplate);
-		// if (message != null){
-		// logger.info("request for next available kneeding machine is
-		// received");
-		// }
 		switch (step) {
 		case 0:
 			if (availableKneedingMachines.size() < 1) {
 				if (requestKneedingMachineAvailability()){
-					step = 1;
-//					mt = MessageTemplate.MatchConversationId("kneeding-machine-status");
+					step = 1;	
 				}
 			}
 			break;

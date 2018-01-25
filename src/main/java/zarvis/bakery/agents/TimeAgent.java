@@ -2,13 +2,10 @@ package zarvis.bakery.agents;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 public class TimeAgent extends Agent {
-//	Time parameter
+	private static final long serialVersionUID = 1L;
+	//	Time parameter
 	protected long globalStartTime;
 	protected final long MILLIS_PER_MIN = 2;
 	protected final long MILLIS_PER_HOUR = 60*MILLIS_PER_MIN;
@@ -24,7 +21,7 @@ public class TimeAgent extends Agent {
 	}
 	
 	protected class WaitSetup extends Behaviour {
-		
+		private static final long serialVersionUID = 1L;
 		private boolean started = false;
 		
 		@Override

@@ -1,9 +1,6 @@
 package zarvis.bakery.behaviors;
 
-import java.util.List;
-
 import jade.core.AID;
-import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -11,12 +8,12 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import zarvis.bakery.models.Order;
-import zarvis.bakery.utils.Util;
 
 public class FindAllBackeryByNameBehaviour extends CyclicBehaviour {
 
+	private static final long serialVersionUID = 1L;
 	private AID[] backeryAgents;
+	@SuppressWarnings("unused")
 	private MessageTemplate mt;
 
 	@Override

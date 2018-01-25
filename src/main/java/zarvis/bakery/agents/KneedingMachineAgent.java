@@ -1,7 +1,6 @@
 package zarvis.bakery.agents;
 
 import jade.core.Agent;
-import jade.core.behaviours.ParallelBehaviour;
 import zarvis.bakery.behaviors.kneedingmachine.CurrentStatusBehaviour;
 import zarvis.bakery.behaviors.kneedingmachine.DoughKneedingBehaviour;
 import zarvis.bakery.models.Bakery;

@@ -12,12 +12,11 @@ import zarvis.bakery.models.Customer;
 import zarvis.bakery.utils.Util;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 public class RequestPerformerBehavior extends Behaviour {
 
+	private static final long serialVersionUID = 1L;
 	private int step = 0;
 	private boolean stopFlag = false;
 

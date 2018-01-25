@@ -8,14 +8,11 @@ import jade.util.ExtendedProperties;
 import jade.util.leap.Properties;
 import jade.wrapper.AgentContainer;
 import zarvis.bakery.agents.BakeryAgent;
-import zarvis.bakery.agents.BakeryManagerAgent;
 import zarvis.bakery.agents.CoolingAgent;
 import zarvis.bakery.agents.CustomerAgent;
 import zarvis.bakery.agents.KneedingMachineAgent;
 import zarvis.bakery.agents.OvenAgent;
-import zarvis.bakery.agents.PackagingAgent;
 import zarvis.bakery.agents.PreparationTableAgent;
-import zarvis.bakery.agents.TruckAgent;
 import zarvis.bakery.agents.manager.OvenManager;
 import zarvis.bakery.agents.manager.PreparationTableManager;
 import zarvis.bakery.agents.manager.CoolingManager;
@@ -26,7 +23,6 @@ import zarvis.bakery.models.Customer;
 import zarvis.bakery.models.DoughPrepTable;
 import zarvis.bakery.models.KneedingMachine;
 import zarvis.bakery.models.Oven;
-import zarvis.bakery.models.Truck;
 import zarvis.bakery.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,12 +78,6 @@ public class MainContainer {
 				
 				mainContainer.acceptNewAgent("coolingManager-" + bakery.getGuid(),new CoolingManager(bakery)).start();
 				
-				//mainContainer.acceptNewAgent("packagingAgent-" + bakery.getGuid(),new PackagingAgent(bakery)).start();
-				/*
-				for (Truck truck : bakery.getTrucks()) {
-					mainContainer.acceptNewAgent(truck.getGuid() + "-" + bakery.getGuid(), new TruckAgent(bakery));
-				}
-				*/
 				
 				break;
 			}

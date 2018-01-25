@@ -15,7 +15,6 @@ import zarvis.bakery.utils.Util;
 public class ProcessOrderBehaviour extends CyclicBehaviour {
 	
 	private static final long serialVersionUID = 1L;
-	//private Logger logger = LoggerFactory.getLogger(ProcessOrderBehaviour.class);
 	private HashMap<String, Integer> orders = new HashMap<>();
 	private TreeMap<String, Integer> aggregatedOrders = null;
 	private List<String> nextProducts = new ArrayList<String>();
@@ -40,7 +39,6 @@ public class ProcessOrderBehaviour extends CyclicBehaviour {
 			else if (message.getPerformative() == ACLMessage.ACCEPT_PROPOSAL
 					&& message.getConversationId().equals("inform-product-to-kneeding-machine-manager")) {
 
-//				logger.info("Order {} stored in {} successfully", message.getContent(), message.getSender().getName());
 			}
 
 			else if (message.getPerformative() == ACLMessage.CFP && message.getConversationId().equals("place-order")) {
@@ -73,9 +71,6 @@ public class ProcessOrderBehaviour extends CyclicBehaviour {
 
 				Util.sendReply(myAgent, message, ACLMessage.CONFIRM, bakery.getGuid() + " " + order.getGuid(),
 						"place-order");
-				// logger.info("order {} successfully received from
-				// {}",order.getGuid(),titleparts[1]);
-//				informKneedingManager();
 			}
 
 			else if (message.getPerformative() == ACLMessage.REQUEST
@@ -100,6 +95,7 @@ public class ProcessOrderBehaviour extends CyclicBehaviour {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void informKneedingManager() {
 		AID kneedingmachinemanager = Util.searchInYellowPage(myAgent, "KneedingMachineManager", null)[0].getName();
 
@@ -110,8 +106,6 @@ public class ProcessOrderBehaviour extends CyclicBehaviour {
 
 		orders.remove(orderGuid);
 		aggregatedOrders.remove(orderGuid);
-		// logger.info("order {} sent to kneeding manager : {}
-		// ",orderGuid,kneedingmachinemanager.getName());
 
 	}
 }

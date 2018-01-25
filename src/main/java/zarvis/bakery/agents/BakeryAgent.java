@@ -7,55 +7,43 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jade.core.AID;
-import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
-import jade.core.behaviours.SequentialBehaviour;
-import jade.core.behaviours.WakerBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
-import jade.domain.FIPANames;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.FailureException;
-import jade.domain.FIPAAgentManagement.NotUnderstoodException;
-import jade.domain.FIPAAgentManagement.RefuseException;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import zarvis.bakery.agents.TimeAgent.WaitSetup;
-import zarvis.bakery.behaviors.bakery.ProcessOrderBehaviour;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.models.Product;
 import zarvis.bakery.utils.ContentExtractor;
 import zarvis.bakery.utils.Util;
-import jade.proto.ContractNetResponder;
 
 public class BakeryAgent extends TimeAgent {
 
-	private Logger logger = LoggerFactory.getLogger(BakeryAgent.class);
+	private static final long serialVersionUID = 1L;
+//	private Logger logger = LoggerFactory.getLogger(BakeryAgent.class);
 	private Bakery bakery;
 	private List<Product> products;
 	
+	@SuppressWarnings("unused")
 	private MessageTemplate orderTemplate;
 	
 	//Process
+	@SuppressWarnings("unused")
 	private AID sender;
+	@SuppressWarnings("unused")
 	private ACLMessage processingMsg;
+	@SuppressWarnings("unused")
 	private int sucess;
+	@SuppressWarnings("unused")
 	private int failure;
+	@SuppressWarnings("unused")
 	private boolean managingProduction;
 	private boolean[] availableKnead;
 	
 	//Test
 	private transient List<ContentExtractor> ordersList = new ArrayList<>();
+	@SuppressWarnings("unused")
 	private transient Map<ContentExtractor, Integer> todaysOrderMap = new HashMap<>();
 	private transient List<ContentExtractor> todaysOrder = new ArrayList<>();
 	private int[] todayGoals = new int[Util.PRODUCTNAMES.size()];
@@ -71,7 +59,6 @@ public class BakeryAgent extends TimeAgent {
 		this.sucess = 0;
 		this.failure = 0;
 		this.managingProduction = false;
-//		this.availableKnead = new boolean[bakery.getKneading_machines().size()];
 		this.availableKnead = new boolean[1];
 		Arrays.fill(todayGoals, 0);
 		Arrays.fill(currentMadeAmounts,0);
@@ -94,41 +81,21 @@ public class BakeryAgent extends TimeAgent {
 	protected void setup() {
 
 		Util.registerInYellowPage(this, "BakeryService", bakery.getGuid());
-		
-//		orderTemplate = MessageTemplate.and(
-//		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
-//		  		MessageTemplate.MatchPerformative(ACLMessage.CFP) );
-		
-//		FSMBehaviour fb = new FSMBehaviour();
-//		fb.registerFirstState(new WaitSetup(), "WaitSetup-state");
-//		fb.registerState(new ReceiveOrder(), "ReceiveOrder-state");
-////		fb.registerState(new WaitAccept(), "WaitAccept-state");
-//		
-//		
-//		fb.registerDefaultTransition("WaitSetup-state", "ReceiveOrder-state");
-//		fb.registerDefaultTransition("WaitSetup-state", "ReceiveOrder-state");
-		
-//		SequentialBehaviour seq = new SequentialBehaviour();
 		ParallelBehaviour pal = new ParallelBehaviour();
 		
 		pal.addSubBehaviour(new ReceiveOrder());
 		pal.addSubBehaviour(new CheckTime());
 		pal.addSubBehaviour(new ManageProduction());
 		
-		//ContractNetSequence
-//		fb.registerTransition("ReceiveOrder-state", "ReceiveOrder-state", 0);
-//		fb.registerTransition("ReceiveOrder-state", "WaitAccept-state", 1);
-//		fb.registerTransition("WaitAccept-state", "WaitAccept-state", 0);
-//		fb.registerTransition("WaitAccept-state", "ReceiveOrder-state", 1);
-		
 		addBehaviour(pal);
-//		addBehaviour(new ProcessOrderBehaviour(bakery));
 	}
 
 	protected void takeDown() {
 	}
 	
 	private class ReceiveOrder extends CyclicBehaviour{
+		private static final long serialVersionUID = 1L;
+
 		public void action(){
 			String orders;
 			String price;
@@ -171,10 +138,6 @@ public class BakeryAgent extends TimeAgent {
         				Util.sendReply(myAgent, data, ACLMessage.CONFIRM, extractor.getDeliveryDateString());
     				}
   
-//    				Orders order = jsonData.getOrder(extractor.getOrderGuid());
-//    				order.setBakery(bakery);
-//    				
-//    				liteUtil.addOrder(order);
     			}
     			if (data.getPerformative() == ACLMessage.AGREE) {
     				// An order have been done
@@ -186,6 +149,7 @@ public class BakeryAgent extends TimeAgent {
     		}
 		}
     	
+		@SuppressWarnings("unused")
 		public Map<String, String> extractOrder(String orders){
 			String [] orderArray;
 			Map<String,String> ordersMap = new HashMap<>();
@@ -222,6 +186,8 @@ public class BakeryAgent extends TimeAgent {
 	}
 	
 	private class CheckTime extends CyclicBehaviour {
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public void action() {
 			UpdateTime();
@@ -230,14 +196,13 @@ public class BakeryAgent extends TimeAgent {
 			if (totalHoursElapsed%24 == 0) {
 				addBehaviour(new setTodayOrder());
 			} 
-			
 			// Add todaysOrder
-			
 			block(millisLeft);
 		}
 	}
 	
 	public class setTodayOrder extends OneShotBehaviour{
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public void action() {
@@ -262,6 +227,7 @@ public class BakeryAgent extends TimeAgent {
 	}
 	
 	public class UpdateOrder extends OneShotBehaviour {
+		private static final long serialVersionUID = 1L;
 		private ContentExtractor ce;
 		public UpdateOrder(ContentExtractor ce) {
 			this.ce = ce;
@@ -281,7 +247,7 @@ public class BakeryAgent extends TimeAgent {
 	}
 	
 	public class ManageProduction extends CyclicBehaviour{
-		
+		private static final long serialVersionUID = 1L;
 		MessageTemplate confirmMt;
 		
 		public ManageProduction() {
@@ -322,7 +288,6 @@ public class BakeryAgent extends TimeAgent {
 					} else {
 						for (int i = 0; i < availableKnead.length; i++) {
 							if (availableKnead[i] == true) {
-//								System.out.println("CHECK!" + i);
 								if (currentOrderAmounts[idx] == 0) break;
 								ACLMessage toKnead = new ACLMessage(ACLMessage.INFORM);
 								toKnead.addReceiver(
@@ -336,7 +301,6 @@ public class BakeryAgent extends TimeAgent {
 								{
 									ACLMessage msg = myAgent.receive(confirmMt);
 									if (msg!=null) {
-//										System.out.println("CHECK!");
 										availableKnead[i] = false;
 										currentOrderAmounts[idx]--;
 										break;
@@ -350,16 +314,4 @@ public class BakeryAgent extends TimeAgent {
 		}
 	}
 	
-//	ACLMessage toBakery = myAgent.receive(mt);
-//	if (toBakery != null) {
-//		if (toBakery.getConversationId() == "free-knead") {
-//			AID senderAID = toBakery.getSender();
-//			String guid = senderAID.getLocalName();
-//			for (int i = 0; i < availableKnead.length; i++) {
-//				if (bakery.getKneading_machines().get(i).getGuid() == guid) {
-//					availableKnead[i] = true;
-//				}
-//			}
-//		} 
-//	}
 }

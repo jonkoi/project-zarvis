@@ -7,12 +7,12 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import zarvis.bakery.agents.CustomerAgent;
 import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Order;
 import zarvis.bakery.utils.Util;
 
 public class ManageProductsBehavior extends CyclicBehaviour {
+	private static final long serialVersionUID = 1L;
 	private Logger logger = LoggerFactory.getLogger(ManageProductsBehavior.class);
 	List<Order> orderList = new ArrayList<Order>();
 	Order currentOrder = null;

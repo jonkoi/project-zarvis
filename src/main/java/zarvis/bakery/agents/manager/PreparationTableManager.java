@@ -1,8 +1,6 @@
 package zarvis.bakery.agents.manager;
 
 import jade.core.Agent;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.lang.acl.ACLMessage;
 import zarvis.bakery.behaviors.PreparationTableManager.SendProductsToPreparationTableBehavior;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.utils.Util;

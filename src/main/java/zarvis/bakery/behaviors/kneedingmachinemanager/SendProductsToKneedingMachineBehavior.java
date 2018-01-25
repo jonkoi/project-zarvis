@@ -11,17 +11,18 @@ import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.utils.Util;
 
-import java.util.HashSet;
-
 public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
+	private static final long serialVersionUID = 1L;
+
 	private Logger logger = LoggerFactory.getLogger(SendProductsToKneedingMachineBehavior.class);
 
-	private HashSet<String> availableKneedingMachines = new HashSet<String>();
 
 	private int step = 0;
 
+	@SuppressWarnings("unused")
 	private MessageTemplate mt;
 
+	@SuppressWarnings("unused")
 	private static final int blockingTime = 3000;
 
 	private String product = "";
@@ -35,6 +36,7 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 		this.bakery = bakery;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void action() {
 
@@ -60,7 +62,6 @@ public class SendProductsToKneedingMachineBehavior extends CyclicBehaviour {
 				}
 				if (productResponse.getPerformative() == ACLMessage.REFUSE
 						&& productResponse.getConversationId().equals("next-product-request")) {
-					//logger.info(productResponse.getContent());
 
 					step = 0;
 				}

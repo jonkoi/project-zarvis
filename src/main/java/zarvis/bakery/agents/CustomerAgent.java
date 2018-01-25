@@ -1,43 +1,31 @@
 package zarvis.bakery.agents;
 
 import java.util.*;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
-import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.WakerBehaviour;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
-import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.CyclicBehaviour;
-import zarvis.bakery.behaviors.customer.RequestPerformerBehavior;
 import zarvis.bakery.models.Customer;
 import zarvis.bakery.models.Order;
 import zarvis.bakery.utils.Util;
-import jade.proto.ContractNetInitiator;
 
 public class CustomerAgent extends TimeAgent {
 	private static final long serialVersionUID = 1L;
 	private boolean finish = false;
-	//private Logger logger = LoggerFactory.getLogger(CustomerAgent.class);
 	private Customer customer;
 	private List<Order> orders;
-//	private List<Bakeries> bakeries;
 	private HashMap<String, Integer> orderAggregation = new HashMap<String, Integer>();
 	private TreeMap<String, Integer> sortedOrderAggregation = new TreeMap<String, Integer>();
 	private DFAgentDescription[] bakeries;
-	//Book keeping
 	private TreeMap<String, Integer> inWaitOrderAggregation = new TreeMap<String,Integer>();
+	@SuppressWarnings("unused")
 	private TreeMap<String, Integer> inProcessOrderAggregation = new TreeMap<String,Integer>();
+	@SuppressWarnings("unused")
 	private TreeMap<String, Integer> finishedOrderAggregation = new TreeMap<String, Integer>();
 	
 	private ACLMessage orderMsg;
@@ -64,9 +52,7 @@ public class CustomerAgent extends TimeAgent {
 
 	@Override
 	protected void setup() {
-//		System.out.println("My local-name is "+getAID().getLocalName());
 		Util.registerInYellowPage(this, "Customer", customer.getGuid());
-		//TreeMap<String, Integer> aggregatedOrders = Util.sortMapByValue(orderAggregation);
 		
 		
 		
@@ -79,7 +65,6 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerState(new CheckTime(this, millisLeft), "CheckTime-state");
 		fb.registerState(new PlaceOrder(), "PlaceOrder-state");
 		fb.registerState(new WaitProposal(), "WaitProposal-state");
-//		fb.registerState(new AcceptProposal(), "WaitProposal-state");
 		
 		//Transitions
 		fb.registerDefaultTransition("WaitSetup-state", "GetBakeries-state");
@@ -92,15 +77,8 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerTransition("CheckTime-state", "PlaceOrder-state", 1);
 		fb.registerDefaultTransition("PlaceOrder-state", "CheckNextOrders-state");
 		
-
-		//ContractNet Sequence
-//		fb.registerDefaultTransition("PlaceOrder-state", "WaitProposal-state");
-//		fb.registerTransition("WaitProposal-state", "WaitProposal-state", 0);
-//		fb.registerTransition("WaitProposal-state", "CheckNextOrders-state", 1);
-		
 		
 		addBehaviour(fb);
-//		addBehaviour(new RequestPerformerBehavior(customer, Util.sortMapByValue(orderAggregation)));
 		finish = true;
 	}
 
@@ -117,6 +95,7 @@ public class CustomerAgent extends TimeAgent {
 	// Behaviours: To be modularized
 	// Get the bakery list | 0: No bakeries found, 1: Bakeries, move to check next order
 	private class GetBakeries extends OneShotBehaviour{
+		private static final long serialVersionUID = 1L;
 		private int exitValue = 0;
 
 		@Override
@@ -124,7 +103,7 @@ public class CustomerAgent extends TimeAgent {
 			for (Map.Entry<String, Integer> entry : sortedOrderAggregation.entrySet()) {
 				System.out.println(entry.getKey() + " " + entry.getValue());
 			}
-//			System.out.println("GS");
+
 			bakeries = Util.searchInYellowPage(myAgent, "BakeryService", null);
 			if (bakeries.length > 0) {
 				System.out.println(bakeries.length);
@@ -146,6 +125,7 @@ public class CustomerAgent extends TimeAgent {
 	
 	// Get the next order(s) to be auctioned/ordered | 0: No more orders, 1: Error, previous order has not been processed, 2: Next order(s) had
 	private class CheckNextOrders extends OneShotBehaviour {
+		private static final long serialVersionUID = 1L;
 		private int exitValue = 0;
 		
 		public void onStart() {
@@ -165,7 +145,6 @@ public class CustomerAgent extends TimeAgent {
 				exitValue = 1;
 				return;
 			}
-//			System.out.println("CS");
 			Map.Entry<String,Integer> entry = sortedOrderAggregation.entrySet().iterator().next();
 			String key;
 			int value = entry.getValue();
@@ -197,6 +176,7 @@ public class CustomerAgent extends TimeAgent {
 	}
 	
 	private class CheckTime extends WakerBehaviour {
+		private static final long serialVersionUID = 1L;
 		private int exitValue = 0;
 		
 		public CheckTime(Agent a, long timeout) {
@@ -227,6 +207,7 @@ public class CustomerAgent extends TimeAgent {
 	}
 	
 	private class PlaceOrder extends Behaviour{
+		private static final long serialVersionUID = 1L;
 		private MessageTemplate mt;
 		private int replies = 0;
 		private AID cheapestBakery;
@@ -310,6 +291,7 @@ public class CustomerAgent extends TimeAgent {
 		}
 	}
 	
+	@SuppressWarnings({ "unused", "serial" })
 	private class PlaceOrder_old2 extends OneShotBehaviour{
 		@Override
 		public void action() {
@@ -317,6 +299,7 @@ public class CustomerAgent extends TimeAgent {
 			inWaitOrderAggregation.clear();
 		}
 	}
+	@SuppressWarnings("serial")
 	private class WaitProposal extends OneShotBehaviour{
 		private int exitValue = 0;
 		public void action() {

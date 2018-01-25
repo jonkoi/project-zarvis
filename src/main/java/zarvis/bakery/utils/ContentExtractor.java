@@ -1,7 +1,6 @@
 package zarvis.bakery.utils;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import zarvis.bakery.utils.Util;
 
@@ -17,6 +16,7 @@ public class ContentExtractor {
 	private String [] content;
 	private String [] split;
 	
+	@SuppressWarnings("unused")
 	private String guid;
 	private String customer;
 	private String productString;

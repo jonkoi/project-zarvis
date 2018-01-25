@@ -3,6 +3,7 @@ package zarvis.bakery.utils;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -27,12 +28,23 @@ public class Util {
 		//final String FILENAME = "/home/aniruddha/Downloads/WS2017/MultiAgent/project-zarvis/src/main/config/random-scenario.json";
 		//final String FILENAME = "/home/yassine/WS17_yboukn2s/project-zarvis/src/main/config/random-scenario.json";
 		BakeryJsonWrapper jsonwrapper = null;
+		BufferedReader reader = null;
 		try {
 			// read json file and convert them to objects
-			BufferedReader reader = new BufferedReader(new FileReader(FILENAME));
+			reader = new BufferedReader(new FileReader(FILENAME));
 			jsonwrapper = new Gson().fromJson(reader, BakeryJsonWrapper.class);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+		}
+		finally
+		{
+			try {
+				reader.close();
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}		
+			
 		}
 		return jsonwrapper;
 	}

@@ -17,6 +17,7 @@ import zarvis.bakery.agents.manager.OvenManager;
 import zarvis.bakery.agents.manager.PreparationTableManager;
 import zarvis.bakery.agents.manager.CoolingManager;
 import zarvis.bakery.agents.manager.KneedingMachineManager;
+import zarvis.bakery.agents.manager.KneedingMachineManager2;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.models.BakeryJsonWrapper;
 import zarvis.bakery.models.Customer;
@@ -57,7 +58,8 @@ public class MainContainer {
 					mainContainer.acceptNewAgent(kneedingMachine.getGuid(),
 							new KneedingMachineAgent(bakery)).start();
 				}
-				mainContainer.acceptNewAgent("kneeding_machine_manager-" + bakery.getGuid(),new KneedingMachineManager(bakery)).start();
+//				mainContainer.acceptNewAgent("kneeding_machine_manager-" + bakery.getGuid(),new KneedingMachineManager(bakery)).start();
+				mainContainer.acceptNewAgent("kneeding_machine_manager-" + bakery.getGuid(),new KneedingMachineManager2(bakery)).start();
 				
 				for(DoughPrepTable prepaTable: bakery.getDough_prep_tables().subList(0, 1)){
 					mainContainer.acceptNewAgent(prepaTable.getGuid()+"-"+bakery.getGuid(),

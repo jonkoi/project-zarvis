@@ -282,7 +282,7 @@ public class BakeryAgent extends TimeAgent {
 				if (avaiReply!=null) {
 					stuckCase1 = 0;
 					if (avaiReply.getContent().equals("A")) {
-						System.out.println("CASE 1: in");
+//						System.out.println("CASE 1: in");
 						ContentExtractor sendingCE = todaysOrder.get(0);
 						String orderString = sendingCE.getGuid()+","+sendingCE.getProductString();
 						Util.sendMessage(myAgent,
@@ -305,7 +305,7 @@ public class BakeryAgent extends TimeAgent {
 			case 2:
 				ACLMessage orderReply = myAgent.receive(kneadConfirmTemplate);
 				if (orderReply!=null && orderReply.getPerformative()==ACLMessage.CONFIRM) {
-					System.out.println("CASE 2: in");
+//					System.out.println("CASE 2: in");
 					waitOrder.add(todaysOrder.get(0));
 					todaysOrder.remove(0);
 					step = 3;

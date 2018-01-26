@@ -194,28 +194,11 @@ public class KneedingMachineManager2 extends Agent {
 				if(Arrays.equals(currentOrderExisting, currentOrderOrigin)) {
 					//Send finish back to bakery or Preptable
 					//Might need confirmation feature
+					isAvailable = true;
 					Util.sendMessage(myAgent, bakery.getAid(), CustomMessage.FINISH_ORDER, currentOrderGuid, "FINISH");
 				}
 			}
 		}
-	}
-	
-	private class DummyWait extends WakerBehaviour{
-
-		public DummyWait(Agent a, long timeout) {
-			super(a, timeout);
-		}
-		
-		public void onWake() {
-			System.out.println(bakery.getAid().getLocalName());
-			isAvailable = true;
-			Util.sendMessage(myAgent,
-					bakery.getAid(),
-					CustomMessage.FINISH_ORDER,
-					"",
-					"FINISH");
-		}
-		
 	}
 	
 	private void InitOrder(String orderString) {

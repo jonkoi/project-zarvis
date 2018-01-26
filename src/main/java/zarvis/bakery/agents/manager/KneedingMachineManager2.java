@@ -181,9 +181,16 @@ public class KneedingMachineManager2 extends Agent {
 			ACLMessage productFinishMsg = myAgent.receive(finishProductTemplate);
 			if (productFinishMsg!=null) {
 				System.out.println("Received product done: " + productFinishMsg.getContent());
-				int productIdx = Integer.parseInt(productFinishMsg.getContent());
+				String[] content = productFinishMsg.getContent().split(",");
+				int productIdx = Integer.parseInt(content[1]);
 				currentOrderExisting[productIdx]++;
-				isMachineAvailable[0] = true;
+				//Revert to true for available
+				for (int i = 0; i < isMachineAvailable.length; i++) {
+					if (kneadingMachines[i].getName().getLocalName().equals(content[0])) {
+						isMachineAvailable[i] = true;
+					}
+				}
+				
 				if(Arrays.equals(currentOrderExisting, currentOrderOrigin)) {
 					//Send finish back to bakery or Preptable
 					//Might need confirmation feature

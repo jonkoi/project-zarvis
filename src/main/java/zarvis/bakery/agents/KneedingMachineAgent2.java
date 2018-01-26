@@ -94,7 +94,7 @@ public class KneedingMachineAgent2 extends Agent {
 			Util.sendMessage(myAgent,
 					sender,
 					CustomMessage.FINISH_PRODUCT,
-					productString,
+					myAgent.getLocalName()+","+productString,
 					"kneading-product-finish");
 		}
 	}

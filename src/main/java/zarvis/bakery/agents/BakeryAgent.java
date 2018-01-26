@@ -264,7 +264,7 @@ public class BakeryAgent extends TimeAgent {
 			switch(step) {
 			case 0:
 				if (todaysOrder.size() > 0) {
-					System.out.println("CASE 0: in");
+//					System.out.println("CASE 0: in");
 					Util.sendMessage(myAgent,
 							new AID("kneeding_machine_manager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
 							CustomMessage.INQUIRE_AVAILABILITY,
@@ -284,7 +284,7 @@ public class BakeryAgent extends TimeAgent {
 					if (avaiReply.getContent().equals("A")) {
 						System.out.println("CASE 1: in");
 						ContentExtractor sendingCE = todaysOrder.get(0);
-						String orderString = sendingCE.getProductString();
+						String orderString = sendingCE.getGuid()+","+sendingCE.getProductString();
 						Util.sendMessage(myAgent,
 								new AID("kneeding_machine_manager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
 								CustomMessage.INFORM_ORDER,

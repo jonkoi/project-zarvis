@@ -10,4 +10,6 @@ public class CustomMessage {
 	public static final int RESPOND_AVAILABILITY = 106;
 	public static final int INFORM_ORDER = 107;
 	public static final int FINISH_ORDER = 108;
+	public static final int INFORM_PRODUCT = 109;
+	public static final int FINISH_PRODUCT = 110;
 }

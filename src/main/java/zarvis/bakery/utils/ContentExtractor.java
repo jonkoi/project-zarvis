@@ -52,6 +52,10 @@ public class ContentExtractor {
 		return productlist;
 	}
 	
+	public String getGuid() {
+		return guid;
+	}
+	
 	public String getCustomer(){
 		return customer;
 	}

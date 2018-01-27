@@ -55,6 +55,8 @@ public class BakeryAgent extends TimeAgent {
 	
 	//Other time management
 	private long lastHourChecked = 0;
+	
+	private int step = 0;
  
 	public BakeryAgent(Bakery bakery, long globalStartTime) {
 		super(globalStartTime);
@@ -226,9 +228,16 @@ public class BakeryAgent extends TimeAgent {
 		@Override
 		public void action() {
 			UpdateTime();
+			//Remaining orders are failed
+			for (ContentExtractor cont: todaysOrder) {
+				String cus = cont.getCustomer();
+				String failOrderGuid = cont.getGuid();
+				Util.sendMessage(myAgent, new AID(cus, AID.ISLOCALNAME), CustomMessage.FINISH_ORDER, failOrderGuid, "to-customer-finish-order");
+			}
 			todaysOrder.clear();
 			Arrays.fill(currentMadeAmounts, 0);
 			Arrays.fill(todayGoals, 0);
+//			step = 0;
 			for (int i = 0; i < ordersList.size(); i++) {
 				ContentExtractor ce = ordersList.get(i);
 				if (ce.getDeliveryDay() == daysElapsed) {
@@ -239,9 +248,18 @@ public class BakeryAgent extends TimeAgent {
 					}
 				}
 			}
-			System.out.println("Todays Order set out:" + todaysOrder.size());
 			Util.sendMessage(myAgent,
 					new AID("kneeding_machine_manager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
+					CustomMessage.NEW_DAY,
+					"",
+					"new-day");
+			Util.sendMessage(myAgent,
+					new AID("ovenManager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
+					CustomMessage.NEW_DAY,
+					"",
+					"new-day");
+			Util.sendMessage(myAgent,
+					new AID("preparationTableManager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
 					CustomMessage.NEW_DAY,
 					"",
 					"new-day");
@@ -271,7 +289,6 @@ public class BakeryAgent extends TimeAgent {
 	
 	public class ManageProduction extends CyclicBehaviour {
 		
-		private int step = 0;
 		private int stuckCase1 = 0;
 		private MessageTemplate avaiTemplate = MessageTemplate.and(
 				MessageTemplate.MatchPerformative(CustomMessage.RESPOND_AVAILABILITY),
@@ -287,6 +304,7 @@ public class BakeryAgent extends TimeAgent {
 		public void action() {
 			switch(step) {
 			case 0:
+//				System.out.println("Bakery-new-day-step-0");
 				if (todaysOrder.size() > 0) {
 //					System.out.println("CASE 0: in");
 					Util.sendMessage(myAgent,
@@ -347,11 +365,13 @@ public class BakeryAgent extends TimeAgent {
 				ACLMessage finishReply = myAgent.receive(finishTemplate);
 				if (finishReply!=null) {
 					System.out.println("Yay!");
-					Util.sendMessage(myAgent, new AID(customer, AID.ISLOCALNAME), CustomMessage.FINISH_ORDER, orderID, "to-customer-finish-order");
+					String returnOrderGuid = finishReply.getContent();
+					Util.sendMessage(myAgent, new AID(customer, AID.ISLOCALNAME), CustomMessage.FINISH_ORDER, returnOrderGuid, "to-customer-finish-order");
 					step = 0;
 				} else {
 					block();
 				}
+				break;
 			}
 		}
 	}

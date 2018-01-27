@@ -26,6 +26,8 @@ public class KneedingMachineManager2 extends Agent {
 	private int[] currentOrderRemains = new int[Util.PRODUCTNAMES.size()];
 	private int[] currentOrderExisting = new int[Util.PRODUCTNAMES.size()];
 	private boolean isRemainEmpty;
+	
+	private int step = 0;
 
 	public KneedingMachineManager2(Bakery bakery) {
 		this.bakery = bakery;
@@ -45,6 +47,7 @@ public class KneedingMachineManager2 extends Agent {
 		pal.addSubBehaviour(new ReceiveOrder());
 		pal.addSubBehaviour(new WorkDistribution());
 		pal.addSubBehaviour(new FinishListener());
+//		pal.addSubBehaviour(new CleanNewDay());
 		addBehaviour(pal);
 	}
 	
@@ -93,7 +96,7 @@ public class KneedingMachineManager2 extends Agent {
 				orderReply.setPerformative(ACLMessage.REFUSE);
 				myAgent.send(orderReply);
 			} else {
-				block();
+				block(15*Util.MILLIS_PER_MIN);
 			}
 		}
 	}
@@ -105,12 +108,13 @@ public class KneedingMachineManager2 extends Agent {
 				MessageTemplate.MatchPerformative(ACLMessage.CONFIRM));
 		private int consideringMachine = 0;
 		private int consideringProduct = 0;
-		private int step = 0;
 		@Override
 		public void action() {
 			switch(step) {
 			case 0:
+//				System.out.println("OUT-new-day-step-0");
 				if (hasOrder && isRemainEmpty == false) {
+//					System.out.println("Manager-new-day-step-0");
 					for (int i = 0; i < isMachineAvailable.length; i++ ) {
 //						System.out.println("Knead CASE 0: out");
 						if (isMachineAvailable[i] == true) {
@@ -195,11 +199,44 @@ public class KneedingMachineManager2 extends Agent {
 					//Send finish back to bakery or Preptable
 					//Might need confirmation feature
 					isAvailable = true;
+					System.out.println("Return to bakery");
 //					System.out.println(bakery.getAid().getLocalName());
 					Util.sendMessage(myAgent, bakery.getAid(), CustomMessage.FINISH_ORDER, currentOrderGuid, "FINISH");
 				}
 			}
 		}
+	}
+	
+	private class CleanNewDay extends CyclicBehaviour {
+		
+		private MessageTemplate newDayTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("new-day"),
+				MessageTemplate.MatchPerformative(CustomMessage.NEW_DAY));
+		
+		@Override
+		public void action() {
+			ACLMessage newDayMsg = myAgent.receive(newDayTemplate);
+			if (newDayMsg!=null) {
+				System.out.println("Manager clean");
+				EraseOrder();
+				for (DFAgentDescription machine: kneadingMachines) {
+					Util.sendMessage(myAgent, machine.getName(), CustomMessage.NEW_DAY,"", "new-day-to-machine");
+				}
+			} else {
+				block();
+			}
+		}
+		
+	}
+	
+	private void EraseOrder() {
+		hasOrder = false;
+		isAvailable = true;
+		currentOrderGuid = "";
+		Arrays.fill(currentOrderExisting, 0);
+		Arrays.fill(currentOrderRemains, 0);
+		Arrays.fill(currentOrderOrigin, 0);
+		Arrays.fill(isMachineAvailable, true);
+		step = 0;
 	}
 	
 	private void InitOrder(String orderString) {

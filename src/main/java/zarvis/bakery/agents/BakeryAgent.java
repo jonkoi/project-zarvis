@@ -275,7 +275,6 @@ public class BakeryAgent extends TimeAgent {
 		public void action() {
 			switch(step) {
 			case 0:
-				System.out.println("Todays order 1: " + todaysOrder.size());
 				if (todaysOrder.size() > 0) {
 //					System.out.println("CASE 0: in");
 					Util.sendMessage(myAgent,

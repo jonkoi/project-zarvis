@@ -1,5 +1,6 @@
 package zarvis.bakery.agents;
 
+import java.util.Arrays;
 import java.util.List;
 
 import jade.core.AID;
@@ -7,6 +8,7 @@ import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.WakerBehaviour;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import zarvis.bakery.models.Bakery;
@@ -20,6 +22,7 @@ public class KneedingMachineAgent2 extends Agent {
 	private boolean isAvailable = true;
 	private AID sender;
 	private List<Product> productList;
+	private WakerBehaviour kneadFunction;
 	
 	public KneedingMachineAgent2(Bakery bakery) {
 		this.bakery = bakery;
@@ -32,6 +35,7 @@ public class KneedingMachineAgent2 extends Agent {
 		ParallelBehaviour pal = new ParallelBehaviour();
 		pal.addSubBehaviour(new AnswerAvailability());
 		pal.addSubBehaviour(new ReceiveProduct());
+//		pal.addSubBehaviour(new CleanNewDay());
 		addBehaviour(pal);
 	}
 	
@@ -77,8 +81,9 @@ public class KneedingMachineAgent2 extends Agent {
 				long startCalculate = System.currentTimeMillis();
 				long waitTime = calculateTime(productString) - (System.currentTimeMillis() - startCalculate);
 				
-//				myAgent.addBehaviour(new Function(myAgent, waitTime, productString));
-				myAgent.addBehaviour(new Function(myAgent, 15*Util.MILLIS_PER_MIN, productString));
+				kneadFunction = new Function(myAgent, 45*Util.MILLIS_PER_MIN, productString);
+//				kneadFunction = new Function(myAgent, waitTime, productString);
+				myAgent.addBehaviour(kneadFunction);
 				
 			} else if (productMsg!=null && isAvailable == false) {
 				ACLMessage productReply = productMsg.createReply();
@@ -106,8 +111,9 @@ public class KneedingMachineAgent2 extends Agent {
 					CustomMessage.FINISH_PRODUCT,
 					myAgent.getLocalName()+","+productString,
 					"kneading-product-finish");
+			kneadFunction = null;
+			myAgent.removeBehaviour(this);
 		}
-		
 	}
 	
 	private long calculateTime(String productString) {
@@ -124,5 +130,30 @@ public class KneedingMachineAgent2 extends Agent {
 		
 		return waitTime;
 		
+	}
+	
+	private class CleanNewDay extends CyclicBehaviour {
+		
+		private MessageTemplate newDayTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("new-day-to-machine"),
+				MessageTemplate.MatchPerformative(CustomMessage.NEW_DAY));
+		
+		@Override
+		public void action() {
+			ACLMessage newDayMsg = myAgent.receive(newDayTemplate);
+			if (newDayMsg!=null) {
+				System.out.println("Machine clean");
+				EraseOrder();
+			} else {
+				block();
+			}
+		}
+			
+	}
+		
+	private void EraseOrder() {
+		isAvailable = true;
+		if (kneadFunction!=null) {
+			this.removeBehaviour(kneadFunction);
+		}
 	}
 }

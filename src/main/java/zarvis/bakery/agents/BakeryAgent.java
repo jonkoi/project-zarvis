@@ -116,7 +116,7 @@ public class BakeryAgent extends TimeAgent {
     			if(data.getPerformative() == ACLMessage.CFP){
     				ACLMessage msg = data;
 	    			orders = msg.getContent();
-	    			System.out.println(orders);
+	    			System.out.println("[BAKERY] Order: " + orders);
 	    			
 	    			String[] splitOrders = orders.split(";");
 	    			
@@ -129,7 +129,6 @@ public class BakeryAgent extends TimeAgent {
 							Util.sendReply(myAgent, msg, ACLMessage.PROPOSE, price);						
 						}
 						else{
-							System.out.println("We reject");
 							Util.sendReply(myAgent, msg, ACLMessage.REJECT_PROPOSAL, orders);
 						}		
 	    			}
@@ -175,10 +174,10 @@ public class BakeryAgent extends TimeAgent {
 			//Invalid delivery date
 			UpdateTime();
 			long timeToFulfill = ((orderExtractor.getDeliveryDay()-1)*24 + orderExtractor.getDeliveryHour()) - totalHoursElapsed;
-			System.out.println(orderExtractor.getDeliveryDay()*24 + orderExtractor.getDeliveryHour());
-			System.out.println(totalHoursElapsed);
+//			System.out.println(orderExtractor.getDeliveryDay()*24 + orderExtractor.getDeliveryHour());
+//			System.out.println(totalHoursElapsed);
 			if (timeToFulfill < 0) {
-				System.out.println("Can't do it!");
+//				System.out.println("Can't do it!");
 				return false;
 			} else {
 				return true;
@@ -305,8 +304,9 @@ public class BakeryAgent extends TimeAgent {
 			switch(step) {
 			case 0:
 //				System.out.println("Bakery-new-day-step-0");
+//				System.out.println("[BAKERY] today orders: " + todaysOrder.size());
 				if (todaysOrder.size() > 0) {
-//					System.out.println("CASE 0: in");
+					
 					Util.sendMessage(myAgent,
 							new AID("kneeding_machine_manager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
 							CustomMessage.INQUIRE_AVAILABILITY,
@@ -364,7 +364,7 @@ public class BakeryAgent extends TimeAgent {
 			case 3:
 				ACLMessage finishReply = myAgent.receive(finishTemplate);
 				if (finishReply!=null) {
-					System.out.println("Yay!");
+//					System.out.println("Yay!");
 					String returnOrderGuid = finishReply.getContent();
 					Util.sendMessage(myAgent, new AID(customer, AID.ISLOCALNAME), CustomMessage.FINISH_ORDER, returnOrderGuid, "to-customer-finish-order");
 					step = 0;

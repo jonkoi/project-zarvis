@@ -13,9 +13,13 @@ import zarvis.bakery.agents.CustomerAgent;
 import zarvis.bakery.agents.KneedingMachineAgent;
 import zarvis.bakery.agents.KneedingMachineAgent2;
 import zarvis.bakery.agents.OvenAgent;
+import zarvis.bakery.agents.OvenAgent2;
 import zarvis.bakery.agents.PreparationTableAgent;
+import zarvis.bakery.agents.PreparationTableAgent2;
 import zarvis.bakery.agents.manager.OvenManager;
+import zarvis.bakery.agents.manager.OvenManager2;
 import zarvis.bakery.agents.manager.PreparationTableManager;
+import zarvis.bakery.agents.manager.PreparationTableManager2;
 import zarvis.bakery.agents.manager.CoolingManager;
 import zarvis.bakery.agents.manager.KneedingMachineManager;
 import zarvis.bakery.agents.manager.KneedingMachineManager2;
@@ -63,20 +67,20 @@ public class MainContainer {
 //				mainContainer.acceptNewAgent("kneeding_machine_manager-" + bakery.getGuid(),new KneedingMachineManager(bakery)).start();
 				mainContainer.acceptNewAgent("kneeding_machine_manager-" + bakery.getGuid(),new KneedingMachineManager2(bakery)).start();
 				
-				for(DoughPrepTable prepaTable: bakery.getDough_prep_tables().subList(0, 1)){
+				for(DoughPrepTable prepaTable: bakery.getDough_prep_tables()){
 					mainContainer.acceptNewAgent(prepaTable.getGuid()+"-"+bakery.getGuid(),
-							new PreparationTableAgent(bakery)).start();
+							new PreparationTableAgent2(bakery)).start();
 				}
 				
 				mainContainer.acceptNewAgent("preparationTableManager-"+bakery.getGuid(),
-						new PreparationTableManager(bakery)).start();
+						new PreparationTableManager2(bakery)).start();
 				
 				
 				for (Oven ovenMachine : bakery.getOvens()) {
-					mainContainer.acceptNewAgent(ovenMachine.getGuid() + "-" + bakery.getGuid(),new OvenAgent(bakery)).start();
+					mainContainer.acceptNewAgent(ovenMachine.getGuid() + "-" + bakery.getGuid(),new OvenAgent2(bakery)).start();
 				}
 				
-				mainContainer.acceptNewAgent("ovenManager-" + bakery.getGuid(),new OvenManager(bakery)).start();
+				mainContainer.acceptNewAgent("ovenManager-" + bakery.getGuid(),new OvenManager2(bakery)).start();
 				
 				mainContainer.acceptNewAgent("coolingMachine" + "-" + bakery.getGuid(),new CoolingAgent(bakery)).start();
 				

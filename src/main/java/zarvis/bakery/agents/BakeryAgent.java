@@ -53,6 +53,9 @@ public class BakeryAgent extends TimeAgent {
 	private int[] currentOrderAmounts = new int[Util.PRODUCTNAMES.size()];
 	private ContentExtractor currentCE;
 	Map<String,Integer> currentOrderProducts = new HashMap<>();
+	
+	//Other time management
+	private long lastHourChecked = 0;
  
 	public BakeryAgent(Bakery bakery, long globalStartTime) {
 		super(globalStartTime);
@@ -187,16 +190,23 @@ public class BakeryAgent extends TimeAgent {
 	}
 	
 	private class CheckTime extends CyclicBehaviour {
+		
+		private MessageTemplate dummyTemplate = MessageTemplate.MatchPerformative(CustomMessage.DUMMY);
 
 		public void action() {
+			ACLMessage dummyMsg = myAgent.receive(dummyTemplate);
 			UpdateTime();
 			String log = getAID().getLocalName() + " - " + "Day: " + daysElapsed + " " + "Hours: " + totalHoursElapsed;
 //			System.out.println(log);
-			if (totalHoursElapsed%24 == 0) {
+			if (totalHoursElapsed%24 == 0 && totalHoursElapsed != lastHourChecked) {
+				lastHourChecked = totalHoursElapsed;
 				addBehaviour(new setTodayOrder());
 			} 
+			if (dummyMsg == null) {
+				block(millisLeft);
+			}
 			// Add todaysOrder
-			block(millisLeft);
+			
 		}
 	}
 	
@@ -219,6 +229,7 @@ public class BakeryAgent extends TimeAgent {
 					}
 				}
 			}
+			System.out.println("Todays Order set out:" + todaysOrder.size());
 			Util.sendMessage(myAgent,
 					new AID("kneeding_machine_manager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
 					CustomMessage.NEW_DAY,
@@ -243,6 +254,7 @@ public class BakeryAgent extends TimeAgent {
 			for (int j = 0; j < productAmounts.size(); j ++) {
 				todayGoals[j] += productAmounts.get(Util.PRODUCTNAMES.get(j));
 			}
+			System.out.println("Todays Order out update:" + todaysOrder.size());
 			todaysOrder.sort(Comparator.comparing(ContentExtractor::getDeliveryTime));
 		}
 	}
@@ -263,6 +275,7 @@ public class BakeryAgent extends TimeAgent {
 		public void action() {
 			switch(step) {
 			case 0:
+				System.out.println("Todays order 1: " + todaysOrder.size());
 				if (todaysOrder.size() > 0) {
 //					System.out.println("CASE 0: in");
 					Util.sendMessage(myAgent,
@@ -284,6 +297,8 @@ public class BakeryAgent extends TimeAgent {
 					if (avaiReply.getContent().equals("A")) {
 //						System.out.println("CASE 1: in");
 						ContentExtractor sendingCE = todaysOrder.get(0);
+
+						
 						String orderString = sendingCE.getGuid()+","+sendingCE.getProductString();
 						Util.sendMessage(myAgent,
 								new AID("kneeding_machine_manager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
@@ -305,11 +320,12 @@ public class BakeryAgent extends TimeAgent {
 			case 2:
 				ACLMessage orderReply = myAgent.receive(kneadConfirmTemplate);
 				if (orderReply!=null && orderReply.getPerformative()==ACLMessage.CONFIRM) {
-//					System.out.println("CASE 2: in");
 					waitOrder.add(todaysOrder.get(0));
 					todaysOrder.remove(0);
+					System.out.println("Todays order 2: " + todaysOrder.size());
 					step = 3;
 				} else if (orderReply!=null && orderReply.getPerformative()==ACLMessage.REFUSE) {
+//					System.out.println("Here somehow");
 					step = 0;
 				} else {
 					block();

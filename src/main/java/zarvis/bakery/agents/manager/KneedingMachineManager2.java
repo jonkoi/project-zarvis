@@ -112,9 +112,9 @@ public class KneedingMachineManager2 extends Agent {
 			case 0:
 				if (hasOrder && isRemainEmpty == false) {
 					for (int i = 0; i < isMachineAvailable.length; i++ ) {
-						System.out.println("Knead CASE 0: out");
+//						System.out.println("Knead CASE 0: out");
 						if (isMachineAvailable[i] == true) {
-							System.out.println("Knead CASE 0: in");
+//							System.out.println("Knead CASE 0: in");
 							Util.sendMessage(myAgent, kneadingMachines[i].getName(), CustomMessage.INQUIRE_AVAILABILITY, "", "machine-availability");
 							consideringMachine = i;
 							step = 1;
@@ -140,7 +140,7 @@ public class KneedingMachineManager2 extends Agent {
 						if (currentOrderRemains[i]> 0) {
 							consideringProduct = i;
 							isRemainEmpty = false;
-							System.out.println("Knead CASE 1: in");
+//							System.out.println("Knead CASE 1: in");
 							Util.sendMessage(myAgent, kneadingMachines[consideringMachine].getName(), CustomMessage.INFORM_PRODUCT, Integer.toString(i), "kneading-product");
 							step = 2;
 							break;
@@ -157,7 +157,7 @@ public class KneedingMachineManager2 extends Agent {
 			case 2:
 				ACLMessage productReply = myAgent.receive(productConfirmTemplate);
 				if (productReply!=null && productReply.getPerformative()==ACLMessage.CONFIRM) {
-					System.out.println("Knead CASE 2: in");
+//					System.out.println("Knead CASE 2: in");
 					currentOrderRemains[consideringProduct]--;
 					isMachineAvailable[consideringMachine] = false;
 					step = 0;
@@ -195,6 +195,7 @@ public class KneedingMachineManager2 extends Agent {
 					//Send finish back to bakery or Preptable
 					//Might need confirmation feature
 					isAvailable = true;
+					System.out.println(bakery.getAid().getLocalName());
 					Util.sendMessage(myAgent, bakery.getAid(), CustomMessage.FINISH_ORDER, currentOrderGuid, "FINISH");
 				}
 			}

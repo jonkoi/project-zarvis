@@ -62,7 +62,7 @@ public class KneedingMachineAgent2 extends Agent {
 			if (productMsg!=null && isAvailable) {
 				String productString = productMsg.getContent();
 				sender = productMsg.getSender();
-				System.out.println("Product received: " + productString);
+//				System.out.println("Product received: " + productString);
 				isAvailable = false;
 				
 				ACLMessage productReply = productMsg.createReply();
@@ -89,7 +89,7 @@ public class KneedingMachineAgent2 extends Agent {
 		}
 		
 		public void onWake() {
-			System.out.println("Product done: " + productString);
+//			System.out.println("Product done: " + productString);
 			isAvailable = true;
 			Util.sendMessage(myAgent,
 					sender,

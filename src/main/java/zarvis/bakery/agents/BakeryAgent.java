@@ -30,8 +30,7 @@ public class BakeryAgent extends TimeAgent {
 	private MessageTemplate orderTemplate;
 	
 	//Process
-	@SuppressWarnings("unused")
-	private AID sender;
+	
 	@SuppressWarnings("unused")
 	private ACLMessage processingMsg;
 	@SuppressWarnings("unused")
@@ -128,6 +127,7 @@ public class BakeryAgent extends TimeAgent {
 							Util.sendReply(myAgent, msg, ACLMessage.PROPOSE, price);						
 						}
 						else{
+							System.out.println("We reject");
 							Util.sendReply(myAgent, msg, ACLMessage.REJECT_PROPOSAL, orders);
 						}		
 	    			}
@@ -171,7 +171,17 @@ public class BakeryAgent extends TimeAgent {
 		public boolean checkOrders(ContentExtractor orderExtractor) {
 			//Many criteria, return true for now
 			//Invalid delivery date
-			return true;
+			UpdateTime();
+			long timeToFulfill = ((orderExtractor.getDeliveryDay()-1)*24 + orderExtractor.getDeliveryHour()) - totalHoursElapsed;
+			System.out.println(orderExtractor.getDeliveryDay()*24 + orderExtractor.getDeliveryHour());
+			System.out.println(totalHoursElapsed);
+			if (timeToFulfill < 0) {
+				System.out.println("Can't do it!");
+				return false;
+			} else {
+				return true;
+			}
+			
 		}
 		
 		public String getPrice(ContentExtractor orderExtractor){
@@ -270,12 +280,13 @@ public class BakeryAgent extends TimeAgent {
 		private MessageTemplate finishTemplate = MessageTemplate.and(
 				MessageTemplate.MatchPerformative(CustomMessage.FINISH_ORDER),
 				MessageTemplate.MatchConversationId("FINISH"));
+		private String customer;
+		private String orderID;
 
 		@Override
 		public void action() {
 			switch(step) {
 			case 0:
-				System.out.println("Todays order 1: " + todaysOrder.size());
 				if (todaysOrder.size() > 0) {
 //					System.out.println("CASE 0: in");
 					Util.sendMessage(myAgent,
@@ -298,8 +309,9 @@ public class BakeryAgent extends TimeAgent {
 //						System.out.println("CASE 1: in");
 						ContentExtractor sendingCE = todaysOrder.get(0);
 
-						
-						String orderString = sendingCE.getGuid()+","+sendingCE.getProductString();
+						customer = sendingCE.getCustomer();
+						orderID = sendingCE.getGuid();
+						String orderString = orderID+","+sendingCE.getProductString();
 						Util.sendMessage(myAgent,
 								new AID("kneeding_machine_manager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
 								CustomMessage.INFORM_ORDER,
@@ -335,6 +347,7 @@ public class BakeryAgent extends TimeAgent {
 				ACLMessage finishReply = myAgent.receive(finishTemplate);
 				if (finishReply!=null) {
 					System.out.println("Yay!");
+					Util.sendMessage(myAgent, new AID(customer, AID.ISLOCALNAME), CustomMessage.FINISH_ORDER, orderID, "to-customer-finish-order");
 					step = 0;
 				} else {
 					block();

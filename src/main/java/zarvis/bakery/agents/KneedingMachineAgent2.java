@@ -1,5 +1,7 @@
 package zarvis.bakery.agents;
 
+import java.util.List;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -8,6 +10,7 @@ import jade.core.behaviours.WakerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import zarvis.bakery.models.Bakery;
+import zarvis.bakery.models.Product;
 import zarvis.bakery.utils.Util;
 import zarvis.bakery.messages.CustomMessage;
 
@@ -16,9 +19,11 @@ public class KneedingMachineAgent2 extends Agent {
 	private Bakery bakery;
 	private boolean isAvailable = true;
 	private AID sender;
+	private List<Product> productList;
 	
 	public KneedingMachineAgent2(Bakery bakery) {
 		this.bakery = bakery;
+		productList = bakery.getProducts();
 	}
 	@Override
 	protected void setup() {
@@ -69,7 +74,12 @@ public class KneedingMachineAgent2 extends Agent {
 				productReply.setPerformative(ACLMessage.CONFIRM);
 				myAgent.send(productReply);
 				
-				myAgent.addBehaviour(new DummyWait(myAgent, 15*Util.MILLIS_PER_MIN, productString));
+				long startCalculate = System.currentTimeMillis();
+				long waitTime = calculateTime(productString) - (System.currentTimeMillis() - startCalculate);
+				
+//				myAgent.addBehaviour(new Function(myAgent, waitTime, productString));
+				myAgent.addBehaviour(new Function(myAgent, 15*Util.MILLIS_PER_MIN, productString));
+				
 			} else if (productMsg!=null && isAvailable == false) {
 				ACLMessage productReply = productMsg.createReply();
 				productReply.setPerformative(ACLMessage.REFUSE);
@@ -81,15 +91,15 @@ public class KneedingMachineAgent2 extends Agent {
 		
 	}
 	
-	private class DummyWait extends WakerBehaviour{
+	private class Function extends WakerBehaviour{
 		private String productString;
-		public DummyWait(Agent a, long timeout, String productString) {
+
+		public Function(Agent a, long timeout, String productString) {
 			super(a, timeout);
 			this.productString = productString;
 		}
 		
 		public void onWake() {
-//			System.out.println("Product done: " + productString);
 			isAvailable = true;
 			Util.sendMessage(myAgent,
 					sender,
@@ -97,5 +107,22 @@ public class KneedingMachineAgent2 extends Agent {
 					myAgent.getLocalName()+","+productString,
 					"kneading-product-finish");
 		}
+		
+	}
+	
+	private long calculateTime(String productString) {
+		int productIdx = Integer.parseInt(productString);
+		String productName = Util.PRODUCTNAMES.get(productIdx);
+		
+		long waitTime = 0;
+		
+		for (Product p: productList) {
+			if (p.getGuid().equals(productName)) {
+				waitTime = (p.getItem_prep_time() + p.getResting_time())*Util.MILLIS_PER_MIN;
+			}
+		}
+		
+		return waitTime;
+		
 	}
 }

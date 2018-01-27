@@ -267,7 +267,6 @@ public class CustomerAgent extends TimeAgent {
 					}
 					
 					else if (reply.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-						System.out.println("We are here");
 						replies++;
 					}
 				

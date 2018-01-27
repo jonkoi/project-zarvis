@@ -56,7 +56,7 @@ public class MainContainer {
 			for (Bakery bakery : wrapper.getBakeries()) {
 //				System.out.println(bakery.getAid().getLocalName());
 				mainContainer.acceptNewAgent(bakery.getGuid(), new BakeryAgent(bakery, globalStartTime)).start();
-				for (KneedingMachine kneedingMachine : bakery.getKneading_machines().subList(0, 1)) {
+				for (KneedingMachine kneedingMachine : bakery.getKneading_machines()) {
 					mainContainer.acceptNewAgent(kneedingMachine.getGuid(),
 							new KneedingMachineAgent2(bakery)).start();
 				}

@@ -217,6 +217,7 @@ public class CustomerAgent extends TimeAgent {
 		private static final int ACCEPT_LOWEST = 2;
 		private static final int RECEIVE_ACKNOWLEDGEMENT = 3;
 		private static final int DONE = 4;
+//		private static final int FAIL_PREEMP = 5;
 		private int giveOrderState = PlaceOrder.SEND_ORDER;
 		
 		public void action(){
@@ -230,6 +231,9 @@ public class CustomerAgent extends TimeAgent {
 					mt = MessageTemplate.MatchConversationId("Order");
 					giveOrderState = PlaceOrder.RECEIVE_PROPOSAL;
 					inWaitOrderAggregation.clear();
+					bestPrice = 0;
+					cheapestBakery = null;
+					replies = 0;
 					break;
 					
 				case PlaceOrder.RECEIVE_PROPOSAL:
@@ -239,7 +243,7 @@ public class CustomerAgent extends TimeAgent {
 						block();		
 					}
 					else if (reply.getPerformative() == ACLMessage.PROPOSE) {
-						
+//						System.out.println("Message returned");
 						double price = Double.parseDouble(reply.getContent());
 						if(cheapestBakery == null || price < bestPrice){
 							cheapestBakery = reply.getSender();
@@ -249,16 +253,22 @@ public class CustomerAgent extends TimeAgent {
 					}
 					
 					else if (reply.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-						
+						System.out.println("We are here");
 						replies++;
 					}
 				
 					if (replies >= bakeriesAID.length){
-						giveOrderState = PlaceOrder.ACCEPT_LOWEST;
+						if (cheapestBakery!=null) {
+							giveOrderState = PlaceOrder.ACCEPT_LOWEST;
+						} else {
+							//Order fails preemptively
+							giveOrderState = PlaceOrder.DONE;
+						}
 					}
 					break;
 					
 				case PlaceOrder.ACCEPT_LOWEST:
+					System.out.println("THE LOWEST!!!!!!!!!: " + bestPrice + cheapestBakery);
 					Util.sendMessage(myAgent, cheapestBakery, ACLMessage.ACCEPT_PROPOSAL, orderMsgString, "Accepting");
 					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("Accepting"),
 							MessageTemplate.MatchPerformative(ACLMessage.CONFIRM));
@@ -276,6 +286,7 @@ public class CustomerAgent extends TimeAgent {
 					}
 					break;
 					
+					
 				default:
 					System.out.println("Error in give order sequence...");
 			}
@@ -287,6 +298,7 @@ public class CustomerAgent extends TimeAgent {
 		
 		public int onEnd() {
 			giveOrderState = PlaceOrder.SEND_ORDER;
+			//Push order into wait
 			return 0;
 		}
 	}

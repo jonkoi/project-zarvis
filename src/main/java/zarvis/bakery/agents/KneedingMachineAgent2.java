@@ -77,7 +77,8 @@ public class KneedingMachineAgent2 extends Agent {
 				long startCalculate = System.currentTimeMillis();
 				long waitTime = calculateTime(productString) - (System.currentTimeMillis() - startCalculate);
 				
-				myAgent.addBehaviour(new Function(myAgent, waitTime, productString));
+//				myAgent.addBehaviour(new Function(myAgent, waitTime, productString));
+				myAgent.addBehaviour(new Function(myAgent, 15*Util.MILLIS_PER_MIN, productString));
 				
 			} else if (productMsg!=null && isAvailable == false) {
 				ACLMessage productReply = productMsg.createReply();

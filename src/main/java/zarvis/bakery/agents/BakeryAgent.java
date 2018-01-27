@@ -128,6 +128,7 @@ public class BakeryAgent extends TimeAgent {
 							Util.sendReply(myAgent, msg, ACLMessage.PROPOSE, price);						
 						}
 						else{
+							System.out.println("We reject");
 							Util.sendReply(myAgent, msg, ACLMessage.REJECT_PROPOSAL, orders);
 						}		
 	    			}
@@ -171,7 +172,17 @@ public class BakeryAgent extends TimeAgent {
 		public boolean checkOrders(ContentExtractor orderExtractor) {
 			//Many criteria, return true for now
 			//Invalid delivery date
-			return true;
+			UpdateTime();
+			long timeToFulfill = ((orderExtractor.getDeliveryDay()-1)*24 + orderExtractor.getDeliveryHour()) - totalHoursElapsed;
+			System.out.println(orderExtractor.getDeliveryDay()*24 + orderExtractor.getDeliveryHour());
+			System.out.println(totalHoursElapsed);
+			if (timeToFulfill < 0) {
+				System.out.println("Can't do it!");
+				return false;
+			} else {
+				return true;
+			}
+			
 		}
 		
 		public String getPrice(ContentExtractor orderExtractor){

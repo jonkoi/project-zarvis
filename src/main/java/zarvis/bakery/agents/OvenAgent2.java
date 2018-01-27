@@ -16,20 +16,20 @@ import zarvis.bakery.models.Product;
 import zarvis.bakery.utils.Util;
 import zarvis.bakery.messages.CustomMessage;
 
-public class PreparationTableAgent2 extends Agent {
+public class OvenAgent2 extends Agent {
 	private Bakery bakery;
 	private boolean isAvailable = true;
 	private AID sender;
 	private List<Product> productList;
-	private WakerBehaviour prepFunction;
+	private WakerBehaviour ovenFunction;
 	
-	public PreparationTableAgent2(Bakery bakery) {
+	public OvenAgent2(Bakery bakery) {
 		this.bakery = bakery;
 		productList = bakery.getProducts();
 	}
 	
 	protected void setup() {
-		Util.registerInYellowPage(this, "PrepTableAgent", this.bakery.getGuid());
+		Util.registerInYellowPage(this, "OvenAgent", this.bakery.getGuid());
 		
 		ParallelBehaviour pal = new ParallelBehaviour();
 		pal.addSubBehaviour(new AnswerAvailability());
@@ -40,12 +40,12 @@ public class PreparationTableAgent2 extends Agent {
 	
 	private class AnswerAvailability extends CyclicBehaviour{
 		private MessageTemplate avaiTemplate = MessageTemplate.and(MessageTemplate.MatchPerformative(CustomMessage.INQUIRE_AVAILABILITY),
-				MessageTemplate.MatchConversationId("table-availability"));
+				MessageTemplate.MatchConversationId("single-oven-availability"));
 		
 		public void action() {
 			ACLMessage avaiMsg = myAgent.receive(avaiTemplate);
 			if (avaiMsg!=null) {
-//				System.out.println("Received avai");
+				System.out.println("Received avai");
 				ACLMessage avaiReply = avaiMsg.createReply();
 				avaiReply.setContent(isAvailable ? "A" : "U");
 				avaiReply.setPerformative(CustomMessage.RESPOND_AVAILABILITY);
@@ -59,14 +59,14 @@ public class PreparationTableAgent2 extends Agent {
 	private class ReceiveProduct extends CyclicBehaviour{
 		
 		private MessageTemplate productTemplate = MessageTemplate.and(MessageTemplate.MatchPerformative(CustomMessage.INFORM_PRODUCT),
-				MessageTemplate.MatchConversationId("prep-product"));
+				MessageTemplate.MatchConversationId("oven-product"));
 		public void action() {
 			ACLMessage productMsg = myAgent.receive(productTemplate);
 			if (productMsg!=null && isAvailable) {
 				String productString = productMsg.getContent();
 				sender = productMsg.getSender();
-//				System.out.println("[PREP TAB] Product received: " + productString);
-//				System.out.println("[PREP TAB] Sender is: " + sender.getLocalName());
+//				System.out.println("[OVEN TAB] Product received: " + productString);
+//				System.out.println("[OVEN TAB] Sender is: " + sender.getLocalName());
 				isAvailable = false;
 				
 				ACLMessage productReply = productMsg.createReply();
@@ -76,10 +76,10 @@ public class PreparationTableAgent2 extends Agent {
 				long startCalculate = System.currentTimeMillis();
 				long waitTime = calculateTime(productString) - (System.currentTimeMillis() - startCalculate);
 				
-				prepFunction = new Function(myAgent, 15*Util.MILLIS_PER_MIN, productString);
+				ovenFunction = new Function(myAgent, 15*Util.MILLIS_PER_MIN, productString);
 //				kneadFunction = new Function(myAgent, waitTime, productString);
 				
-				myAgent.addBehaviour(prepFunction);
+				myAgent.addBehaviour(ovenFunction);
 			} else if (productMsg!=null && isAvailable == false) {
 				ACLMessage productReply = productMsg.createReply();
 				productReply.setPerformative(ACLMessage.REFUSE);
@@ -99,14 +99,14 @@ public class PreparationTableAgent2 extends Agent {
 		}
 		
 		public void onWake() {
-//			System.out.println("[PREP TAB] Finish product: " + productString);
+//			System.out.println("[OVEN TAB] Finish product: " + productString);
 			isAvailable = true;
 			Util.sendMessage(myAgent,
 					sender,
 					CustomMessage.FINISH_PRODUCT,
 					myAgent.getLocalName()+","+productString,
-					"prep-product-finish");
-			prepFunction = null;
+					"oven-product-finish");
+			ovenFunction = null;
 			myAgent.removeBehaviour(this);
 		}
 	}

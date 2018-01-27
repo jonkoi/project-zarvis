@@ -15,12 +15,12 @@ import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.utils.Util;
 
-public class PreparationTableManager2 extends Agent{
+public class OvenManager2 extends Agent{
 	private Bakery bakery;
 	private boolean isAvailable = true;
 	private boolean isOrderReady = false;
-	private DFAgentDescription[] prepTables;
-	private boolean[] isTableAvailable;
+	private DFAgentDescription[] ovens;
+	private boolean[] isOvenAvailable;
 	
 	private boolean hasOrder;
 	private boolean isRemainEmpty;
@@ -32,15 +32,15 @@ public class PreparationTableManager2 extends Agent{
 	
 	private boolean talkWithOven;
 	
-	public PreparationTableManager2(Bakery bakery) {
+	public OvenManager2(Bakery bakery) {
 		this.bakery = bakery;
 	}
 	
 	protected void setup() {
-		Util.registerInYellowPage(this, "PrepTableManager", "preparationTableManager-" + bakery.getGuid());
-		prepTables = Util.searchInYellowPage(this, "PrepTableAgent", bakery.getGuid());
-		isTableAvailable = new boolean[prepTables.length];
-		Arrays.fill(isTableAvailable, true);
+		Util.registerInYellowPage(this, "OvenManager", "ovenManager-" + bakery.getGuid());
+		ovens = Util.searchInYellowPage(this, "OvenAgent", bakery.getGuid());
+		isOvenAvailable = new boolean[ovens.length];
+		Arrays.fill(isOvenAvailable, true);
 		this.talkWithOven = false;
 		this.hasOrder = false;
 		this.isRemainEmpty = false;
@@ -51,7 +51,6 @@ public class PreparationTableManager2 extends Agent{
 		pal.addSubBehaviour(new AnswerAvailability());
 		pal.addSubBehaviour(new ReceiveOrder());
 		pal.addSubBehaviour(new WorkDistribution());
-		pal.addSubBehaviour(new TalkWithOven());
 		pal.addSubBehaviour(new FinishListener());
 		
 		addBehaviour(pal);
@@ -60,7 +59,7 @@ public class PreparationTableManager2 extends Agent{
 	private class AnswerAvailability extends CyclicBehaviour{
 		private MessageTemplate avaiTemplate = MessageTemplate.and(
 				MessageTemplate.MatchPerformative(CustomMessage.INQUIRE_AVAILABILITY),
-				MessageTemplate.MatchConversationId("prep-availability"));
+				MessageTemplate.MatchConversationId("oven-availability"));
 		
 		public void action() {
 			ACLMessage avaiMsg = myAgent.receive(avaiTemplate);
@@ -78,14 +77,14 @@ public class PreparationTableManager2 extends Agent{
 	private class ReceiveOrder extends CyclicBehaviour{
 		private MessageTemplate orderTemplate = MessageTemplate.and(
 				MessageTemplate.MatchPerformative(CustomMessage.INFORM_ORDER),
-				MessageTemplate.MatchConversationId("prep-order"));
+				MessageTemplate.MatchConversationId("oven-order"));
 		public void action() {
 			ACLMessage orderMsg = myAgent.receive(orderTemplate);
 			if (orderMsg!=null && isAvailable) {
 				String orderString = orderMsg.getContent();
 				currentOrderString = orderString;
 				
-				System.out.println("[PREP] Order received: " + orderString);
+				System.out.println("[OVEN] Order received: " + orderString);
 				ACLMessage orderReply = orderMsg.createReply();
 				orderReply.setPerformative(ACLMessage.CONFIRM);
 				isAvailable = false;
@@ -104,24 +103,24 @@ public class PreparationTableManager2 extends Agent{
 	
 	private class WorkDistribution extends CyclicBehaviour{
 		
-		private MessageTemplate avaiTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("table-availability"),
+		private MessageTemplate avaiTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("single-oven-availability"),
 				MessageTemplate.MatchPerformative(CustomMessage.RESPOND_AVAILABILITY));
-		private MessageTemplate productConfirmTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("prep-product"),
+		private MessageTemplate productConfirmTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("oven-product"),
 				MessageTemplate.MatchPerformative(ACLMessage.CONFIRM));
 		
 		private int step = 0;
-		private int consideringTable = 0;
+		private int consideringOven = 0;
 		private int consideringProduct = 0;
 		
 		public void action() {
 			switch(step) {
 			case 0:
 				if (hasOrder && isRemainEmpty == false) {
-					for (int i = 0; i < isTableAvailable.length; i++ ) {
-						if (isTableAvailable[i] == true) {
-//							System.out.println("[PREP] Ask Table");
-							Util.sendMessage(myAgent, prepTables[i].getName(), CustomMessage.INQUIRE_AVAILABILITY, "", "table-availability");
-							consideringTable = i;
+					for (int i = 0; i < isOvenAvailable.length; i++ ) {
+						if (isOvenAvailable[i] == true) {
+							System.out.println("[OVEN] Ask oven");
+							Util.sendMessage(myAgent, ovens[i].getName(), CustomMessage.INQUIRE_AVAILABILITY, "", "single-oven-availability");
+							consideringOven = i;
 							step = 1;
 							break;
 						}
@@ -134,17 +133,17 @@ public class PreparationTableManager2 extends Agent{
 				ACLMessage avaiReply = myAgent.receive(avaiTemplate);
 				if (avaiReply!=null && avaiReply.getContent().equals("U")) {
 					//Not really free
-					isTableAvailable[consideringTable] = false;
+					isOvenAvailable[consideringOven] = false;
 					step = 0;
 				}
 				else if (avaiReply!=null && avaiReply.getContent().equals("A")) {
-//					System.out.println("[PREP] Receive Table available");
+//					System.out.println("[OVEN] Receive oven available");
 					isRemainEmpty = true;
 					for (int i = 0; i < currentOrderRemains.length; i++) {
 						if (currentOrderRemains[i]> 0) {
 							consideringProduct = i;
 							isRemainEmpty = false;
-							Util.sendMessage(myAgent, prepTables[consideringTable].getName(), CustomMessage.INFORM_PRODUCT, Integer.toString(i), "prep-product");
+							Util.sendMessage(myAgent, ovens[consideringOven].getName(), CustomMessage.INFORM_PRODUCT, Integer.toString(i), "oven-product");
 							step = 2;
 							break;
 						}
@@ -163,9 +162,9 @@ public class PreparationTableManager2 extends Agent{
 				ACLMessage productReply = myAgent.receive(productConfirmTemplate);
 				
 				if (productReply!=null && productReply.getPerformative()==ACLMessage.CONFIRM) {
-//					System.out.println("[PREP] Get Table confirm");
+					System.out.println("[OVEN] Get Oven confirm");
 					currentOrderRemains[consideringProduct]--;
-					isTableAvailable[consideringTable] = false;
+					isOvenAvailable[consideringOven] = false;
 					step = 0;
 				} else if (productReply!=null && productReply.getPerformative()==ACLMessage.REFUSE) {
 					step = 0;
@@ -178,94 +177,34 @@ public class PreparationTableManager2 extends Agent{
 	}
 	
 	private class FinishListener extends CyclicBehaviour{
-		private MessageTemplate finishProductTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("prep-product-finish"),
+		private MessageTemplate finishProductTemplate = MessageTemplate.and(MessageTemplate.MatchConversationId("oven-product-finish"),
 				MessageTemplate.MatchPerformative(CustomMessage.FINISH_PRODUCT));
 		
 		public void action() {
 			ACLMessage productFinishMsg = myAgent.receive(finishProductTemplate);
 			
 			if (productFinishMsg!=null) {
-				System.out.println("[PREP] " + productFinishMsg.getContent());
+				System.out.println("[OVEN] " + productFinishMsg.getContent());
 				String[] content = productFinishMsg.getContent().split(",");
 				int productIdx = Integer.parseInt(content[1]);
 				currentOrderExisting[productIdx]++;
 				
-				for (int i = 0; i < isTableAvailable.length; i++) {
-					if (prepTables[i].getName().getLocalName().equals(content[0])) {
-						isTableAvailable[i] = true;
+				for (int i = 0; i < isOvenAvailable.length; i++) {
+					if (ovens[i].getName().getLocalName().equals(content[0])) {
+						isOvenAvailable[i] = true;
 					}
 				}
 				
 				if(Arrays.equals(currentOrderExisting, currentOrderOrigin)) {
-					talkWithOven = true;
-//					isAvailable = true;
-//					Util.sendMessage(myAgent, bakery.getAid(), CustomMessage.FINISH_ORDER, currentOrderGuid, "FINISH");
+//					talkWithOven = true;
+					isAvailable = true;
+					Util.sendMessage(myAgent, bakery.getAid(), CustomMessage.FINISH_ORDER, currentOrderGuid, "FINISH");
 				}	
 			} else {
 				block();
 			}
 		}
 		
-	}
-	
-	private class TalkWithOven extends CyclicBehaviour{
-		private int step2 = 0;
-		private int stuckCase1 = 0;
-		private MessageTemplate avaiTemplate2 = MessageTemplate.and(
-				MessageTemplate.MatchPerformative(CustomMessage.RESPOND_AVAILABILITY),
-				MessageTemplate.MatchConversationId("oven-availability"));
-		private MessageTemplate prepConfirmTemplate = MessageTemplate.MatchConversationId("oven-order");
-		
-		public void action() {
-			switch(step2) {
-			case 0:
-				if (talkWithOven) {
-					stuckCase1 = 0;
-					Util.sendMessage(myAgent,
-							new AID("ovenManager-"+bakery.getAid().getLocalName(), AID.ISLOCALNAME),
-							CustomMessage.INQUIRE_AVAILABILITY,
-							"",
-							"oven-availability");
-					step2=1;
-				} else {
-					block(15*Util.MILLIS_PER_MIN);
-				}
-				break;
-			case 1:
-				ACLMessage avaiReply2 = myAgent.receive(avaiTemplate2);
-				if (avaiReply2!=null) {
-					if (avaiReply2.getContent().equals("A")) {
-//						System.out.println("CASE 1: ");
-						Util.sendMessage(myAgent,
-								new AID("ovenManager-"+bakery.getAid().getLocalName(), AID.ISLOCALNAME),
-								CustomMessage.INFORM_ORDER,
-								currentOrderString,
-								"oven-order");
-						step2 = 2;
-					}
-				} else {
-					stuckCase1++;
-					if (stuckCase1 > 2) {
-						step2 = 0;
-					}
-					block(15*Util.MILLIS_PER_MIN);
-				}
-				break;
-			case 2:
-				ACLMessage orderReply = myAgent.receive(prepConfirmTemplate);
-				if (orderReply!=null && orderReply.getPerformative()==ACLMessage.CONFIRM) {
-					System.out.println("[PREP]: OVEN confirmed!");
-					isAvailable = true;
-					currentOrderString = "";
-					talkWithOven = false;
-					step2 = 0;
-				} else if (orderReply!=null && orderReply.getPerformative()==ACLMessage.REFUSE) {
-					step2 = 0;
-				} else {
-					block();
-				}
-			}
-		}
 	}
 	
 	private void InitOrder(String orderString) {

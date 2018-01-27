@@ -30,8 +30,7 @@ public class BakeryAgent extends TimeAgent {
 	private MessageTemplate orderTemplate;
 	
 	//Process
-	@SuppressWarnings("unused")
-	private AID sender;
+	
 	@SuppressWarnings("unused")
 	private ACLMessage processingMsg;
 	@SuppressWarnings("unused")
@@ -281,6 +280,8 @@ public class BakeryAgent extends TimeAgent {
 		private MessageTemplate finishTemplate = MessageTemplate.and(
 				MessageTemplate.MatchPerformative(CustomMessage.FINISH_ORDER),
 				MessageTemplate.MatchConversationId("FINISH"));
+		private String customer;
+		private String orderID;
 
 		@Override
 		public void action() {
@@ -308,8 +309,9 @@ public class BakeryAgent extends TimeAgent {
 //						System.out.println("CASE 1: in");
 						ContentExtractor sendingCE = todaysOrder.get(0);
 
-						
-						String orderString = sendingCE.getGuid()+","+sendingCE.getProductString();
+						customer = sendingCE.getCustomer();
+						orderID = sendingCE.getGuid();
+						String orderString = orderID+","+sendingCE.getProductString();
 						Util.sendMessage(myAgent,
 								new AID("kneeding_machine_manager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
 								CustomMessage.INFORM_ORDER,
@@ -345,6 +347,7 @@ public class BakeryAgent extends TimeAgent {
 				ACLMessage finishReply = myAgent.receive(finishTemplate);
 				if (finishReply!=null) {
 					System.out.println("Yay!");
+					Util.sendMessage(myAgent, new AID(customer, AID.ISLOCALNAME), CustomMessage.FINISH_ORDER, orderID, "to-customer-finish-order");
 					step = 0;
 				} else {
 					block();

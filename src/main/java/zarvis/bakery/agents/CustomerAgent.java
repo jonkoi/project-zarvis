@@ -5,11 +5,14 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
+import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Customer;
 import zarvis.bakery.models.Order;
 import zarvis.bakery.utils.Util;
@@ -24,9 +27,10 @@ public class CustomerAgent extends TimeAgent {
 	private DFAgentDescription[] bakeries;
 	private TreeMap<String, Integer> inWaitOrderAggregation = new TreeMap<String,Integer>();
 	@SuppressWarnings("unused")
-	private TreeMap<String, Integer> inProcessOrderAggregation = new TreeMap<String,Integer>();
+	private List<String>inProcessOrderAggregation = new ArrayList<>();
+	private String preemptFailOrder;
 	@SuppressWarnings("unused")
-	private TreeMap<String, Integer> finishedOrderAggregation = new TreeMap<String, Integer>();
+	private TreeMap<String, Boolean> finishedOrderAggregation = new TreeMap<String, Boolean>();
 	
 	private ACLMessage orderMsg;
 
@@ -58,13 +62,13 @@ public class CustomerAgent extends TimeAgent {
 		
 		// Koi: My take on the FSMBehavior
 		// FSM building
+		ParallelBehaviour pal = new ParallelBehaviour();
 		FSMBehaviour fb = new FSMBehaviour();
 		fb.registerFirstState(new WaitSetup(), "WaitSetup-state");
 		fb.registerState(new GetBakeries(), "GetBakeries-state");
 		fb.registerState(new CheckNextOrders(), "CheckNextOrders-state");
 		fb.registerState(new CheckTime(this, millisLeft), "CheckTime-state");
 		fb.registerState(new PlaceOrder(), "PlaceOrder-state");
-		fb.registerState(new WaitProposal(), "WaitProposal-state");
 		
 		//Transitions
 		fb.registerDefaultTransition("WaitSetup-state", "GetBakeries-state");
@@ -77,8 +81,10 @@ public class CustomerAgent extends TimeAgent {
 		fb.registerTransition("CheckTime-state", "PlaceOrder-state", 1);
 		fb.registerDefaultTransition("PlaceOrder-state", "CheckNextOrders-state");
 		
+		pal.addSubBehaviour(fb);
+		pal.addSubBehaviour(new OrderFinishListener());
 		
-		addBehaviour(fb);
+		addBehaviour(pal);
 		finish = true;
 	}
 
@@ -150,18 +156,26 @@ public class CustomerAgent extends TimeAgent {
 			int value = entry.getValue();
 			
 			String msg = "";
-			do {
-				key = entry.getKey();
-				inWaitOrderAggregation.put(key, value);
-				
-				msg += Util.buildOrderMessage(key, orders, getAID().getLocalName());
-				
-				sortedOrderAggregation.remove(key);
-				if (sortedOrderAggregation.size() == 0) {
-					break;
-				}
-				entry = sortedOrderAggregation.entrySet().iterator().next();
-			} while (value == entry.getValue());
+			
+			key = entry.getKey();
+			inWaitOrderAggregation.put(key, value);
+			
+			msg = Util.buildOrderMessage(key, orders, getAID().getLocalName());
+			sortedOrderAggregation.remove(key);			
+			
+			//Below are multi order in one message
+//			do {
+//				key = entry.getKey();
+//				inWaitOrderAggregation.put(key, value);
+//				
+//				msg += Util.buildOrderMessage(key, orders, getAID().getLocalName());
+//				
+//				sortedOrderAggregation.remove(key);
+//				if (sortedOrderAggregation.size() == 0) {
+//					break;
+//				}
+//				entry = sortedOrderAggregation.entrySet().iterator().next();
+//			} while (value == entry.getValue());
 			
 			orderMsgString = msg.substring(0, msg.length() - 1);
 			orderMsg.setContent(msg.substring(0, msg.length() - 1));
@@ -217,7 +231,7 @@ public class CustomerAgent extends TimeAgent {
 		private static final int ACCEPT_LOWEST = 2;
 		private static final int RECEIVE_ACKNOWLEDGEMENT = 3;
 		private static final int DONE = 4;
-//		private static final int FAIL_PREEMP = 5;
+		private static final int FAIL_PREEMP = 5;
 		private int giveOrderState = PlaceOrder.SEND_ORDER;
 		
 		public void action(){
@@ -230,10 +244,10 @@ public class CustomerAgent extends TimeAgent {
 					Util.sendMessage(myAgent, bakeriesAID, ACLMessage.CFP, orderMsgString, "Order");
 					mt = MessageTemplate.MatchConversationId("Order");
 					giveOrderState = PlaceOrder.RECEIVE_PROPOSAL;
-					inWaitOrderAggregation.clear();
 					bestPrice = 0;
 					cheapestBakery = null;
 					replies = 0;
+					preemptFailOrder = "";
 					break;
 					
 				case PlaceOrder.RECEIVE_PROPOSAL:
@@ -260,15 +274,22 @@ public class CustomerAgent extends TimeAgent {
 					if (replies >= bakeriesAID.length){
 						if (cheapestBakery!=null) {
 							giveOrderState = PlaceOrder.ACCEPT_LOWEST;
+							for (Map.Entry<String, Integer> o : inWaitOrderAggregation.entrySet()) {
+								inProcessOrderAggregation.add(o.getKey());
+							}
+							inWaitOrderAggregation.clear();
 						} else {
 							//Order fails preemptively
-							giveOrderState = PlaceOrder.DONE;
+							giveOrderState = PlaceOrder.FAIL_PREEMP;
+							for (Map.Entry<String, Integer> o : inWaitOrderAggregation.entrySet()) {
+								preemptFailOrder += inProcessOrderAggregation.add(o.getKey());
+							}
+							inWaitOrderAggregation.clear();
 						}
 					}
 					break;
 					
 				case PlaceOrder.ACCEPT_LOWEST:
-					System.out.println("THE LOWEST!!!!!!!!!: " + bestPrice + cheapestBakery);
 					Util.sendMessage(myAgent, cheapestBakery, ACLMessage.ACCEPT_PROPOSAL, orderMsgString, "Accepting");
 					mt = MessageTemplate.and(MessageTemplate.MatchConversationId("Accepting"),
 							MessageTemplate.MatchPerformative(ACLMessage.CONFIRM));
@@ -285,7 +306,14 @@ public class CustomerAgent extends TimeAgent {
 						block();
 					}
 					break;
-					
+				case PlaceOrder.FAIL_PREEMP:
+					for (Order o: orders) {
+						if (o.getGuid().equals(preemptFailOrder)) {
+							finishedOrderAggregation.put(preemptFailOrder, false);
+						}
+					}
+					giveOrderState = PlaceOrder.DONE;
+					break;
 					
 				default:
 					System.out.println("Error in give order sequence...");
@@ -303,37 +331,36 @@ public class CustomerAgent extends TimeAgent {
 		}
 	}
 	
-	@SuppressWarnings({ "unused", "serial" })
-	private class PlaceOrder_old2 extends OneShotBehaviour{
+	private class OrderFinishListener extends CyclicBehaviour {
+		
+		private MessageTemplate orderFinishTemplate =
+				MessageTemplate.and(MessageTemplate.MatchPerformative(CustomMessage.FINISH_ORDER),
+						MessageTemplate.MatchConversationId("to-customer-finish-order"));
+		
 		@Override
 		public void action() {
-			send(orderMsg);
-			inWaitOrderAggregation.clear();
-		}
-	}
-	@SuppressWarnings("serial")
-	private class WaitProposal extends OneShotBehaviour{
-		private int exitValue = 0;
-		public void action() {
-			System.out.println("GOT PROPOSAL 1!");
-			MessageTemplate template = 
-					MessageTemplate.MatchConversationId("proposal");
-			ACLMessage msg = myAgent.receive(template);
-			if (msg != null) {
-				System.out.println("GOT PROPOSAL!");
-				System.out.println(msg.getContent());
-				ACLMessage acceptMsg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-				acceptMsg.addReceiver(new AID(bakeries[0].getName().getLocalName(), AID.ISLOCALNAME));
-				acceptMsg.setConversationId("accept-proposal");
-				myAgent.send(acceptMsg);
-				exitValue = 1;
+			ACLMessage orderFinishMsg = myAgent.receive(orderFinishTemplate);
+			if (orderFinishMsg != null) {
+				String orderBack = orderFinishMsg.getContent();
+				
+				for (Order o: orders) {
+					if (o.getGuid().equals(orderBack)) {
+						long evaluatedTime = (o.getDelivery_date().getDay()-1)*24 + o.getDelivery_date().getHour() - totalHoursElapsed;
+						if (evaluatedTime < 0) {
+							System.out.println("ORDER BACK!: " + orderBack + " false");
+							finishedOrderAggregation.put(orderBack, false);
+						} else {
+							System.out.println("ORDER BACK!: " + orderBack + " true");
+							finishedOrderAggregation.put(orderBack, true);
+						}
+					}
+				}
+				
 			} else {
 				block();
 			}
 		}
-		public int onEnd() {
-			return exitValue;
-		}
+		
 	}
 	
 }

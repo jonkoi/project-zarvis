@@ -85,7 +85,7 @@ public class PreparationTableManager2 extends Agent{
 				String orderString = orderMsg.getContent();
 				currentOrderString = orderString;
 				
-				System.out.println("[PREP] Order received: " + orderString);
+				System.out.println(bakery.getGuid() + " [PREP] Order received: " + orderString);
 				ACLMessage orderReply = orderMsg.createReply();
 				orderReply.setPerformative(ACLMessage.CONFIRM);
 				isAvailable = false;
@@ -119,7 +119,7 @@ public class PreparationTableManager2 extends Agent{
 				if (hasOrder && isRemainEmpty == false) {
 					for (int i = 0; i < isTableAvailable.length; i++ ) {
 						if (isTableAvailable[i] == true) {
-//							System.out.println("[PREP] Ask Table");
+//							System.out.println(bakery.getGuid() + " [PREP] Ask Table");
 							Util.sendMessage(myAgent, prepTables[i].getName(), CustomMessage.INQUIRE_AVAILABILITY, "", "table-availability");
 							consideringTable = i;
 							step = 1;
@@ -138,7 +138,7 @@ public class PreparationTableManager2 extends Agent{
 					step = 0;
 				}
 				else if (avaiReply!=null && avaiReply.getContent().equals("A")) {
-//					System.out.println("[PREP] Receive Table available");
+//					System.out.println(bakery.getGuid() + " [PREP] Receive Table available");
 					isRemainEmpty = true;
 					for (int i = 0; i < currentOrderRemains.length; i++) {
 						if (currentOrderRemains[i]> 0) {
@@ -163,7 +163,7 @@ public class PreparationTableManager2 extends Agent{
 				ACLMessage productReply = myAgent.receive(productConfirmTemplate);
 				
 				if (productReply!=null && productReply.getPerformative()==ACLMessage.CONFIRM) {
-//					System.out.println("[PREP] Get Table confirm");
+//					System.out.println(bakery.getGuid() + " [PREP] Get Table confirm");
 					currentOrderRemains[consideringProduct]--;
 					isTableAvailable[consideringTable] = false;
 					step = 0;
@@ -185,7 +185,7 @@ public class PreparationTableManager2 extends Agent{
 			ACLMessage productFinishMsg = myAgent.receive(finishProductTemplate);
 			
 			if (productFinishMsg!=null) {
-				System.out.println("[PREP] " + productFinishMsg.getContent());
+				System.out.println(bakery.getGuid() + " [PREP] " + productFinishMsg.getContent());
 				String[] content = productFinishMsg.getContent().split(",");
 				int productIdx = Integer.parseInt(content[1]);
 				currentOrderExisting[productIdx]++;
@@ -254,7 +254,7 @@ public class PreparationTableManager2 extends Agent{
 			case 2:
 				ACLMessage orderReply = myAgent.receive(prepConfirmTemplate);
 				if (orderReply!=null && orderReply.getPerformative()==ACLMessage.CONFIRM) {
-					System.out.println("[PREP]: OVEN confirmed!");
+//					System.out.println(bakery.getGuid() + " [PREP]: OVEN confirmed!");
 					isAvailable = true;
 					currentOrderString = "";
 					talkWithOven = false;

@@ -13,6 +13,7 @@ import jade.lang.acl.MessageTemplate;
 //import zarvis.bakery.behaviors.kneedingmachinemanager.SendProductsToKneedingMachineBehavior;
 import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Bakery;
+import zarvis.bakery.models.Product;
 import zarvis.bakery.utils.Util;
 
 public class OvenManager2 extends Agent{
@@ -84,7 +85,7 @@ public class OvenManager2 extends Agent{
 				String orderString = orderMsg.getContent();
 				currentOrderString = orderString;
 				
-				System.out.println("[OVEN] Order received: " + orderString);
+				System.out.println(bakery.getGuid() + " [OVEN] Order received: " + orderString);
 				ACLMessage orderReply = orderMsg.createReply();
 				orderReply.setPerformative(ACLMessage.CONFIRM);
 				isAvailable = false;
@@ -111,6 +112,7 @@ public class OvenManager2 extends Agent{
 		private int step = 0;
 		private int consideringOven = 0;
 		private int consideringProduct = 0;
+		private int consideringBreadsPerOven = 1;
 		
 		public void action() {
 			switch(step) {
@@ -118,7 +120,7 @@ public class OvenManager2 extends Agent{
 				if (hasOrder && isRemainEmpty == false) {
 					for (int i = 0; i < isOvenAvailable.length; i++ ) {
 						if (isOvenAvailable[i] == true) {
-							System.out.println("[OVEN] Ask oven");
+//							System.out.println(bakery.getGuid() + " [OVEN] Ask oven");
 							Util.sendMessage(myAgent, ovens[i].getName(), CustomMessage.INQUIRE_AVAILABILITY, "", "single-oven-availability");
 							consideringOven = i;
 							step = 1;
@@ -137,13 +139,24 @@ public class OvenManager2 extends Agent{
 					step = 0;
 				}
 				else if (avaiReply!=null && avaiReply.getContent().equals("A")) {
-//					System.out.println("[OVEN] Receive oven available");
+//					System.out.println(bakery.getGuid() + " [OVEN] Receive oven available");
 					isRemainEmpty = true;
 					for (int i = 0; i < currentOrderRemains.length; i++) {
 						if (currentOrderRemains[i]> 0) {
 							consideringProduct = i;
+							//Bread per oven
+							for (Product p : bakery.getProducts()) {
+//								System.out.println(p.getGuid() + " " + Util.PRODUCTNAMES.get(consideringProduct));
+								if (p.getGuid().equals(Util.PRODUCTNAMES.get(consideringProduct))) {
+									System.out.println("RRRRRR: " + currentOrderRemains[consideringProduct] + "CCCC: " +  p.getBreads_per_oven());
+									consideringBreadsPerOven = 
+											currentOrderRemains[consideringProduct] < p.getBreads_per_oven() ? 
+													currentOrderRemains[consideringProduct] : p.getBreads_per_oven();
+								}
+							}
+							String msg = consideringProduct + "," + consideringBreadsPerOven;
 							isRemainEmpty = false;
-							Util.sendMessage(myAgent, ovens[consideringOven].getName(), CustomMessage.INFORM_PRODUCT, Integer.toString(i), "oven-product");
+							Util.sendMessage(myAgent, ovens[consideringOven].getName(), CustomMessage.INFORM_PRODUCT, msg, "oven-product");
 							step = 2;
 							break;
 						}
@@ -162,8 +175,8 @@ public class OvenManager2 extends Agent{
 				ACLMessage productReply = myAgent.receive(productConfirmTemplate);
 				
 				if (productReply!=null && productReply.getPerformative()==ACLMessage.CONFIRM) {
-					System.out.println("[OVEN] Get Oven confirm");
-					currentOrderRemains[consideringProduct]--;
+//					System.out.println(bakery.getGuid() + " [OVEN] Get Oven confirm");
+					currentOrderRemains[consideringProduct] -= consideringBreadsPerOven;
 					isOvenAvailable[consideringOven] = false;
 					step = 0;
 				} else if (productReply!=null && productReply.getPerformative()==ACLMessage.REFUSE) {
@@ -184,10 +197,10 @@ public class OvenManager2 extends Agent{
 			ACLMessage productFinishMsg = myAgent.receive(finishProductTemplate);
 			
 			if (productFinishMsg!=null) {
-				System.out.println("[OVEN] " + productFinishMsg.getContent());
+				System.out.println(bakery.getGuid() + " [OVEN] " + productFinishMsg.getContent());
 				String[] content = productFinishMsg.getContent().split(",");
 				int productIdx = Integer.parseInt(content[1]);
-				currentOrderExisting[productIdx]++;
+				currentOrderExisting[productIdx] += Integer.parseInt(content[2]);
 				
 				for (int i = 0; i < isOvenAvailable.length; i++) {
 					if (ovens[i].getName().getLocalName().equals(content[0])) {

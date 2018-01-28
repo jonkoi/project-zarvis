@@ -76,7 +76,7 @@ public class PreparationTableAgent2 extends Agent {
 				long startCalculate = System.currentTimeMillis();
 				long waitTime = calculateTime(productString) - (System.currentTimeMillis() - startCalculate);
 				
-				prepFunction = new Function(myAgent, 15*Util.MILLIS_PER_MIN, productString);
+				prepFunction = new Function(myAgent, 45*Util.MILLIS_PER_MIN, productString);
 //				kneadFunction = new Function(myAgent, waitTime, productString);
 				
 				myAgent.addBehaviour(prepFunction);
@@ -112,7 +112,17 @@ public class PreparationTableAgent2 extends Agent {
 	}
 	
 	private long calculateTime(String productString) {
-		return 45*Util.MILLIS_PER_MIN;
+		int productIdx = Integer.parseInt(productString);
+		String productName = Util.PRODUCTNAMES.get(productIdx);
+		
+		long waitTime = 0;
+		for (Product p: productList) {
+			if (p.getGuid().equals(productName)) {
+				waitTime = p.getItem_prep_time()*Util.MILLIS_PER_MIN;
+			}
+		}
+		
+		return waitTime;
 	}
 
 }

@@ -116,7 +116,7 @@ public class BakeryAgent extends TimeAgent {
     			if(data.getPerformative() == ACLMessage.CFP){
     				ACLMessage msg = data;
 	    			orders = msg.getContent();
-	    			System.out.println("[BAKERY] Order: " + orders);
+//	    			System.out.println(bakery.getGuid() + " [BAKERY] Order: " + orders);
 	    			
 	    			String[] splitOrders = orders.split(";");
 	    			
@@ -124,8 +124,7 @@ public class BakeryAgent extends TimeAgent {
 	    				currentOrder = new ContentExtractor(o);
 	    				if(checkOrders(currentOrder)){
 							price = getPrice(currentOrder);
-							System.out.print("price: ");
-							System.out.println(price);
+							System.out.println(bakery.getGuid() + " [BAKERY] Order: " + orders + " price " + price);
 							Util.sendReply(myAgent, msg, ACLMessage.PROPOSE, price);						
 						}
 						else{
@@ -140,7 +139,7 @@ public class BakeryAgent extends TimeAgent {
     					ContentExtractor extractor = new ContentExtractor(o);
         				ordersList.add(extractor);
         				ordersList.sort(Comparator.comparing(ContentExtractor::getDeliveryTime));
-        				System.out.println("Order List size: " + ordersList.size());
+        				System.out.println(bakery.getGuid() + " [BAKERY] Order List size: " + ordersList.size());
         				if(extractor.getDeliveryDay()==daysElapsed){
         					addBehaviour(new UpdateOrder(extractor));
         				}
@@ -281,7 +280,7 @@ public class BakeryAgent extends TimeAgent {
 			for (int j = 0; j < productAmounts.size(); j ++) {
 				todayGoals[j] += productAmounts.get(Util.PRODUCTNAMES.get(j));
 			}
-			System.out.println("Todays Order out update:" + todaysOrder.size());
+//			System.out.println(bakery.getGuid() + " [BAKERY] Todays Order out update:" + todaysOrder.size());
 			todaysOrder.sort(Comparator.comparing(ContentExtractor::getDeliveryTime));
 		}
 	}
@@ -304,7 +303,7 @@ public class BakeryAgent extends TimeAgent {
 			switch(step) {
 			case 0:
 //				System.out.println("Bakery-new-day-step-0");
-//				System.out.println("[BAKERY] today orders: " + todaysOrder.size());
+//				System.out.println(bakery.getGuid() + " [BAKERY] today orders: " + todaysOrder.size());
 				if (todaysOrder.size() > 0) {
 					
 					Util.sendMessage(myAgent,
@@ -352,7 +351,7 @@ public class BakeryAgent extends TimeAgent {
 				if (orderReply!=null && orderReply.getPerformative()==ACLMessage.CONFIRM) {
 					waitOrder.add(todaysOrder.get(0));
 					todaysOrder.remove(0);
-					System.out.println("Todays order 2: " + todaysOrder.size());
+//					System.out.println("Todays order 2: " + todaysOrder.size());
 					step = 3;
 				} else if (orderReply!=null && orderReply.getPerformative()==ACLMessage.REFUSE) {
 //					System.out.println("Here somehow");

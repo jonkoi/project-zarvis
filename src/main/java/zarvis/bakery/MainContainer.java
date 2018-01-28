@@ -82,12 +82,9 @@ public class MainContainer {
 				
 				mainContainer.acceptNewAgent("ovenManager-" + bakery.getGuid(),new OvenManager2(bakery)).start();
 				
-				mainContainer.acceptNewAgent("coolingMachine" + "-" + bakery.getGuid(),new CoolingAgent(bakery)).start();
-				
-				mainContainer.acceptNewAgent("coolingManager-" + bakery.getGuid(),new CoolingManager(bakery)).start();
-				
-				
-				break;
+//				mainContainer.acceptNewAgent("coolingMachine" + "-" + bakery.getGuid(),new CoolingAgent(bakery)).start();
+//				
+//				mainContainer.acceptNewAgent("coolingManager-" + bakery.getGuid(),new CoolingManager(bakery)).start();
 			}
 
 			

@@ -81,8 +81,8 @@ public class KneedingMachineAgent2 extends Agent {
 				long startCalculate = System.currentTimeMillis();
 				long waitTime = calculateTime(productString) - (System.currentTimeMillis() - startCalculate);
 				
-				kneadFunction = new Function(myAgent, 45*Util.MILLIS_PER_MIN, productString);
-//				kneadFunction = new Function(myAgent, waitTime, productString);
+//				kneadFunction = new Function(myAgent, 15*Util.MILLIS_PER_MIN, productString);
+				kneadFunction = new Function(myAgent, waitTime, productString);
 				myAgent.addBehaviour(kneadFunction);
 				
 			} else if (productMsg!=null && isAvailable == false) {

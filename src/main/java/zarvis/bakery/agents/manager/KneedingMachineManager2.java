@@ -84,7 +84,7 @@ public class KneedingMachineManager2 extends Agent {
 			if (orderMsg!=null && isAvailable) {
 				String orderString = orderMsg.getContent();
 				currentOrderString = orderString;
-				System.out.println("[KNEAD] Order received: " + orderString);
+				System.out.println(bakery.getGuid() + " [KNEAD] Order received: " + orderString);
 				isAvailable = false;
 				
 				ACLMessage orderReply = orderMsg.createReply();
@@ -196,7 +196,7 @@ public class KneedingMachineManager2 extends Agent {
 			
 			ACLMessage productFinishMsg = myAgent.receive(finishProductTemplate);
 			if (productFinishMsg!=null) {
-				System.out.println("[KNEAD] " + productFinishMsg.getContent());
+				System.out.println(bakery.getGuid() + " [KNEAD] " + productFinishMsg.getContent());
 				String[] content = productFinishMsg.getContent().split(",");
 				int productIdx = Integer.parseInt(content[1]);
 				currentOrderExisting[productIdx]++;
@@ -232,7 +232,7 @@ public class KneedingMachineManager2 extends Agent {
 			switch(step2) {
 			case 0:
 				if (talkWithPrepTable) {
-//					System.out.println("[KNEAD] Ask availability ");
+//					System.out.println(bakery.getGuid() + " [KNEAD] Ask availability ");
 					stuckCase1 = 0;
 					Util.sendMessage(myAgent,
 							new AID("preparationTableManager-"+bakery.getAid().getLocalName(), AID.ISLOCALNAME),
@@ -248,7 +248,7 @@ public class KneedingMachineManager2 extends Agent {
 				ACLMessage avaiReply2 = myAgent.receive(avaiTemplate2);
 				if (avaiReply2!=null) {
 					if (avaiReply2.getContent().equals("A")) {
-//						System.out.println("[KNEAD] Received availability ");
+//						System.out.println(bakery.getGuid() + " [KNEAD] Received availability ");
 //						System.out.println("CASE 1: ");
 						Util.sendMessage(myAgent,
 								new AID("preparationTableManager-"+bakery.getAid().getLocalName(), AID.ISLOCALNAME),
@@ -268,7 +268,7 @@ public class KneedingMachineManager2 extends Agent {
 			case 2:
 				ACLMessage orderReply = myAgent.receive(prepConfirmTemplate);
 				if (orderReply!=null && orderReply.getPerformative()==ACLMessage.CONFIRM) {
-//					System.out.println("[KNEAD]: PREP confirmed!");
+//					System.out.println(bakery.getGuid() + " [KNEAD]: PREP confirmed!");
 					isAvailable = true;
 					currentOrderString = "";
 					talkWithPrepTable = false;

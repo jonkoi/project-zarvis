@@ -2,12 +2,13 @@ package zarvis.bakery.agents;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import zarvis.bakery.utils.Util;
 
 public class TimeAgent extends Agent {
 	private static final long serialVersionUID = 1L;
 	//	Time parameter
 	protected long globalStartTime;
-	protected final long MILLIS_PER_MIN = 2;
+	protected final long MILLIS_PER_MIN = Util.MILLIS_PER_MIN;
 	protected final long MILLIS_PER_HOUR = 60*MILLIS_PER_MIN;
 	protected final long MILLIS_PER_DAY = 24*MILLIS_PER_HOUR;
 	

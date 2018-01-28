@@ -20,6 +20,7 @@ import zarvis.bakery.models.*;
 public class Util {
 	public static final List<String> PRODUCTNAMES = Arrays.asList("Bagel", "Baguette", "Berliner", "Bread", "Brezel", "Bun", "Ciabatta",
 			"Cookie", "Croissant", "Donut", "Muffin","Multigrain Bread");
+	public static final long MILLIS_PER_MIN = 2;
 
 	public static BakeryJsonWrapper getWrapper() {
 		final String FILENAME = "src/main/config/random-scenario.json";

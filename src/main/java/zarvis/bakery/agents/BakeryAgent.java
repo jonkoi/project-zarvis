@@ -13,8 +13,10 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.models.Product;
+import zarvis.bakery.models.Truck;
 import zarvis.bakery.utils.ContentExtractor;
 import zarvis.bakery.utils.Util;
 
@@ -29,8 +31,7 @@ public class BakeryAgent extends TimeAgent {
 	private MessageTemplate orderTemplate;
 	
 	//Process
-	@SuppressWarnings("unused")
-	private AID sender;
+	
 	@SuppressWarnings("unused")
 	private ACLMessage processingMsg;
 	@SuppressWarnings("unused")
@@ -46,11 +47,17 @@ public class BakeryAgent extends TimeAgent {
 	@SuppressWarnings("unused")
 	private transient Map<ContentExtractor, Integer> todaysOrderMap = new HashMap<>();
 	private transient List<ContentExtractor> todaysOrder = new ArrayList<>();
+	private transient List<ContentExtractor> waitOrder = new ArrayList<>();
 	private int[] todayGoals = new int[Util.PRODUCTNAMES.size()];
 	private int[] currentMadeAmounts = new int[Util.PRODUCTNAMES.size()];
 	private int[] currentOrderAmounts = new int[Util.PRODUCTNAMES.size()];
 	private ContentExtractor currentCE;
 	Map<String,Integer> currentOrderProducts = new HashMap<>();
+	
+	//Other time management
+	private long lastHourChecked = 0;
+	
+	private int step = 0;
  
 	public BakeryAgent(Bakery bakery, long globalStartTime) {
 		super(globalStartTime);
@@ -72,14 +79,15 @@ public class BakeryAgent extends TimeAgent {
 			});
 		}
 		
-		for (Product p: this.products) {
-			System.out.println(p.getGuid());
-		}
+//		for (Product p: this.products) {
+//			System.out.println(p.getGuid());
+//		}
+		
 	}
 
 	@Override
 	protected void setup() {
-
+		this.bakery.setAid(getAID());
 		Util.registerInYellowPage(this, "BakeryService", bakery.getGuid());
 		ParallelBehaviour pal = new ParallelBehaviour();
 		
@@ -95,19 +103,21 @@ public class BakeryAgent extends TimeAgent {
 	
 	private class ReceiveOrder extends CyclicBehaviour{
 		private static final long serialVersionUID = 1L;
+		private MessageTemplate receviveOrderTemplate = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.CFP),
+				MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL));
 
 		public void action(){
 			String orders;
 			String price;
 			ContentExtractor currentOrder;
 			
-			ACLMessage data = myAgent.receive();
+			ACLMessage data = myAgent.receive(receviveOrderTemplate);
 			if( data != null){
 				UpdateTime();
     			if(data.getPerformative() == ACLMessage.CFP){
     				ACLMessage msg = data;
 	    			orders = msg.getContent();
-	    			System.out.println(orders);
+//	    			System.out.println(bakery.getGuid() + " [BAKERY] Order: " + orders);
 	    			
 	    			String[] splitOrders = orders.split(";");
 	    			
@@ -115,8 +125,7 @@ public class BakeryAgent extends TimeAgent {
 	    				currentOrder = new ContentExtractor(o);
 	    				if(checkOrders(currentOrder)){
 							price = getPrice(currentOrder);
-							System.out.print("price: ");
-							System.out.println(price);
+							System.out.println(bakery.getGuid() + " [BAKERY] Order: " + orders + " price " + price);
 							Util.sendReply(myAgent, msg, ACLMessage.PROPOSE, price);						
 						}
 						else{
@@ -131,17 +140,13 @@ public class BakeryAgent extends TimeAgent {
     					ContentExtractor extractor = new ContentExtractor(o);
         				ordersList.add(extractor);
         				ordersList.sort(Comparator.comparing(ContentExtractor::getDeliveryTime));
-        				System.out.println(ordersList.size());
+        				System.out.println(bakery.getGuid() + " [BAKERY] Order List size: " + ordersList.size());
         				if(extractor.getDeliveryDay()==daysElapsed){
         					addBehaviour(new UpdateOrder(extractor));
         				}
         				Util.sendReply(myAgent, data, ACLMessage.CONFIRM, extractor.getDeliveryDateString());
     				}
   
-    			}
-    			if (data.getPerformative() == ACLMessage.AGREE) {
-    				// An order have been done
-    				
     			}
     		} else {
     			UpdateTime();
@@ -167,7 +172,17 @@ public class BakeryAgent extends TimeAgent {
 		public boolean checkOrders(ContentExtractor orderExtractor) {
 			//Many criteria, return true for now
 			//Invalid delivery date
-			return true;
+			UpdateTime();
+			long timeToFulfill = ((orderExtractor.getDeliveryDay()-1)*24 + orderExtractor.getDeliveryHour()) - totalHoursElapsed;
+//			System.out.println(orderExtractor.getDeliveryDay()*24 + orderExtractor.getDeliveryHour());
+//			System.out.println(totalHoursElapsed);
+			if (timeToFulfill < 0) {
+//				System.out.println("Can't do it!");
+				return false;
+			} else {
+				return true;
+			}
+			
 		}
 		
 		public String getPrice(ContentExtractor orderExtractor){
@@ -186,18 +201,23 @@ public class BakeryAgent extends TimeAgent {
 	}
 	
 	private class CheckTime extends CyclicBehaviour {
-		private static final long serialVersionUID = 1L;
+		
+		private MessageTemplate dummyTemplate = MessageTemplate.MatchPerformative(CustomMessage.DUMMY);
 
-		@Override
 		public void action() {
+			ACLMessage dummyMsg = myAgent.receive(dummyTemplate);
 			UpdateTime();
 			String log = getAID().getLocalName() + " - " + "Day: " + daysElapsed + " " + "Hours: " + totalHoursElapsed;
-			System.out.println(log);
-			if (totalHoursElapsed%24 == 0) {
+//			System.out.println(log);
+			if (totalHoursElapsed%24 == 0 && totalHoursElapsed != lastHourChecked) {
+				lastHourChecked = totalHoursElapsed;
 				addBehaviour(new setTodayOrder());
 			} 
+			if (dummyMsg == null) {
+				block(millisLeft);
+			}
 			// Add todaysOrder
-			block(millisLeft);
+			
 		}
 	}
 	
@@ -207,9 +227,16 @@ public class BakeryAgent extends TimeAgent {
 		@Override
 		public void action() {
 			UpdateTime();
+			//Remaining orders are failed
+			for (ContentExtractor cont: todaysOrder) {
+				String cus = cont.getCustomer();
+				String failOrderGuid = cont.getGuid();
+				Util.sendMessage(myAgent, new AID(cus, AID.ISLOCALNAME), CustomMessage.FINISH_ORDER, failOrderGuid, "to-customer-finish-order");
+			}
 			todaysOrder.clear();
 			Arrays.fill(currentMadeAmounts, 0);
 			Arrays.fill(todayGoals, 0);
+//			step = 0;
 			for (int i = 0; i < ordersList.size(); i++) {
 				ContentExtractor ce = ordersList.get(i);
 				if (ce.getDeliveryDay() == daysElapsed) {
@@ -220,8 +247,21 @@ public class BakeryAgent extends TimeAgent {
 					}
 				}
 			}
-			
-			
+			Util.sendMessage(myAgent,
+					new AID("kneeding_machine_manager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
+					CustomMessage.NEW_DAY,
+					"",
+					"new-day");
+			Util.sendMessage(myAgent,
+					new AID("ovenManager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
+					CustomMessage.NEW_DAY,
+					"",
+					"new-day");
+			Util.sendMessage(myAgent,
+					new AID("preparationTableManager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
+					CustomMessage.NEW_DAY,
+					"",
+					"new-day");
 		}
 		
 	}
@@ -241,77 +281,131 @@ public class BakeryAgent extends TimeAgent {
 			for (int j = 0; j < productAmounts.size(); j ++) {
 				todayGoals[j] += productAmounts.get(Util.PRODUCTNAMES.get(j));
 			}
+//			System.out.println(bakery.getGuid() + " [BAKERY] Todays Order out update:" + todaysOrder.size());
 			todaysOrder.sort(Comparator.comparing(ContentExtractor::getDeliveryTime));
 		}
-		
 	}
 	
-	public class ManageProduction extends CyclicBehaviour{
-		private static final long serialVersionUID = 1L;
-		MessageTemplate confirmMt;
+	public class ManageProduction extends CyclicBehaviour {
 		
-		public ManageProduction() {
-			confirmMt = MessageTemplate.and(
-					MessageTemplate.MatchPerformative(ACLMessage.CONFIRM),
-					MessageTemplate.MatchConversationId("kneeding-product"));
-		}
+		private int stuckCase1 = 0;
+		private MessageTemplate avaiTemplate = MessageTemplate.and(
+				MessageTemplate.MatchPerformative(CustomMessage.RESPOND_AVAILABILITY),
+				MessageTemplate.MatchConversationId("kneading-availability"));
+		private MessageTemplate kneadConfirmTemplate = MessageTemplate.MatchConversationId("kneading-order");
+		private MessageTemplate finishTemplate = MessageTemplate.and(
+				MessageTemplate.MatchPerformative(CustomMessage.FINISH_ORDER),
+				MessageTemplate.MatchConversationId("FINISH"));
+		private String customer;
+		private String orderID;
 
 		@Override
 		public void action() {
-			if (todaysOrder.size() > 0 || currentCE != null) {
-				if (currentCE == null) {
+			switch(step) {
+			case 0:
+//				System.out.println("Bakery-new-day-step-0");
+//				System.out.println(bakery.getGuid() + " [BAKERY] today orders: " + todaysOrder.size());
+				if (todaysOrder.size() > 0) {
 					
-					
-					currentCE = todaysOrder.get(0);
-					todaysOrder.remove(0);
-					
-					currentOrderProducts = currentCE.getProducts();
-					int i = 0;
-					for (Map.Entry<String, Integer> entry : currentOrderProducts.entrySet()) {
-						currentOrderAmounts[i] = entry.getValue();
-						i++;
-					}
-				} 
-				
-				else if (currentCE != null) {
-					int idx = 9999;
-					for (int i = 0; i < currentOrderAmounts.length; i++) {
-						if (currentOrderAmounts[i] > 0) {
-							idx = i;
-							break;
-						}
-					}
-					
-					
-					if (idx == 9999) {
-						currentCE = null;
-					} else {
-						for (int i = 0; i < availableKnead.length; i++) {
-							if (availableKnead[i] == true) {
-								if (currentOrderAmounts[idx] == 0) break;
-								ACLMessage toKnead = new ACLMessage(ACLMessage.INFORM);
-								toKnead.addReceiver(
-										new AID(bakery.getKneading_machines().get(i).getGuid(),AID.ISLOCALNAME));
-								toKnead.setConversationId("kneeding-product");
-								toKnead.setContent(Integer.toString(idx));
-								myAgent.send(toKnead);
-								
-								//Quite a nested hell
-								while(true)
-								{
-									ACLMessage msg = myAgent.receive(confirmMt);
-									if (msg!=null) {
-										availableKnead[i] = false;
-										currentOrderAmounts[idx]--;
-										break;
-									}
-								}
-							}
-						}
-					}
+					Util.sendMessage(myAgent,
+							new AID("kneeding_machine_manager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
+							CustomMessage.INQUIRE_AVAILABILITY,
+							"",
+							"kneading-availability");
+					stuckCase1 = 0;
+					step = 1;
+				} else {
+					block(15*Util.MILLIS_PER_MIN);
 				}
+				break;
+			case 1:
+				ACLMessage avaiReply = myAgent.receive(avaiTemplate);
+//				System.out.println(avaiReply.getContent());
+				if (avaiReply!=null) {
+					stuckCase1 = 0;
+					if (avaiReply.getContent().equals("A")) {
+//						System.out.println("CASE 1: in");
+						ContentExtractor sendingCE = todaysOrder.get(0);
+
+						customer = sendingCE.getCustomer();
+						orderID = sendingCE.getGuid();
+						String orderString = orderID+","+sendingCE.getProductString();
+						Util.sendMessage(myAgent,
+								new AID("kneeding_machine_manager-"+myAgent.getLocalName(), AID.ISLOCALNAME),
+								CustomMessage.INFORM_ORDER,
+								orderString,
+								"kneading-order");
+						step = 2;
+					} else {
+						step = 0;
+					}
+				} else {
+					stuckCase1++;
+					if (stuckCase1 > 2) {
+						step = 0;
+					}
+					block(15*Util.MILLIS_PER_MIN);
+				}
+				break;
+			case 2:
+				ACLMessage orderReply = myAgent.receive(kneadConfirmTemplate);
+				if (orderReply!=null && orderReply.getPerformative()==ACLMessage.CONFIRM) {
+					waitOrder.add(todaysOrder.get(0));
+					todaysOrder.remove(0);
+//					System.out.println("Todays order 2: " + todaysOrder.size());
+					step = 3;
+				} else if (orderReply!=null && orderReply.getPerformative()==ACLMessage.REFUSE) {
+//					System.out.println("Here somehow");
+					step = 0;
+				} else {
+					block();
+				}
+				break;
+			case 3:
+				ACLMessage finishReply = myAgent.receive(finishTemplate);
+				if (finishReply!=null) {
+//					System.out.println("Yay!");
+					String returnOrderGuid = finishReply.getContent();
+					System.out.println(bakery.getGuid() + " [BAKERY] Finished order: " + returnOrderGuid);
+					String deliveryMsg="";
+					for (ContentExtractor ce : waitOrder) {
+						if (ce.getGuid().equals(returnOrderGuid)) {
+							deliveryMsg = ProductPackage(ce);
+						}
+					}
+					Util.sendMessage(myAgent, new AID(customer, AID.ISLOCALNAME), CustomMessage.FINISH_ORDER, deliveryMsg, "to-customer-finish-order");
+					step = 0;
+				} else {
+					block();
+				}
+				break;
 			}
 		}
 	}
+	
+	private String ProductPackage(ContentExtractor ce) {
+		int noBoxes = 0;
+		
+		Map<String, Integer> productList = ce.getProducts();
+		for (Map.Entry<String,Integer> P : productList.entrySet()) {
+			for (Product p : bakery.getProducts()){
+				if (p.getGuid().equals(P.getKey())) {
+					int noProducts = P.getValue();
+					double breadPerBox = (double) p.getBreads_per_box();
+					noBoxes += (int) Math.ceil(noProducts/breadPerBox);
+				}
+			}
+		}
+		String truckGuid = "";
+		for (Truck t: bakery.getTrucks()) {
+			if (t.getLoad_capacity() >= noBoxes) {
+				truckGuid = t.getGuid();
+			}
+		}
+		String returnMsg=ce.getGuid()+","+truckGuid+","+noBoxes;
+		return returnMsg;
+	}
+	
+	
 	
 }

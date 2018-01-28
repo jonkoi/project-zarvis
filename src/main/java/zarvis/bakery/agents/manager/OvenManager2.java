@@ -118,7 +118,7 @@ public class OvenManager2 extends Agent{
 				if (hasOrder && isRemainEmpty == false) {
 					for (int i = 0; i < isOvenAvailable.length; i++ ) {
 						if (isOvenAvailable[i] == true) {
-							System.out.println("[OVEN] Ask oven");
+//							System.out.println("[OVEN] Ask oven");
 							Util.sendMessage(myAgent, ovens[i].getName(), CustomMessage.INQUIRE_AVAILABILITY, "", "single-oven-availability");
 							consideringOven = i;
 							step = 1;
@@ -162,7 +162,7 @@ public class OvenManager2 extends Agent{
 				ACLMessage productReply = myAgent.receive(productConfirmTemplate);
 				
 				if (productReply!=null && productReply.getPerformative()==ACLMessage.CONFIRM) {
-					System.out.println("[OVEN] Get Oven confirm");
+//					System.out.println("[OVEN] Get Oven confirm");
 					currentOrderRemains[consideringProduct]--;
 					isOvenAvailable[consideringOven] = false;
 					step = 0;

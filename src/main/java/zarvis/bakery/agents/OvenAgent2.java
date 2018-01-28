@@ -45,7 +45,7 @@ public class OvenAgent2 extends Agent {
 		public void action() {
 			ACLMessage avaiMsg = myAgent.receive(avaiTemplate);
 			if (avaiMsg!=null) {
-				System.out.println("Received avai");
+//				System.out.println("Received avai");
 				ACLMessage avaiReply = avaiMsg.createReply();
 				avaiReply.setContent(isAvailable ? "A" : "U");
 				avaiReply.setPerformative(CustomMessage.RESPOND_AVAILABILITY);

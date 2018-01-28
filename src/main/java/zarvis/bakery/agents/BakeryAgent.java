@@ -116,7 +116,6 @@ public class BakeryAgent extends TimeAgent {
     			if(data.getPerformative() == ACLMessage.CFP){
     				ACLMessage msg = data;
 	    			orders = msg.getContent();
-	    			System.out.println("[BAKERY] Order: " + orders);
 	    			
 	    			String[] splitOrders = orders.split(";");
 	    			
@@ -124,8 +123,8 @@ public class BakeryAgent extends TimeAgent {
 	    				currentOrder = new ContentExtractor(o);
 	    				if(checkOrders(currentOrder)){
 							price = getPrice(currentOrder);
-							System.out.print("price: ");
-							System.out.println(price);
+							
+							System.out.println(bakery.getGuid() + " [BAKERY] Order received: " + orders + " price: " + price);
 							Util.sendReply(myAgent, msg, ACLMessage.PROPOSE, price);						
 						}
 						else{
@@ -304,7 +303,7 @@ public class BakeryAgent extends TimeAgent {
 			switch(step) {
 			case 0:
 //				System.out.println("Bakery-new-day-step-0");
-//				System.out.println("[BAKERY] today orders: " + todaysOrder.size());
+//				System.out.println(bakery.getGuid() + " [BAKERY] today orders: " + todaysOrder.size());
 				if (todaysOrder.size() > 0) {
 					
 					Util.sendMessage(myAgent,

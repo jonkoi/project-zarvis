@@ -340,16 +340,17 @@ public class CustomerAgent extends TimeAgent {
 		public void action() {
 			ACLMessage orderFinishMsg = myAgent.receive(orderFinishTemplate);
 			if (orderFinishMsg != null) {
-				String orderBack = orderFinishMsg.getContent();
+				String[] content = orderFinishMsg.getContent().split(",");
+				String orderBack = content[0];
 				
 				for (Order o: orders) {
 					if (o.getGuid().equals(orderBack)) {
 						long evaluatedTime = (o.getDelivery_date().getDay()-1)*24 + o.getDelivery_date().getHour() - totalHoursElapsed;
 						if (evaluatedTime < 0) {
-							System.out.println("ORDER BACK!: " + orderBack + " false");
+							System.out.println("ORDER BACK!: " + orderFinishMsg.getContent() + " false");
 							finishedOrderAggregation.put(orderBack, false);
 						} else {
-							System.out.println("ORDER BACK!: " + orderBack + " true");
+							System.out.println("ORDER BACK!: " + orderFinishMsg.getContent() + " true");
 							finishedOrderAggregation.put(orderBack, true);
 						}
 					}

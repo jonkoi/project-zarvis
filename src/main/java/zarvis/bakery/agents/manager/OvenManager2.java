@@ -148,7 +148,7 @@ public class OvenManager2 extends Agent{
 							for (Product p : bakery.getProducts()) {
 //								System.out.println(p.getGuid() + " " + Util.PRODUCTNAMES.get(consideringProduct));
 								if (p.getGuid().equals(Util.PRODUCTNAMES.get(consideringProduct))) {
-									System.out.println("RRRRRR: " + currentOrderRemains[consideringProduct] + "CCCC: " +  p.getBreads_per_oven());
+//									System.out.println("RRRRRR: " + currentOrderRemains[consideringProduct] + "CCCC: " +  p.getBreads_per_oven());
 									consideringBreadsPerOven = 
 											currentOrderRemains[consideringProduct] < p.getBreads_per_oven() ? 
 													currentOrderRemains[consideringProduct] : p.getBreads_per_oven();

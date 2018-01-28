@@ -16,6 +16,7 @@ import jade.lang.acl.MessageTemplate;
 import zarvis.bakery.messages.CustomMessage;
 import zarvis.bakery.models.Bakery;
 import zarvis.bakery.models.Product;
+import zarvis.bakery.models.Truck;
 import zarvis.bakery.utils.ContentExtractor;
 import zarvis.bakery.utils.Util;
 
@@ -365,7 +366,14 @@ public class BakeryAgent extends TimeAgent {
 				if (finishReply!=null) {
 //					System.out.println("Yay!");
 					String returnOrderGuid = finishReply.getContent();
-					Util.sendMessage(myAgent, new AID(customer, AID.ISLOCALNAME), CustomMessage.FINISH_ORDER, returnOrderGuid, "to-customer-finish-order");
+					System.out.println(bakery.getGuid() + " [BAKERY] Finished order: " + returnOrderGuid);
+					String deliveryMsg="";
+					for (ContentExtractor ce : waitOrder) {
+						if (ce.getGuid().equals(returnOrderGuid)) {
+							deliveryMsg = ProductPackage(ce);
+						}
+					}
+					Util.sendMessage(myAgent, new AID(customer, AID.ISLOCALNAME), CustomMessage.FINISH_ORDER, deliveryMsg, "to-customer-finish-order");
 					step = 0;
 				} else {
 					block();
@@ -374,5 +382,30 @@ public class BakeryAgent extends TimeAgent {
 			}
 		}
 	}
+	
+	private String ProductPackage(ContentExtractor ce) {
+		int noBoxes = 0;
+		
+		Map<String, Integer> productList = ce.getProducts();
+		for (Map.Entry<String,Integer> P : productList.entrySet()) {
+			for (Product p : bakery.getProducts()){
+				if (p.getGuid().equals(P.getKey())) {
+					int noProducts = P.getValue();
+					double breadPerBox = (double) p.getBreads_per_box();
+					noBoxes += (int) Math.ceil(noProducts/breadPerBox);
+				}
+			}
+		}
+		String truckGuid = "";
+		for (Truck t: bakery.getTrucks()) {
+			if (t.getLoad_capacity() >= noBoxes) {
+				truckGuid = t.getGuid();
+			}
+		}
+		String returnMsg=ce.getGuid()+","+truckGuid+","+noBoxes;
+		return returnMsg;
+	}
+	
+	
 	
 }

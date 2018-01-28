@@ -340,6 +340,7 @@ public class CustomerAgent extends TimeAgent {
 		public void action() {
 			ACLMessage orderFinishMsg = myAgent.receive(orderFinishTemplate);
 			if (orderFinishMsg != null) {
+				System.out.print(orderFinishMsg.getContent() + "!!!!!!!!!!!!!!!!!!!!!!");
 				String[] content = orderFinishMsg.getContent().split(",");
 				String orderBack = content[0];
 				

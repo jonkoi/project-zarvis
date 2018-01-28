@@ -16,6 +16,7 @@ import zarvis.bakery.agents.OvenAgent;
 import zarvis.bakery.agents.OvenAgent2;
 import zarvis.bakery.agents.PreparationTableAgent;
 import zarvis.bakery.agents.PreparationTableAgent2;
+import zarvis.bakery.agents.TruckAgent;
 import zarvis.bakery.agents.manager.OvenManager;
 import zarvis.bakery.agents.manager.OvenManager2;
 import zarvis.bakery.agents.manager.PreparationTableManager;
@@ -29,6 +30,7 @@ import zarvis.bakery.models.Customer;
 import zarvis.bakery.models.DoughPrepTable;
 import zarvis.bakery.models.KneedingMachine;
 import zarvis.bakery.models.Oven;
+import zarvis.bakery.models.Truck;
 import zarvis.bakery.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +83,10 @@ public class MainContainer {
 				}
 				
 				mainContainer.acceptNewAgent("ovenManager-" + bakery.getGuid(),new OvenManager2(bakery)).start();
+				
+				for (Truck truck: bakery.getTrucks()) {
+					mainContainer.acceptNewAgent(truck.getGuid(),new TruckAgent(bakery)).start();
+				}
 				
 //				mainContainer.acceptNewAgent("coolingMachine" + "-" + bakery.getGuid(),new CoolingAgent(bakery)).start();
 //				

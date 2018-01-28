@@ -13,4 +13,7 @@ public class CustomMessage {
 	public static final int INFORM_PRODUCT = 109;
 	public static final int FINISH_PRODUCT = 110;
 	public static final int DUMMY= 111;
+	public static final int REQUEST_DELIVERY = 112;
+	public static final int HAS_RETURNED = 113;
+	
 }

@@ -175,5 +175,25 @@ public class Util {
 		}
 		return msg;
 	}
+	
+	public static NeiGraph InitializeGraph() {
+		
+		BakeryJsonWrapper wrapper = getWrapper();
+		StreetNetwork net = wrapper.getStreet_network();
+		
+		NeiGraph neig = new NeiGraph();
+		for (Node n : net.getNodes()) {
+			List<String> m = new ArrayList<>();
+			for (Link l : net.getLinks()) {
+				if(l.getSource().equals(n.getGuid())) {
+					m.add(l.getTarget());
+				}
+			}
+			neig.AddEntry(n, m);
+		}
+		
+		return neig;
+		
+	}
 
 }

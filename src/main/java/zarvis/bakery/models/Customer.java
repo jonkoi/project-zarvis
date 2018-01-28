@@ -13,7 +13,6 @@ public class Customer {
 	private int total_type1;
 	private int total_type2;
 	private int total_type3;
-
 	private List<Order> orders = new ArrayList<Order>();
 
 	public int getTotal_type1() {

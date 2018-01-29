@@ -183,10 +183,16 @@ public class Util {
 		
 		NeiGraph neig = new NeiGraph();
 		for (Node n : net.getNodes()) {
-			List<String> m = new ArrayList<>();
+			List<Node> m = new ArrayList<>();
 			for (Link l : net.getLinks()) {
 				if(l.getSource().equals(n.getGuid())) {
-					m.add(l.getTarget());
+					String target = l.getTarget();
+					for (Node n1 : net.getNodes()) {
+						if (n1.getCompany().equals(target)) {
+							m.add(n1);
+							break;
+						}
+					}
 				}
 			}
 			neig.AddEntry(n, m);

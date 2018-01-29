@@ -8,17 +8,17 @@ import zarvis.bakery.models.Node;
 
 public class NeiGraph {
 	
-	private Map<Node, List<String>> adjacencyMap;
+	private Map<Node, List<Node>> adjacencyMap;
 	
 	public NeiGraph() {
 		this.adjacencyMap = new HashMap<>();
 	}
 	
-	public void AddEntry(Node n, List<String> m) {
+	public void AddEntry(Node n, List<Node> m) {
 		adjacencyMap.put(n, m);
 	}
 	
-	public Map<Node, List<String>> GetMap(){
+	public Map<Node, List<Node>> GetMap(){
 		return adjacencyMap;
 	}
 

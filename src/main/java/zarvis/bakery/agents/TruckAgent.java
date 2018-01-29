@@ -13,6 +13,7 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import zarvis.bakery.models.Bakery;
+import zarvis.bakery.models.Location;
 import zarvis.bakery.models.Oven;
 import zarvis.bakery.models.Product;
 import zarvis.bakery.utils.NeiGraph;
@@ -27,15 +28,18 @@ public class TruckAgent extends Agent {
 	private String bakeryGuid;
 	private boolean isAvailable = true;
 	private NeiGraph neig;
+	private Location bakeryLoc;
 	public TruckAgent(Bakery bakery) {
 		this.bakery = bakery;
 		neig = Util.InitializeGraph();
 	}
+	
 	@Override
 	protected void setup() {
 		Util.registerInYellowPage(this, "TruckAgent", this.bakery.getGuid());
 //		System.out.println("TRUCK!!!");
 		bakeryGuid = bakery.getGuid();
+		bakeryLoc = bakery.getLocation();
 		
 		ParallelBehaviour pal = new ParallelBehaviour();
 		pal.addSubBehaviour(new ReceiveRequest());
@@ -60,10 +64,10 @@ public class TruckAgent extends Agent {
 					
 					isAvailable = false;
 					
-					long waitTime = calculateWaitTime(truckReply.getContent());
+					long waitTime = calculateWaitTime(truckMsg.getContent());
 					
 					myAgent.addBehaviour(new Deliver(myAgent, waitTime, truckMsg.getContent()));
-					myAgent.addBehaviour(new Return(myAgent, waitTime*2));
+					myAgent.addBehaviour(new Return(myAgent, waitTime));
 					
 				} else {
 					ACLMessage truckReply = truckMsg.createReply();
@@ -110,10 +114,33 @@ public class TruckAgent extends Agent {
 	
 	private long calculateWaitTime(String content) {
 		long waitTime = 5 * Util.MILLIS_PER_MIN;
-//		Node currentNode = new Node();
-//		for (Map.Entry<Node, List<String>> e : neig.GetMap().entrySet()) {
-//			if(e.getKey().getCompany().equals(bakeryGuid)) {
-//				currentNode = e.getKey();
+		
+//		long waitTime = 0;
+//		System.out.println(content + "!!!!!!!!!!!!!!!!!!!!!!!!");
+//		String customer = content.split(",")[1];
+//		Location targetLoc = new Location();
+//		Location currentLoc = bakeryLoc;
+//		for (Map.Entry<Node, List<Node>> n : neig.GetMap().entrySet()) {
+//			if (n.getKey().getCompany().equals(customer)) {
+//				targetLoc = n.getKey().getLocation();
+//				
+//				while (currentLoc.equals(targetLoc) == false) {
+//					double  minDist = 9999.00;
+//					Location minLoc = currentLoc;
+//					
+//					for (Node n1 : n.getValue()) {
+//						double dist = Math.pow(n1.getLocation().getX() - targetLoc.getX(),2) + Math.pow(n1.getLocation().getY() - targetLoc.getY(),2);
+//						if (dist < minDist) {
+//							minDist = dist;
+//							minLoc = n1.getLocation();
+//						}
+//					}
+//					
+//					double travelCost = Math.sqrt(Math.pow(currentLoc.getX() - minLoc.getX(),2) + Math.pow(currentLoc.getY() - minLoc.getY(),2));
+//					waitTime += (long) travelCost;
+//					currentLoc = minLoc;
+//				}
+//				break;
 //			}
 //		}
 		return waitTime;

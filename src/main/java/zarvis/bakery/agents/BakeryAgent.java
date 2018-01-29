@@ -70,6 +70,7 @@ public class BakeryAgent extends TimeAgent {
 	private String noBoxes = "";
 	private String customer2 = "";
 	private String guid2 = "";
+	private List<String> toBeDelivered = new ArrayList<>();
  
 	public BakeryAgent(Bakery bakery, long globalStartTime) {
 		super(globalStartTime);
@@ -425,6 +426,8 @@ public class BakeryAgent extends TimeAgent {
 						noBoxes = ProductPackage(ce);
 						customer2 = ce.getCustomer();
 						guid2 = ce.getGuid();
+						toBeDelivered.add(guid2+","+customer2);
+						break;
 					}
 				}
 				
@@ -446,6 +449,7 @@ public class BakeryAgent extends TimeAgent {
 	private class TalkToTruck extends CyclicBehaviour {
 		private int step2 = 0;
 		private int consideringTruck = 0;
+		private String consideringDelivery = "";
 		private MessageTemplate truckTemplate = 
 				MessageTemplate.MatchConversationId("delivery-request");
 		private int noTruck = 0;
@@ -454,12 +458,13 @@ public class BakeryAgent extends TimeAgent {
 			switch(step2) {
 			
 			case 0:
-				if (talkToTruck) {
+				if (talkToTruck && toBeDelivered.size() > 0) {
 					for (int i = 0; i < isTruckAvailable.length; i++) {
 						if (isTruckAvailable[i] && Integer.parseInt(noBoxes) < bakery.getTrucks().get(i).getLoad_capacity()) {
 							System.out.println(bakery.getGuid() + " [TRUCK] Request delivery to " + bakery.getTrucks().get(i).getGuid());
+							consideringDelivery = toBeDelivered.get(0);
 							Util.sendMessage(myAgent, new AID(bakery.getTrucks().get(i).getGuid(), AID.ISLOCALNAME),
-									CustomMessage.REQUEST_DELIVERY, guid2+","+customer2, "delivery-request");
+									CustomMessage.REQUEST_DELIVERY, consideringDelivery, "delivery-request");
 							consideringTruck = i;
 							step2 = 1;
 							noTruck = 0;
@@ -467,6 +472,8 @@ public class BakeryAgent extends TimeAgent {
 						}
 					}
 					block(15*Util.MILLIS_PER_MIN);
+				} else if (toBeDelivered.size() <= 0) {
+					talkToTruck = false;
 				}
 				break;
 			case 1:
@@ -474,7 +481,10 @@ public class BakeryAgent extends TimeAgent {
 				if (truckReply != null) {
 					if (truckReply.getPerformative() == ACLMessage.CONFIRM) {
 						System.out.println(bakery.getGuid() + " [TRUCK] Confirmed");
-						talkToTruck = false;
+						toBeDelivered.remove(0);
+						if (toBeDelivered.size() == 0) {
+							talkToTruck = false;
+						}
 						isTruckAvailable[consideringTruck] = false;
 						step2 = 0;
 					}

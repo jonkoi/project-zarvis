@@ -448,6 +448,7 @@ public class BakeryAgent extends TimeAgent {
 		private int consideringTruck = 0;
 		private MessageTemplate truckTemplate = 
 				MessageTemplate.MatchConversationId("delivery-request");
+		private int noTruck = 0;
 		
 		public void action() {
 			switch(step2) {
@@ -461,6 +462,7 @@ public class BakeryAgent extends TimeAgent {
 									CustomMessage.REQUEST_DELIVERY, guid2+","+customer2, "delivery-request");
 							consideringTruck = i;
 							step2 = 1;
+							noTruck = 0;
 							break;
 						}
 					}
@@ -473,11 +475,23 @@ public class BakeryAgent extends TimeAgent {
 					if (truckReply.getPerformative() == ACLMessage.CONFIRM) {
 						System.out.println(bakery.getGuid() + " [TRUCK] Confirmed");
 						talkToTruck = false;
+						isTruckAvailable[consideringTruck] = false;
+						step2 = 0;
 					}
-					isTruckAvailable[consideringTruck] = false;
-					step2 = 0;
+					
+					else if (truckReply.getPerformative() == ACLMessage.REFUSE) {
+						isTruckAvailable[consideringTruck] = false;
+						step2 = 0;
+					}
+					
 				} else {
-					block();
+					if (noTruck > 2) {
+						System.out.println(bakery.getGuid() + " [TRUCK] No Available Truck!");
+						step2 = 0;
+					}
+					
+					noTruck++;
+					block(15*Util.MILLIS_PER_MIN);
 				}
 				break;
 			}
